@@ -36,3 +36,15 @@ class Environment():
         cambia el estado del sistema
         '''
         raise NotImplementedError()
+
+    def next_step(self):
+        '''
+        Ejecuta un paso de la simulacion dentro del Medio
+        '''
+        raise NotImplementedError()
+
+    def outputs(self):
+        '''
+        Devuelve las observaciones realizadas hasta el momento de las variables observables.
+        '''
+        raise NotImplementedError()
