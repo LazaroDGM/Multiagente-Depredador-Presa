@@ -32,9 +32,20 @@ class StateAgent(Agent):
 
     def action(self):
         '''
-        Segun los estados internos, el agente decide que accion realizar
+        Segun los estados internos, el agente decide que accion realizar. Puede modificar los estados internos
 
         `return`: Accion que el agente quiere realizar
         '''
         raise NotImplementedError()
+
+class BrooksAgent(StateAgent):
+
+    def __init__(self) -> None:
+        self.behaviors = []
+
+    def action(self, P):
+        for condition, rule_action in self.behaviors:
+            if condition(self, P):
+                return rule_action(self, P)
+        return None
     
