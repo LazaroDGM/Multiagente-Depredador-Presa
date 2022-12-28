@@ -164,6 +164,7 @@ class EnvironmentSimulator01(Environment):
                 deleted.append(agent)
         for agent in deleted:
             self.agents.pop(agent)
+        self.count_agents -= len(deleted)
                 
 
         actions = []
@@ -196,5 +197,5 @@ class EnvironmentSimulator01(Environment):
                 self._map[position[0]][position[1]].add(agent)
                 self.agents[agent] = position
             
-
-
+    def outputs(self):
+        return self.count_agents, len(self.agents), self.count_foods
