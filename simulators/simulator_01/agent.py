@@ -9,29 +9,13 @@ class AnimalAgentPropierties:
             cls.digestion_time = digestion_time
             cls.max_energy = max_energy
             cls._behaviors = [
-                (AnimalAgent.__condition_keep_eating, AnimalAgent.__keep_eating),
-                (AnimalAgent.__condition_eat, AnimalAgent.__eat),
-                (AnimalAgent.__condition_mov, AnimalAgent.__mov)
+                (cls.__condition_keep_eating, cls.__keep_eating),
+                (cls.__condition_eat, cls.__eat),
+                (cls.__condition_mov, cls.__mov)
             ]
             cls.rand = random.Random()
         return cls.instance
-
-class AnimalAgent(BrooksAgent):
-
-    def __init__(self, digestion_time, max_energy) -> None:
-        self.prop = AnimalAgentPropierties(digestion_time, max_energy)
-        self.eating = 0
-        self.behaviors = self.prop._behaviors
-        self.energy = max_energy
     
-    def next(self, P):
-        if self.eating == 1:
-            self.energy = max(self.energy + Food().energy_ratio * self.prop.max_energy,
-                                self.prop.max_energy)
-        elif self.eating == 0:
-            self.energy -= 1
-        return
-
     #### Regla 1 ####
     def __condition_keep_eating(self, P):
         return self.eating > 0
@@ -54,4 +38,23 @@ class AnimalAgent(BrooksAgent):
     def __mov(self, P):
         self.energy -= 1
         raise NotImplementedError()
+
+
+class AnimalAgent(BrooksAgent):
+
+    def __init__(self, digestion_time, max_energy) -> None:
+        self.prop = AnimalAgentPropierties(digestion_time, max_energy)
+        self.eating = 0
+        self.behaviors = self.prop._behaviors
+        self.energy = max_energy
+    
+    def next(self, P):
+        if self.eating == 1:
+            self.energy = max(self.energy + Food().energy_ratio * self.prop.max_energy,
+                                self.prop.max_energy)
+        elif self.eating == 0:
+            self.energy -= 1
+        return
+
+    
 
