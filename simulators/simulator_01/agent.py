@@ -1,4 +1,7 @@
-from simulator.agent import BrooksAgent
+from operator import index
+from Algorithms.AStar import AStar
+from Algorithms.transform import betterMove, transform
+from simulator.agent import Agent, BrooksAgent
 import random
 from simulators.simulator_01.entities import Food
 
@@ -37,7 +40,16 @@ class AnimalAgentPropierties:
         return True
     def __mov(self, P):
         self.energy -= 1
-        raise NotImplementedError()
+
+        food_found = lambda ent: ent == Food()
+        obstacle_found = lambda ent : ent in [type(Agent)]                                                     # modificar lista para agragar obstaculos
+        x, y = P[1]
+
+        matrix = AStar(P[0], x, y, len(P[0]), food_found, obstacle_found)
+        abundance_matrix = transform(matrix)
+        return (betterMove(abundance_matrix, rnd=False))
+        
+        
 
 
 class AnimalAgent(BrooksAgent):
