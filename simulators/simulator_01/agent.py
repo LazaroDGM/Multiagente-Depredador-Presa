@@ -1,6 +1,6 @@
 from operator import index
 from Algorithms.AStar import AStar
-from Algorithms.transform import transform
+from Algorithms.transform import betterMove, transform
 from simulator.agent import Agent, BrooksAgent
 import random
 from simulators.simulator_01.entities import Food
@@ -47,20 +47,9 @@ class AnimalAgentPropierties:
 
         matrix = AStar(P[0], x, y, len(P[0]), food_found, obstacle_found)
         abundance_matrix = transform(matrix)
+        return (betterMove(abundance_matrix, rnd=False))
         
-        maxs = [(i, max(array)) for i, array in  enumerate(abundance_matrix)]
-        maxx = 0
-        positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
-        sameImportance = []
-        for i, (j, temp_max) in enumerate(maxs):
-            if temp_max > maxx:
-                maaxx = temp_max
-                sameImportance.clear()
-                sameImportance.append((i, j))
-            elif temp_max == maxx:
-                sameImportance.append((i, j))
         
-        return (sameImportance[random.randint(0, 7)], False)
 
 
 class AnimalAgent(BrooksAgent):
