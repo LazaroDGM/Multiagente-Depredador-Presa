@@ -26,5 +26,3 @@ def transform(matrix, xpansion_distance = 3, high_rank_value = 4):              
                     final_matrix[i][j] += elem - _distance
 
     return final_matrix
-                        
-    
