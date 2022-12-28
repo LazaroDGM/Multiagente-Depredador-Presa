@@ -48,28 +48,51 @@ class EnvironmentSimulator01(Environment):
         
         f = Food(energy_ratio)
         self._init_map()
-        self._gen_food()
+        
+        self._gen_food(int(self.food_ratio * self.shape_map[0]*self.shape_map[1]))
         
 
-    def seeAgent(agent: AnimalAgent):
-        raise NotImplementedError()
+    def seeAgent(self, agent: AnimalAgent):
+        r, c = self.agents[agent]
+        min_r = max(0, r-self.vision_radius)
+        min_c = max(0, c-self.vision_radius)
+        max_r = min(self._map.shape[0], r+self.vision_radius+1)
+        max_c = min(self._map.shape[1], c+self.vision_radius+1)
+        extract = self._map[min_r:max_r, min_c:max_c]
+
+        vision = np.array([set() for _ in range(0, extract.size)])
+        vision.resize(extract.shape)
+        for i in range(extract.shape[0]):
+            for j in range(extract.shape[1]):
+                for ent in extract[i][j]:
+                    if type(ent) is AnimalAgent:
+                        vision[i][j].add(AnimalAgent)
+                    else:
+                        vision[i][j].add(ent)
+        return vision, (r,c)
+
 
     def _init_map(self):
-        fil, col =  self.shape_map
-        self._map = np.array([set() for i in range(0, fil*col)])
-        self._map.resize((fil, col))
-        self._map[0][0].add(AnimalAgent(self.digestion_time, self.max_energy))
+        row, col =  self.shape_map
+        self._map = np.array([set() for i in range(0, row*col)])
+        self._map.resize((row, col))
+        self._gen_animals(self.initial_count_animals)
     
-    def _gen_food(self):
+    def _gen_food(self, count):
         '''
         Genera aleatoriamente uniforme, en lugares sin obstaculos, comida.
         La cantidad de comida generada es en proporcion al mapa.
         '''
         reshaped = self._map.reshape(self._map.size)
+        food = Food(self.energy_ratio)
+
         emptys = np.array(list(filter(lambda s: not self.isObstacle(s), reshaped)))
         emptys.resize(emptys.size)
-        selection = self._rand.choices(emptys,k = min(int(self.food_ratio * self.shape_map[0]*self.shape_map[1]), emptys.size))
-        food = Food(self.energy_ratio)
+        #selection = self._rand.sample(emptys,k = min(, emptys.size))
+
+        # int(self.food_ratio * self.shape_map[0]*self.shape_map[1])
+        idx = np.random.choice(emptys.shape[0], min(count, emptys.size), replace=False)
+        selection = emptys[idx]
         for s in selection:
             s.add(food)
         self.count_foods += len(selection)
@@ -85,7 +108,7 @@ class EnvironmentSimulator01(Environment):
                     _set.remove(food)
         self.count_foods = 0
 
-    def _gen_animals(self):
+    def _gen_animals(self, count):
         '''
         Genera nuevos agentes animales en posiciones libres de obstaculos,
         aleatoriamente de forma uniforme
@@ -96,8 +119,11 @@ class EnvironmentSimulator01(Environment):
                 if not self.isObstacle(self._map[i][j]):
                     emptys.append((i,j))
         emptys = np.array(emptys)
-        emptys.resize(emptys.size)
-        selection = self._rand.choices(emptys,k = min(int(self.breeding_ratio * self.count_agents), emptys.size))
+        #emptys.resize(emptys.size)
+        #int(self.breeding_ratio * self.count_agents),
+        idx = np.random.choice(emptys.shape[0], min(count, emptys.shape[0]), replace=False)
+        selection = emptys[idx,:]
+        #selection = self._rand.sample(emptys, min(count, emptys.size))
         for r, c in selection:
             a = AnimalAgent(self.digestion_time, self.max_energy)
             self._map[r][c].add(a)
