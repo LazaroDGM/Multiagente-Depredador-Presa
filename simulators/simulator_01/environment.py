@@ -41,6 +41,11 @@ class EnvironmentSimulator01(Environment):
             return False
         self.isObstacle = isObstacle
 
+        ### Estados internos del Medio ###
+        self.cicle = 0
+        self.cicle_food = self._rand.expovariate(1/self.food_generation_period)
+        self.cicle_breeding = self._rand.expovariate(1/self.breeding_period)
+
         ### Variables Observables ###
         self.count_agents = 0
         self.count_foods = 0
@@ -138,5 +143,58 @@ class EnvironmentSimulator01(Environment):
                 self.agents.pop(agent)
                 self.count_agents -=1
     
+
+    def next_step(self):
+        # Generacion de Comida
+        if self.cicle == self.cicle_food:
+            self._remove_food()
+            self._gen_food(int(self.food_ratio * self.shape_map[0]*self.shape_map[1]))
+            self.cicle_food = self._rand.expovariate(1/self.food_generation_period)
+
+        # Reproduccion de la Poblacion
+        if self.cicle == self.cicle_breeding:
+            self._gen_animals(int(self.breeding_ratio * self.count_agents))
+            self.cicle_breeding = self._rand.expovariate(1/self.breeding_period)
+        
+        # Eliminar agentes muertos
+        deleted = []
+        for agent, position in self.agents.items():
+            if agent.energy <= 0:
+                self._map[position[0], position[1]].remove(agent)
+                deleted.append(agent)
+        for agent in deleted:
+            self.agents.pop(agent)
+                
+
+        actions = []
+        for agent in self.agents.keys():            
+            P = self.see(agent)
+            agent.next(P)
+            Ac = agent.action(P)
+            actions.append((agent, Ac))
+
+        self.transform(actions)
+        self.cicle += 1
+
+    def transform(self, actions):
+        food = Food()        
+
+        ### Movimiento de los agentes ###
+        new_positions = {}
+        for agent, action in actions:
+            position, eat_food = action
+                       
+            if eat_food == True:
+                self._map[position[0], position[1]].remove(food)
+                new_positions[agent] = position
+            elif new_positions.get(agent, None) is None:
+                new_positions[agent] = position
+        for agent, position in new_positions.items():
+            old_position = self.agents[agent]
+            if old_position != position:
+                self._map[old_position[0]][old_position[1]].remove(agent)
+                self._map[position[0]][position[1]].add(agent)
+                self.agents[agent] = position
+            
 
 
