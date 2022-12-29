@@ -60,7 +60,6 @@ class AnimalAgentPropierties:
         mov = positions[indx]
         if mov != (r,c):
             self.energy -= 1
-        self.energy -= 1
         new_position = (P[2][0] + mov[0] - r, P[2][1] + mov[1] - c)
         if new_position[0] < 0 or new_position[1] < 0:
             raise Exception()
@@ -81,7 +80,7 @@ class AnimalAgent(BrooksAgent):
         if self.eating == 1:
             self.energy = max(self.energy + Food().energy_ratio * self.prop.max_energy,
                                 self.prop.max_energy)
-        elif self.eating == 0:
+        elif self.eating <= 0:
             self.energy -= 1
         return
     

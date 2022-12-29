@@ -26,7 +26,7 @@ class Simulator():
         step = 0
         while step < stop_steps:
             environment.next_step()
-            outputs.append(environment.outputs())
+            outputs.append(environment.outputs())            
             step += 1
         return environment, outputs
 
