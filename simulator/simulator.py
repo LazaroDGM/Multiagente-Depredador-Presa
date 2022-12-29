@@ -22,10 +22,12 @@ class Simulator():
             `return[1]`: El conjunto de variables observables
         '''
         environment = self.class_enviroment(*args, **kvargs)
-        
+        outputs = []
         step = 0
         while step < stop_steps:
             environment.next_step()
-        return environment, environment.outputs()
+            outputs.append(environment.outputs())
+            step += 1
+        return environment, outputs
 
 
