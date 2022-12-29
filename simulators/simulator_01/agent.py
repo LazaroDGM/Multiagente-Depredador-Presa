@@ -43,27 +43,19 @@ class AnimalAgentPropierties:
     def __condition_mov(self, P):
         return True
     def __mov(self, P):
-        
-        r,c = P[1]
-        min_r = max(0, r-1)
-        min_c = max(0, c-1)
-        max_r = min(P[0].shape[0], r+1+1)
-        max_c = min(P[0].shape[1], c+1+1)
-        extract = P[0][min_r:max_r, min_c:max_c]
-        r = min(1,r)
-        c = min(1,c)
-        positions = []
-        for i in range(extract.shape[0]):
-            for j in range(extract.shape[1]):
-                positions.append((i,j))
-        indx = random.randint(0, len(positions)-1)
-        mov = positions[indx]
-        if mov != (r,c):
-            self.energy -= 1
-        new_position = (P[2][0] + mov[0] - r, P[2][1] + mov[1] - c)
-        if new_position[0] < 0 or new_position[1] < 0:
+        food_found = lambda ent: ent == Food()
+        obstacle_found = lambda ent : ent in [type(Agent)]                                                     # modificar lista para agragar obstaculos
+        x, y = P[1]
+
+        matrix = AStar(P[0], x, y, len(P[0]), food_found, obstacle_found)
+        abundance_matrix = transform(matrix)
+        dx, dy = betterMove(abundance_matrix, rnd=False)
+        new_x, new_y = x + dx -1, y + dy -1
+        if new_x < 0 or new_y < 0:
             raise Exception()
-        return (new_position, False)
+        if new_x != x or new_y != y:
+             self.energy -= 1
+        return (new_x,new_y), False
         
         
 
