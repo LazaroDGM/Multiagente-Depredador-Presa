@@ -18,7 +18,8 @@ class Environment():
 
         `return`: Conjunto de percepciones captadas
         '''
-        return self._see_functions[type(agent)](self, agent)
+        f =self._see_functions[type(agent)]
+        return f(self, agent)
 
     def get_see_function(self, type_agent):
         '''

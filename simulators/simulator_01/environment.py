@@ -30,7 +30,7 @@ class EnvironmentSimulator01(Environment):
         self.digestion_time = digestion_time
         self.max_energy = max_energy
 
-        self._see_functions[type(AnimalAgent)] = EnvironmentSimulator01.seeAgent
+        self._see_functions[AnimalAgent] = EnvironmentSimulator01.seeAgent
         self._rand = random.Random()
         self.obstacles = [AnimalAgent, type(AnimalAgent)]
 

@@ -3,6 +3,7 @@ from Algorithms.AStar import AStar
 from Algorithms.transform import betterMove, transform
 from simulator.agent import Agent, BrooksAgent
 import random
+from math import inf
 from simulators.simulator_01.entities import Food
 
 class AnimalAgentPropierties:
@@ -24,16 +25,19 @@ class AnimalAgentPropierties:
         return self.eating > 0
     def __keep_eating(self, P):
         self.eating -= 1
-        return (0,0), False
+        return (P[2][0], P[2][1]), False
 
     #### Regla 2 ####
     def __condition_eat(self, P):
         vision = P[0]
-        obj = vision[P[1][0], P[1][1]]
-        return obj is Food
+        set_obj = vision[P[1][0], P[1][1]]
+        for obj in set_obj:
+            if type(obj) is Food:
+                return True
+        return False
     def __eat(self, P):
         self.eating = self.prop.digestion_time        
-        return (0,0), True
+        return (P[2][0], P[2][1]), True
     
     #### Regla 3 ####
     def __condition_mov(self, P):
