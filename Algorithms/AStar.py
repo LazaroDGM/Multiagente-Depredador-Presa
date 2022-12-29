@@ -1,8 +1,6 @@
-from heapq import heapify, heappop, heappush,  heappushpop
-from syslog import LOG_EMERG
-import numpy as np
+from heapq import heapify, heappop, heappush
 
-# def AStar(numpy_array, x, y, vision, found, obstacule):
+# def AStar(numpy_array, x, y, vision, found, obstacle):
 #     len_x = len(numpy_array)
 #     len_y = len(numpy_array[0])
 #     matrix = [[ [], [], [] ], 
@@ -46,8 +44,9 @@ import numpy as np
                 
 
 
+positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
 
-def AStar(numpy_array, x, y, vision, found, obstacule):
+def AStar(numpy_array, x, y, vision, found, obstacle):
     len_x = len(numpy_array)
     len_y = len(numpy_array[0])
     matrix = [[ [], [], [] ], 
@@ -75,40 +74,26 @@ def AStar(numpy_array, x, y, vision, found, obstacule):
                 if cell in visited_cells: continue                                                                                                             # cell already visited
                 visited_cells.add((_x_pos, _y_pos))
                 manhathan_distance = max(abs(_x_pos - x), abs(_y_pos - y))
-                
+                obstacle_in_cell = False
                 for agent in numpy_array[_x_pos][_y_pos]:
-                    if obstacule(agent): break
+                    if obstacle(agent): 
+                        obstacle_in_cell = True
+                        break
                     if found(agent):
                         if current_direction == 0:
                             matrix[j + 1][k + 1].append(1)
                         else: 
                             matrix[int((current_direction - 1) / 3)][(current_direction - 1) % 3].append(current_cost + 1)
-
+                if obstacle_in_cell: continue
                 next_direction = (j+1)*3 + k+2       if          current_direction == 0        else            current_direction
                 heappush(heap, (manhathan_distance + current_cost + 1, (next_direction, (manhathan_distance, (_x_pos, _y_pos)))))
+        
+    # Adding obstacles
+    for i, j in positions:
+        if x + i - 1 not in range(0, len(numpy_array)) or y + j - 1 not in range(0, len(numpy_array[i])): continue
+        print(f'position analized: {(x + i - 1, y + j - 1)}')
+        for ent in numpy_array[x + i - 1][y + j - 1]:
+            if obstacle(ent):
+                matrix[i][j] = [-1]
+                # print(matrix[i][j])
     return matrix
-
-
-
-
-
-
-
-
-                
-# def PrintMatrix(matrix)        :
-#     for array in matrix:
-#         print("[ ", end="")
-#         for item in array:
-#             print(item, end="")
-#         print(' ]')
-
-
-# matrix = np.full((10, 10, 1), 0)
-# matrix = [[[] * 10] * 10] * 10
-# matrix[0][0] = [0]
-
-# PrintMatrix(matrix)
-# print(AStar(matrix, 9, 9, 500, lambda n:  n == 0, lambda n: n == 0))
-
-
