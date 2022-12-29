@@ -33,7 +33,7 @@ def transform(matrix, xpansion_distance = 2, re_transforming = False, high_rank_
             test_elem = f'M[{i}][{j}][{k}]:   {matrix[i][j][k]}   ->    {int((maxi + mini - matrix[i][j][k]) * (high_rank_value / maxi))}'
             elem = matrix[i][j][k] if re_transforming else int((maxi + mini - matrix[i][j][k]) * (high_rank_value / maxi))
             temp_matrix[i][j].append(elem)
-            final_matrix[i][j] = elem
+            final_matrix[i][j] += elem
     print("matriz con pesos reales: ")
     PrintMatrix(temp_matrix)
 
@@ -72,17 +72,17 @@ def betterMove(abundance_matrix, xpansion_distance = 2, high_rank_value = 4, rnd
     elif len(sameImportance) ==1:       return sameImportance[0] 
     else:                                               return betterMove(transform_again(abundance_matrix, xpansion_distance, high_rank_value))
 
-def PrintMatrix(matrix)        :
+def PrintMatrix(matrix):
     for array in matrix:
         print("[ ", end="")
         for item in array: 
-            print(item, end="")
+            print(item, end=", ")
         print(' ]')
 
 
 
 matrix = [[[0], [-1], [0], [0], [0], [0], [0]],
-                [[0], [0], [0], [0], [0], [0], [1]],
+                [[1], [0], [0], [0], [0], [0], [1]],
                 [[0], [0], [0], [0], [0], [0], [0]],
                 [[0], [0], [0], [0], [0], [0], [0]],
                 [[0], [0], [1], [0], [0], [0], [0]],
