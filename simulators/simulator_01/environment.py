@@ -76,6 +76,8 @@ class EnvironmentSimulator01(Environment):
                         vision[i][j].add(ent)
         row_position_vision = min(self.vision_radius, r)
         col_position_vision = min(self.vision_radius, c)
+        if row_position_vision < 0 or col_position_vision < 0:
+            raise Exception()
         return vision, (row_position_vision, col_position_vision), (r,c)
 
 
@@ -132,6 +134,8 @@ class EnvironmentSimulator01(Environment):
         selection = emptys[idx,:]
         #selection = self._rand.sample(emptys, min(count, emptys.size))
         for r, c in selection:
+            if r < 0 or c < 0:
+                raise Exception()
             a = AnimalAgent(self.digestion_time, self.max_energy)
             self._map[r][c].add(a)
             self.agents[a] = (r, c)
@@ -186,13 +190,24 @@ class EnvironmentSimulator01(Environment):
         new_positions = {}
         for agent, action in actions:
             position, eat_food = action
-                       
+            if position[0] < 0 or position[1] < 0:
+                raise Exception()
+            mov_posible = True
+            for item in self._map[position[0]][position[1]]:
+                if type(item) in [AnimalAgent]:
+                    mov_posible = False
+                    break
+            if not mov_posible:
+                continue
             if eat_food == True:
                 self._map[position[0], position[1]].remove(food)
-                new_positions[agent] = position
-            elif new_positions.get(agent, None) is None:
-                new_positions[agent] = position
-        for agent, position in new_positions.items():
+                new_positions[position] = agent
+            elif new_positions.get(position, None) is None:
+                new_positions[position] = agent
+            elif position == self.agents[agent]:                
+                new_positions[position] = agent
+
+        for position, agent in new_positions.items():
             old_position = self.agents[agent]
             if old_position != position:
                 self._map[old_position[0]][old_position[1]].remove(agent)
