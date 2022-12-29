@@ -47,7 +47,8 @@ class AnimalAgentPropierties:
 
         matrix = AStar(P[0], x, y, len(P[0]), food_found, obstacle_found)
         abundance_matrix = transform(matrix)
-        return (betterMove(abundance_matrix, rnd=False))
+        new_x, new_y = betterMove(abundance_matrix, rnd=False)
+        return ((P[2][0] + new_x - 1, P[2][1] + new_y - 1), False)
         
         
 
@@ -67,6 +68,9 @@ class AnimalAgent(BrooksAgent):
         elif self.eating == 0:
             self.energy -= 1
         return
+    
+    def __repr__(self) -> str:
+        return 'a'
 
     
 

@@ -74,7 +74,9 @@ class EnvironmentSimulator01(Environment):
                         vision[i][j].add(AnimalAgent)
                     else:
                         vision[i][j].add(ent)
-        return vision, (r,c)
+        row_position_vision = min(self.vision_radius, r)
+        col_position_vision = min(self.vision_radius, c)
+        return vision, (row_position_vision, col_position_vision), (r,c)
 
 
     def _init_map(self):

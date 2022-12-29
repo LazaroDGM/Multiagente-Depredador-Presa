@@ -7,4 +7,7 @@ class Food(object):
         if not hasattr(cls, 'instance'):
             cls.instance = super(Food, cls).__new__(cls)
             cls.energy_ratio = energy_ratio
-        return cls.instance    
+        return cls.instance
+
+    def __repr__(self) -> str:
+        return 'f'
