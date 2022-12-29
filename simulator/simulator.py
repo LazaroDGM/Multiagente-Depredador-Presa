@@ -22,10 +22,24 @@ class Simulator():
             `return[1]`: El conjunto de variables observables
         '''
         environment = self.class_enviroment(*args, **kvargs)
-        
+        outputs = []
         step = 0
         while step < stop_steps:
             environment.next_step()
-        return environment, environment.outputs()
+            outputs.append(environment.outputs())            
+            step += 1
+        return environment, outputs
 
+    def StartManySimulations(self, count_simulations, stop_steps, *args, **kvargs):
+        simulations = []
+        for _ in range(count_simulations):
+            outputs = self.StartSimulation(stop_steps, *args, **kvargs)            
+            simulations.append(outputs)
+        return simulations
+
+    
+
+
+
+        
 
