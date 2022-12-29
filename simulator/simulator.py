@@ -30,4 +30,16 @@ class Simulator():
             step += 1
         return environment, outputs
 
+    def StartManySimulations(self, count_simulations, stop_steps, *args, **kvargs):
+        simulations = []
+        for _ in range(count_simulations):
+            outputs = self.StartSimulation(stop_steps, *args, **kvargs)            
+            simulations.append(outputs)
+        return simulations
+
+    
+
+
+
+        
 
