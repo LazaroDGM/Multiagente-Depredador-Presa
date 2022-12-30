@@ -1,5 +1,5 @@
 from random import randint
-from AStar import AStar
+from Algorithms.AStar import AStar
 
 positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
 
