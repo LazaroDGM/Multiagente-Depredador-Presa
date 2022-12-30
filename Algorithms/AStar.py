@@ -10,7 +10,7 @@ from heapq import heapify, heappop, heappush
 #     heapify(heap)
 #     visited_cells = set()
     
-#     heappush(heap, (0, (0, (0, ([], (x, y))))))                       # 1- costo, 2- direccion de partida del camino, 3- dist. manhathan, 4- posicion correspondiente
+#     heappush(heap, (0, (0, (0, ([], (x, y))))))                       # 1- costo, 2- direccion de partida del camino, 3- dist. manhathan, 4- trace o camino hasta el momento 5- posicion correspondiente
 #     visited_cells.add((x, y))
 
     
@@ -64,7 +64,6 @@ def AStar(numpy_array, x, y, vision, found, obstacle):
         current_cost = min_tuple[0] - min_tuple[1][1][0]
         current_direction = min_tuple[1][0]
         for j in range(-1, 2):
-            pass
             _x_pos = min_tuple[1][1][1][0] + j
             if _x_pos < 0 or _x_pos >= len_x or abs(_x_pos - x) > vision: continue                                                  # out of range test
             for k in range(-1, 2):
@@ -90,10 +89,11 @@ def AStar(numpy_array, x, y, vision, found, obstacle):
         
     # Adding obstacles
     for i, j in positions:
-        if x + i - 1 not in range(0, len(numpy_array)) or y + j - 1 not in range(0, len(numpy_array[i])): continue
+        if x + i - 1 not in range(0, len(numpy_array)) or y + j - 1 not in range(0, len(numpy_array[0])): 
+            matrix[i][j] = [-1]
+            continue
         print(f'position analized: {(x + i - 1, y + j - 1)}')
         for ent in numpy_array[x + i - 1][y + j - 1]:
             if obstacle(ent):
                 matrix[i][j] = [-1]
-                # print(matrix[i][j])
     return matrix
