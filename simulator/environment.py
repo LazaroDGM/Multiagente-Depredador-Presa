@@ -55,7 +55,7 @@ class Environment():
         '''
         raise NotImplementedError()
 
-class EnvironmentManyAgents(Environment):
+class EnvironmentFood(Environment):
 
     def __init__(self,
                  map,          
@@ -162,7 +162,7 @@ class EnvironmentManyAgents(Environment):
     def pre_transform(self):
         raise NotImplementedError()
 
-class EnvironmentSimulatorPreyPredator(EnvironmentManyAgents):
+class EnvironmentManyAgents(EnvironmentFood):
 
     def __init__(self,
                  map,
