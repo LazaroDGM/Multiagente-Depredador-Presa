@@ -77,5 +77,32 @@ class PreyAgent(BrooksAgent):
     def __repr__(self) -> str:
         return 'a'
 
+
+class PredatorAgentPropierties:
+    def __new__(cls, digestion_time, max_energy):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(PredatorAgentPropierties, cls).__new__(cls)
+            cls.digestion_time = digestion_time
+            cls.max_energy = max_energy
+            cls._behaviors = [
+                # Agregar Conductas
+                # En forma de tuplas:
+                # predicado, accion
+            ]
+            cls.rand = random.Random()
+        return cls.instance
+
 class PredatorAgent(BrooksAgent):
-    pass
+    def __init__(self, digestion_time, max_energy, alpha, beta) -> None:
+        self.prop = PredatorAgentPropierties(digestion_time, max_energy)
+        self.eating = 0
+        self.behaviors = self.prop._behaviors
+        self.energy = max_energy
+
+    def next(self, P):
+        if self.eating == 1:
+            self.energy = max(self.energy + Food().energy_ratio * self.prop.max_energy,
+                                self.prop.max_energy)
+        elif self.eating <= 0:
+            self.energy -= 1
+        return
