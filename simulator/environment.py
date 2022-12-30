@@ -149,12 +149,12 @@ class EnvironmentFood(Environment):
         self.pre_transform()
 
         actions = []
-        for agents in self.agents_groups:
+        for type_agent, agents in enumerate(self.agents_groups):
             for agent in agents.keys():
                 P = self.see(agent)
                 agent.next(P)
                 Ac = agent.action(P)
-                actions.append((agent, Ac))
+                actions.append((type_agent, agent, Ac))
 
         self.transform(actions)
         self.cicle += 1
@@ -241,7 +241,7 @@ class EnvironmentManyAgents(EnvironmentFood):
             if self.cicle == self.cicle_breeding[i]:
                 count_agents = len(self.agents_groups[i])
                 if count_agents > 0:
-                    self._gen_animals(int(self.breeding_ratio[i] * count_agents)+1)
+                    self._gen_animals(int(self.breeding_ratio[i] * count_agents)+1, i)
                     self.cicle_breeding[i] = int(self._rand.expovariate(1/self.breeding_period[i])) + self.cicle + 1
                     print('Nueva reproduccion animal en : ', self.cicle_breeding[i])
     
