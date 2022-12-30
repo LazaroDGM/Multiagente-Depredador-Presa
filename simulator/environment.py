@@ -57,16 +57,29 @@ class Environment():
 class EnvironmentTwoAgents(Environment):
 
     def __init__(self,
-                 shape_map,                 
+                 map,          
                  food_generation_period,
                  food_ratio,
-                 energy_ratio,                 
+                 energy_ratio,
+                 initial_count_animals,
+                 breeding_period,
+                 breeding_ratio,
+                 digestion_time,
+                 vision_radius,
+                 max_energy,              
                 ) -> None:
         super().__init__()
-        self.shape_map = shape_map        
+        self.shape_map = map.shape       
         self.food_generation_period = food_generation_period
         self.food_ratio = food_ratio
-        self.energy_ratio = energy_ratio        
+        self.energy_ratio = energy_ratio
+
+        self.initial_count_animals = initial_count_animals
+        self.breeding_period = breeding_period
+        self.breeding_ratio = breeding_ratio
+        self.digestion_time = digestion_time
+        self.vision_radius = vision_radius
+        self.max_energy = max_energy    
         
         self._rand = random.Random()
 
@@ -78,14 +91,18 @@ class EnvironmentTwoAgents(Environment):
         self.count_foods = 0        
         
         self.food = ents.Food(energy_ratio)
+        self.obstacle = ents.Obstacle()
+        self.agents_groups = []
         self._init_map()
         self._gen_food(int(self.food_ratio * self.shape_map[0]*self.shape_map[1]))     
-        self.agents_groups = []
         
-    def _init_map(self):
-        row, col =  self.shape_map
+    def _init_map(self, map):
+        row, col =  map.shape
         self._map = np.array([set() for i in range(0, row*col)])
-        self._map.resize((row, col))  
+        self._map.resize((row, col))
+        for i in range(map.shape[0]):
+            for j in range(map.shape[1]):
+                self._map[i][j].add(self.obstacle)
 
     def _gen_food(self, count):
         '''
