@@ -89,7 +89,7 @@ def AStar(numpy_array, x, y, vision, found, obstacle):
         
     # Adding obstacles
     for i, j in positions:
-        if x + i - 1 not in range(0, len(numpy_array)) or y + j - 1 not in range(0, len(numpy_array[i])): 
+        if x + i - 1 not in range(0, len(numpy_array)) or y + j - 1 not in range(0, len(numpy_array[0])): 
             matrix[i][j] = [-1]
             continue
         print(f'position analized: {(x + i - 1, y + j - 1)}')
