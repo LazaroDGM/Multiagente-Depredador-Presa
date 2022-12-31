@@ -1,4 +1,5 @@
 from simulator.simulator import Simulator2D
+from simulators.simulator_02.agent import PredatorAgent, scaredPreyAgent
 import drawing.util as draw
 import pygame
 from simulator.entities import Obstacle, Food
@@ -19,9 +20,11 @@ class Simulator02(Simulator2D):
                         draw.draw_ellipse(screen, (i,j), draw.YELLOW, 20)
                     if isinstance(item, Obstacle):
                         draw.draw_diamond(screen, (i,j), draw.BLACK)
-        for agents in environment.agents_groups:
-            for r, c in agents.values():
-                draw.draw_rect(screen, (r, c), draw.BLUE, 38)
+        for r, c in environment.agents_groups[0].values():
+            draw.draw_rect(screen, (r, c), draw.RED, 38)
+        for r, c in environment.agents_groups[1].values():
+            draw.draw_rect(screen, (r, c), draw.BLUE, 30)
+            
         pygame.display.flip()
 
 

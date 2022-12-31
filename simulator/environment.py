@@ -284,6 +284,7 @@ class EnvironmentManyAgents(EnvironmentFood):
                     deleted.append(agent)
             for agent in deleted:
                 self.agents_groups[type_agent].pop(agent)
+            deleted.clear()
 
     def pre_transform(self):
         
