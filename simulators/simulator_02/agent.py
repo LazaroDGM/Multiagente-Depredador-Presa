@@ -116,7 +116,7 @@ class scaredPreyAgentPropierties:
             for j in range(len(P[0][i])):
                 elem = P[0][i][j]
                 distance_m =scaredPreyAgentPropierties.manhathan_distance(x, y, i, j)
-                if elem == Food() and min_distance > distance_m:
+                if Food() in elem and min_distance > distance_m:
                     return True
         # if closer_food == (-1, -1): return -1
         # return closer_food
