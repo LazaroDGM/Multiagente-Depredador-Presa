@@ -53,9 +53,14 @@ class scaredPreyAgentPropierties:
             cls.alpha = alpha
             cls.beta = beta
             cls._behaviors = [
-                (cls.__condition_keep_eating, cls.__keep_eating),
-                (cls.__condition_eat, cls.__eat),
-                (cls.__condition_mov, cls.__mov)
+                (cls.__condicion_para_esconderse, cls.__accion_de_esconderse),
+                (cls.__condicion_para_buscar_escondite, cls.__accion_de_buscar_escondite),
+                (cls.__condicion_para_huir, cls.__accion_de_huir),
+                (cls.__condicion_para_permanecer, cls.__accion_de_permanecer),
+                (cls.__condicion_para_comer, cls.__accion_de_comer),
+                (cls.__condicion_para_buscar_comida, cls.__accion_de_buscar_comida),
+                (cls.__condicion_para_caminar, cls.__accion_de_caminar),
+                
             ]
             cls.rand = random.Random()
         return cls.instance
