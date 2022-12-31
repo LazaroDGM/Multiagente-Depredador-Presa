@@ -53,9 +53,9 @@ class scaredPreyAgentPropierties:
             cls.alpha = alpha
             cls.beta = beta
             cls._behaviors = [
-                (cls.__condicion_para_esconderse, cls.__accion_de_esconderse),
-                (cls.__condicion_para_buscar_escondite, cls.__accion_de_buscar_escondite),
-                (cls.__condicion_para_huir, cls.__accion_de_huir),
+                #(cls.__condicion_para_esconderse, cls.__accion_de_esconderse),
+                #(cls.__condicion_para_buscar_escondite, cls.__accion_de_buscar_escondite),
+                #(cls.__condicion_para_huir, cls.__accion_de_huir),
                 (cls.__condicion_para_permanecer, cls.__accion_de_permanecer),
                 (cls.__condicion_para_comer, cls.__accion_de_comer),
                 (cls.__condicion_para_buscar_comida, cls.__accion_de_buscar_comida),
@@ -70,7 +70,7 @@ class scaredPreyAgentPropierties:
     def __proximo_escondite(self, P):                                                           # P = matriz, pos
         (x, y) = P[1]
         better_hiding = (-1, -1)
-        min_distance = len(P[0] + 1)
+        min_distance = len(P[0]) + 1
         for i in range(len(P[0])):
             for j in range(len(P[0][i])):
                 elem = P[0][i][j]
@@ -86,14 +86,15 @@ class scaredPreyAgentPropierties:
             if matriz[x + i][y + j] == HidePlace():
                 escondites.append((x + i, y + j))
         # return escondites[random.randint(0, len(escondites) - 1)]
-        self.future_position = escondites[random.randint(0, len(escondites) - 1)]
+        if len(escondites) > 0:
+            self.future_position = escondites[random.randint(0, len(escondites) - 1)]
         return len(escondites) != 0
                 
 
     def __proximo_depredador(self, P):
         (x, y) = P[1]
         closer_predator = (-1, -1)
-        min_distance = len(P[0] + 1)
+        min_distance = len(P[0]) + 1
         for i in range(len(P[0])):
             for j in range(len(P[0][i])):
                 elem = P[0][i][j]
@@ -106,7 +107,7 @@ class scaredPreyAgentPropierties:
     def __proximo_comida(self, P):
         (x, y) = P[1]
         closer_food = (-1, -1)
-        min_distance = len(P[0] + 1)
+        min_distance = len(P[0]) + 1
         for i in range(len(P[0])):
             for j in range(len(P[0][i])):
                 elem = P[0][i][j]
@@ -121,10 +122,12 @@ class scaredPreyAgentPropierties:
         foods = []
         (x, y) = P[1]
         for i, j in directions:
-            if matriz[x + i][y + j] == HidePlace():
-                foods.append((x + i, y + j))
+            if (x + i) in range(0, len(matriz)) and (y + j) in range(0, len(matriz[x + i])) and matriz[x + i][y + j] not in [Obstacle()]:
+                if matriz[x + i][y + j] == Food():
+                    foods.append((x + i, y + j))
         # return foods[random.randint(0, len(foods) - 1)]
-        self.future_position = foods[random.randint(0, len(foods) - 1)]
+        if len(foods) > 0:
+            self.future_position = foods[random.randint(0, len(foods) - 1)]
         return len(foods) != 0
 
         
@@ -199,7 +202,7 @@ class scaredPreyAgentPropierties:
 
     #### Regla 5 ####
     def __condicion_para_comer(self, P):
-        return self.prop.__en_rango_comida(P) and (self.prop.max_energy * self.prop.alpha) > self.energy
+        return Food() in P[0][P[1][0]][P[1][1]] # self.prop.__en_rango_comida(P) and (self.prop.max_energy * self.prop.alpha) > self.energy
     def __accion_de_comer(self, P):
         return self.future_position, True
 
@@ -260,9 +263,12 @@ class scaredPreyAgent(BrooksAgent):
         self.next_predators = []
     
     def next(self, P):
+        if self.eating > 1:
+            self.eating -= 1
         if self.eating == 1:
             self.energy = max(self.energy + Food().energy_ratio * self.prop.max_energy,
                                 self.prop.max_energy)
+            self.eating -= 1
         elif self.eating <= 0:
             self.energy -= 1
         self.future_position = (-1, -1)
