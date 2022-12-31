@@ -69,7 +69,6 @@ class scaredPreyAgentPropierties:
     
     def __proximo_escondite(self, P):                                                           # P = matriz, pos
         (x, y) = P[1]
-        better_hiding = (-1, -1)
         min_distance = len(P[0]) + 1
         for i in range(len(P[0])):
             for j in range(len(P[0][i])):
@@ -83,13 +82,17 @@ class scaredPreyAgentPropierties:
         escondites = []
         (x, y) = P[1]
         (real_x, real_y) = P[2]
-        for i, j in directions:
-            if matriz[x + i][y + j] == HidePlace():
-                escondites.append((real_x + i, real_y + j))
-        # return escondites[random.randint(0, len(escondites) - 1)]
-        if len(escondites) > 0:
-            self.future_position = escondites[random.randint(0, len(escondites) - 1)]
-        return len(escondites) != 0
+        # for i, j in directions:
+        #     if matriz[x + i][y + j] == HidePlace():
+        #         escondites.append((real_x + i, real_y + j))
+        # # return escondites[random.randint(0, len(escondites) - 1)]
+        # if len(escondites) > 0:
+        #     self.future_position = escondites[random.randint(0, len(escondites) - 1)]
+        # return len(escondites) != 0
+        if matriz[x][y] == HidePlace():
+            self.future_position = (real_x, real_y)
+            return True
+        return False
                 
 
     def __proximo_depredador(self, P):
@@ -123,14 +126,17 @@ class scaredPreyAgentPropierties:
         foods = []
         (x, y) = P[1]
         (real_x, real_y) = P[2]
-        for i, j in directions:
-            if (x + i) not in range(0, len(matriz)) or (y + j) not in range(0, len(matriz[x + i])) or matriz[x + i][y + j] in [Obstacle()]: continue            # modificar para agregar tipos de obstaculos
-            if matriz[x + i][y + j] == Food():
-                foods.append((real_x + i, real_y + j))
-        # return foods[random.randint(0, len(foods) - 1)]
-        if len(foods) > 0:
-            self.future_position = foods[random.randint(0, len(foods) - 1)]
-        return len(foods) != 0
+        # for i, j in directions:
+        #     if (x + i) not in range(0, len(matriz)) or (y + j) not in range(0, len(matriz[x + i])) or matriz[x + i][y + j] in [Obstacle()]: continue            # modificar para agregar tipos de obstaculos
+        #     if matriz[x + i][y + j] == Food():
+        #         foods.append((real_x + i, real_y + j))
+        # if len(foods) > 0:
+        #     self.future_position = foods[random.randint(0, len(foods) - 1)]
+        # return len(foods) != 0
+        if matriz[x][y] == Food():
+            self.future_position = (real_x, real_y)
+            return True
+        return False
 
         
     #### Regla 1 ####
@@ -204,13 +210,13 @@ class scaredPreyAgentPropierties:
 
     #### Regla 4 ####
     def __condicion_para_permanecer(self, P):
-        return self.eating > 0 or (self.prop.max_energy * self.prop.beta) > self.energy or (self.prop.__proximo_depredador(P) and self.hidden)
+        return self.eating > 0 or ((self.prop.max_energy * self.prop.beta) > self.energy and self.rand()) or (self.prop.__proximo_depredador(P) and self.hidden)
     def __accion_de_permanecer(self, P):
         return P[1], False
 
     #### Regla 5 ####
     def __condicion_para_comer(self, P):
-        return Food() in P[0][P[1][0]][P[1][1]] # self.prop.__en_rango_comida(P) and (self.prop.max_energy * self.prop.alpha) > self.energy
+        return self.prop.__en_rango_comida(P) and (self.prop.max_energy * self.prop.alpha) > self.energy
     def __accion_de_comer(self, P):
         return self.future_position, True
 
