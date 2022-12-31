@@ -82,9 +82,10 @@ class scaredPreyAgentPropierties:
         matriz = P[0]
         escondites = []
         (x, y) = P[1]
+        (real_x, real_y) = P[2]
         for i, j in directions:
             if matriz[x + i][y + j] == HidePlace():
-                escondites.append((x + i, y + j))
+                escondites.append((real_x + i, real_y + j))
         # return escondites[random.randint(0, len(escondites) - 1)]
         if len(escondites) > 0:
             self.future_position = escondites[random.randint(0, len(escondites) - 1)]
@@ -121,10 +122,11 @@ class scaredPreyAgentPropierties:
         matriz = P[0]
         foods = []
         (x, y) = P[1]
+        (real_x, real_y) = P[2]
         for i, j in directions:
-            if (x + i) in range(0, len(matriz)) and (y + j) in range(0, len(matriz[x + i])) and matriz[x + i][y + j] not in [Obstacle()]:
-                if matriz[x + i][y + j] == Food():
-                    foods.append((x + i, y + j))
+            if (x + i) not in range(0, len(matriz)) or (y + j) not in range(0, len(matriz[x + i])) or matriz[x + i][y + j] in [Obstacle()]: continue            # modificar para agregar tipos de obstaculos
+            if matriz[x + i][y + j] == Food():
+                foods.append((real_x + i, real_y + j))
         # return foods[random.randint(0, len(foods) - 1)]
         if len(foods) > 0:
             self.future_position = foods[random.randint(0, len(foods) - 1)]
@@ -145,7 +147,8 @@ class scaredPreyAgentPropierties:
         predator_found = lambda ent: ent == type(PredatorAgent)
         obstacle_found = lambda ent : ent in []                                                     # modificar lista para agragar obstaculos
         (x, y) = P[1]
-        
+        (real_x, real_y) = P[2]
+
         hideplaces_matrix = AStar(P[0], x, y, len(P[0]), hideplace_found, obstacle_found)
         hideplaces_abundance_matrix = transform(hideplaces_matrix, xpansion_distance= 1)
 
@@ -159,12 +162,13 @@ class scaredPreyAgentPropierties:
             pounded_matrix[i][j] = -1 if hideplaces_matrix[i][j] == -1 else hideplaces_matrix[i][j] - predators_abundance_matrix[i][j]
 
         dx, dy = betterMove(pounded_matrix, rnd=True)
-        new_x, new_y = x + dx -1, y + dy -1
+        (new_x, new_y) = x + dx -1, y + dy -1
+        (new_real_x, new_real_y) = real_x + dx -1, real_y + dy -1
         if new_x < 0 or new_y < 0:
             raise Exception()
         if new_x != x or new_y != y:
-             self.energy -= 1
-        return (new_x,new_y), False
+            self.energy -= 1
+        return (new_real_x, new_real_y), False
         
         
         
@@ -175,8 +179,10 @@ class scaredPreyAgentPropierties:
         return self.prop.__proximo_depredador(P) and not self.hidden
     def __accion_de_huir(self, P):
         predator_found = lambda ent: ent == type(PredatorAgent)
-        obstacle_found = lambda ent : ent in []                                                     # modificar lista para agragar obstaculos
+        obstacle_found = lambda ent : ent in [Obstacle()]                                                     # modificar lista para agragar obstaculos
         (x, y) = P[1]
+        (real_x, real_y) = P[2]
+
         predators_matrix = AStar(P[0], x, y, len(P[0]), predator_found, obstacle_found)
         predators_abundance_matrix = transform(predators_matrix, xpansion_distance= 1)
 
@@ -188,11 +194,13 @@ class scaredPreyAgentPropierties:
 
         dx, dy = betterMove(pounded_matrix, rnd=True)
         new_x, new_y = x + dx -1, y + dy -1
+        (new_real_x, new_real_y) = real_x + dx -1, real_y + dy -1
         if new_x < 0 or new_y < 0:
             raise Exception()
         if new_x != x or new_y != y:
-             self.energy -= 1
-        return (new_x,new_y), False
+            self.energy -= 1
+
+        return (new_real_x, new_real_y), False
 
     #### Regla 4 ####
     def __condicion_para_permanecer(self, P):
@@ -211,20 +219,22 @@ class scaredPreyAgentPropierties:
         return self.prop.__proximo_comida(P) and (self.prop.max_energy * self.prop.beta) > self.energy
     def __accion_de_buscar_comida(self, P):
         food_found = lambda ent: ent == Food()
-        obstacle_foun = lambda ent: ent in []                                                     # modificar lista para agragar obstaculos
+        obstacle_foun = lambda ent: ent in [Obstacle()]                                                     # modificar lista para agragar obstaculos
         (x, y) = P[1]
+        (real_x, real_y) = P[2]
         
         matrix = AStar(P[0], x, y, len(P[0]), food_found, obstacle_foun)
         abundance_matrix = transform(matrix)
         (dx, dy) = betterMove(abundance_matrix), 
 
+        (new_x, new_y) = x + dx -1, y + dy -1
+        (new_real_x, new_real_y) = real_x + dx - 1, real_y + dy - 1
 
-        new_x, new_y = x + dx -1, y + dy -1
         if new_x < 0 or new_y < 0:
             raise Exception()
         if new_x != x or new_y != y:
              self.energy -= 1
-        return (new_x,new_y), False
+        return (new_real_x, new_real_y), False
 
     #### Regla 7 ####
     def __condicion_para_caminar(self, P):
@@ -232,10 +242,12 @@ class scaredPreyAgentPropierties:
     def __accion_de_caminar(self, P):
         matrix = P[0]
         (x, y) = P[1]
+        (real_x, real_y) = P[2]
+        
         default_pos = positions_to_move = []
         for i, j in directions:
-            if (x + i) in range(0, len(matrix)) and (y + j) in range(0, len(matrix[x + i])) and matrix[x + i][y + j] not in []:                          # modificar para agregar obstaculos
-                default_pos.append((x + i, y + j))
+            if (x + i) in range(0, len(matrix)) and (y + j) in range(0, len(matrix[x + i])) and matrix[x + i][y + j] not in [Obstacle()]:                          # modificar para agregar obstaculos
+                default_pos.append((real_x + i, real_y + j))
         if len(default_pos) == 0: return (x, y), False
         return (default_pos[random.randint(0, len(default_pos) - 1)], False)
 
