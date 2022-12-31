@@ -151,7 +151,7 @@ class scaredPreyAgentPropierties:
     def __accion_de_buscar_escondite(self, P):
         hideplace_found = lambda ent: ent == HidePlace()
         predator_found = lambda ent: ent == type(PredatorAgent)
-        obstacle_found = lambda ent : ent in []                                                     # modificar lista para agragar obstaculos
+        obstacle_found = lambda ent : ent in [Obstacle()]                                                     # modificar lista para agragar obstaculos
         (x, y) = P[1]
         (real_x, real_y) = P[2]
 
@@ -212,7 +212,7 @@ class scaredPreyAgentPropierties:
     def __condicion_para_permanecer(self, P):
         return self.eating > 0 or ((self.prop.max_energy * self.prop.beta) > self.energy and self.rand()) or (self.prop.__proximo_depredador(P) and self.hidden)
     def __accion_de_permanecer(self, P):
-        return P[1], False
+        return P[2], False
 
     #### Regla 5 ####
     def __condicion_para_comer(self, P):
@@ -276,7 +276,7 @@ class scaredPreyAgent(BrooksAgent):
         self.eating = 0
         self.energy = max_energy
         self.hidden = False
-        self.rand = lambda: random.random()
+        self.rand = lambda: random.randint(0, 100) > 70
         self.future_position = (-1, -1)
         self.next_predators = []
     
