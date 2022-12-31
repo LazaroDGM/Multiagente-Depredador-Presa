@@ -34,8 +34,8 @@ def transform(matrix, xpansion_distance = 2, re_transforming = False, high_rank_
             elem = matrix[i][j][k] if re_transforming else int((maxi + mini - matrix[i][j][k]) * (high_rank_value / maxi))
             temp_matrix[i][j].append(elem)
             final_matrix[i][j] += elem
-    print("matriz con pesos reales: ")
-    PrintMatrix(temp_matrix)
+    #print("matriz con pesos reales: ")
+    #PrintMatrix(temp_matrix)
 
     for i, j in positions:
         if final_matrix[i][j] == -1: continue
@@ -94,12 +94,12 @@ obstacle_found = lambda ent : ent == -1                                         
 x, y = P[1]
 
 matrix2 = AStar(P[0], x, y, len(P[0]), food_found, obstacle_found)
-print('AStar: ')
-PrintMatrix(matrix2)
+#print('AStar: ')
+#PrintMatrix(matrix2)
 
 abundance_matrix = transform(matrix2)
-print('after transform: ')
-PrintMatrix(abundance_matrix)
+#print('after transform: ')
+#PrintMatrix(abundance_matrix)
 
-print('better move:  ')
-print(betterMove(abundance_matrix, rnd=False))
+#print('better move:  ')
+#print(betterMove(abundance_matrix, rnd=False))
