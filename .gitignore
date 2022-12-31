@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # Para hacer pruebas
-main.py
+#main.py
 test/
