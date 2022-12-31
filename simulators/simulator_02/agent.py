@@ -218,6 +218,7 @@ class scaredPreyAgentPropierties:
     def __condicion_para_comer(self, P):
         return self.prop.__en_rango_comida(P) and (self.prop.max_energy * self.prop.alpha) > self.energy
     def __accion_de_comer(self, P):
+        self.eating = self.prop.digestion_time
         return P[2], True
 
     #### Regla 6 ####
@@ -231,7 +232,7 @@ class scaredPreyAgentPropierties:
         
         matrix = AStar(P[0], x, y, len(P[0]), food_found, obstacle_foun)
         abundance_matrix = transform(matrix)
-        (dx, dy) = betterMove(abundance_matrix), 
+        (dx, dy) = betterMove(abundance_matrix)
 
         (new_x, new_y) = x + dx -1, y + dy -1
         (new_real_x, new_real_y) = real_x + dx - 1, real_y + dy - 1
