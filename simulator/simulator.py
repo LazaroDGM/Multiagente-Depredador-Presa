@@ -65,11 +65,14 @@ class Simulator2D(Simulator):
         pygame.init()
         h, w = environment.shape_map
         screen = pygame.display.set_mode((w * 40, h * 40))
+        pygame.display.flip()
         while step < stop_steps:
-            environment.next_step()
-            outputs.append(environment.outputs())
-            self.draw(environment, screen)
             time.sleep(tick)
+            environment.next_step()
+            output = environment.outputs()
+            outputs.append(output)
+            self.draw(environment, screen)
+            print(step, output)
             step += 1
         return environment, outputs
 
