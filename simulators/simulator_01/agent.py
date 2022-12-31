@@ -44,7 +44,7 @@ class AnimalAgentPropierties:
         return True
     def __mov(self, P):
         food_found = lambda ent: ent == Food()
-        obstacle_found = lambda ent : ent in [type(Agent)]                                                     # modificar lista para agragar obstaculos
+        obstacle_found = lambda ent : ent in []                                                     # modificar lista para agragar obstaculos
         x, y = P[1]
 
         matrix = AStar(P[0], x, y, len(P[0]), food_found, obstacle_found)
