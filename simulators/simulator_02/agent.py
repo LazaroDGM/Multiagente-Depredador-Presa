@@ -285,7 +285,7 @@ class scaredPreyAgent(BrooksAgent):
         if self.eating > 1:
             self.eating -= 1
         if self.eating == 1:
-            self.energy = max(self.energy + Food().energy_ratio * self.prop.max_energy,
+            self.energy = min(self.energy + Food().energy_ratio * self.prop.max_energy,
                                 self.prop.max_energy)
             self.eating -= 1
         elif self.eating <= 0:
