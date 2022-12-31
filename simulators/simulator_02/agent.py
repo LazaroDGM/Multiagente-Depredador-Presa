@@ -89,7 +89,7 @@ class scaredPreyAgentPropierties:
         # if len(escondites) > 0:
         #     self.future_position = escondites[random.randint(0, len(escondites) - 1)]
         # return len(escondites) != 0
-        if matriz[x][y] == HidePlace():
+        if HidePlace() in matriz[x][y]  :
             self.future_position = (real_x, real_y)
             return True
         return False
@@ -133,7 +133,7 @@ class scaredPreyAgentPropierties:
         # if len(foods) > 0:
         #     self.future_position = foods[random.randint(0, len(foods) - 1)]
         # return len(foods) != 0
-        if matriz[x][y] == Food():
+        if Food() in matriz[x][y]  :
             self.future_position = (real_x, real_y)
             return True
         return False
