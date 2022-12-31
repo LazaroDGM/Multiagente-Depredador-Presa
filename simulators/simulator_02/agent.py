@@ -218,7 +218,7 @@ class scaredPreyAgentPropierties:
     def __condicion_para_comer(self, P):
         return self.prop.__en_rango_comida(P) and (self.prop.max_energy * self.prop.alpha) > self.energy
     def __accion_de_comer(self, P):
-        return self.future_position, True
+        return P[2], True
 
     #### Regla 6 ####
     def __condicion_para_buscar_comida(self, P):
