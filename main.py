@@ -21,31 +21,41 @@ o = set([Obstacle()])
 v = set()
 map = np.array(
     [
-        [v,v,v,v,o,v,v,v],
-        [v,v,v,v,v,v,v,v],
-        [v,v,v,v,o,v,v,v],
-        [o,o,o,o,o,v,v,v],
-        [v,v,o,v,v,o,v,v],
-        [v,v,v,v,v,o,o,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],            
     ]
 )
 
 sim = Simulator02(Environment02)
 
 simulation = sim.StartSimulation(
-    tick=0.1,
-    stop_steps=10000,
+    tick=0.0,
+    stop_steps=5000,
     map= map,
-    initial_count_animals= [0,3],
-    breeding_period= [500,70],
+    initial_count_animals= [2,5],
+    breeding_period= [200,50],
     breeding_ratio= [0.3, 0.2],
-    vision_radius= [5,5],
+    breeding_population= [0.75,0.5],
+    vision_radius= [6,3],
     food_generation_period= 50,
-    food_ratio= 0.125,
-    energy_ratio= 1,
-    digestion_time= [3,3],
-    max_energy= [200, 200],
-    special_parameters=[[0,0],[0.7,0.7]],
+    food_ratio= 0.1,
+    energy_ratio= 0.4,
+    digestion_time= [5,2],
+    max_energy= [150, 60],
+    special_parameters=[[0.3,0.3,2],[0.3,0.4,5]],
 )
 
 #sim = Simulator01(EnvironmentSimulator01)
@@ -73,6 +83,7 @@ import matplotlib.pyplot as plt
 t = range(results.shape[1])
 plt.plot(t, results[0])
 plt.plot(t, results[1])
+plt.plot(t, results[2])
 plt.show()
 
 
@@ -83,7 +94,7 @@ env = Environment02(
     initial_count_animals= [0,3],
     breeding_period= [500,200],
     breeding_ratio= [0.3, 0.2],
-    vision_radius= [5,4],
+    vision_radius= [5,3],
     food_generation_period= 20,
     food_ratio= 0.125,
     energy_ratio= 1,
