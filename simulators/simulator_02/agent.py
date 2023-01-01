@@ -19,9 +19,7 @@ class PredatorAgentPropierties:
             cls.digestion_time = digestion_time
             cls.max_energy = max_energy
             cls._behaviors = [
-                # Agregar Conductas
-                # En forma de tuplas:
-                # predicado, accion
+                ((lambda self, P: True) , lambda self, P: (P[2], False))
             ]
             cls.rand = random.Random()
         return cls.instance
@@ -100,7 +98,7 @@ class scaredPreyAgentPropierties:
             for j in range(len(P[0][i])):
                 elem = P[0][i][j]
                 distance_m =scaredPreyAgentPropierties.manhathan_distance(x, y, i, j)
-                if type(PredatorAgent) in elem and min_distance > distance_m:
+                if PredatorAgent in elem and min_distance > distance_m:
                     return True
         # if closer_predator == (-1, -1): return -1
         # return closer_predator
@@ -177,14 +175,14 @@ class scaredPreyAgentPropierties:
         return (new_real_x, new_real_y), False
         
         
-        
-        
 
     #### Regla 3 ####
     def __condicion_para_huir(self, P):
+        # print(self.prop.__proximo_depredador(P))
         return self.prop.__proximo_depredador(P) and not self.hidden
     def __accion_de_huir(self, P):
-        predator_found = lambda ent: ent == type(PredatorAgent)
+        #print('HUIRRRRRRRRR')
+        predator_found = lambda ent: ent in [PredatorAgent]
         obstacle_found = lambda ent : ent in [Obstacle()]                                                     # modificar lista para agragar obstaculos
         (x, y) = P[1]
         (real_x, real_y) = P[2]
@@ -196,12 +194,16 @@ class scaredPreyAgentPropierties:
                                         [0, 0, 0], 
                                         [0, 0, 0]] 
         # maxi = max([max(array) for array in predators_abundance_matrix])
+        
+        maxi = max(max([array for array in predators_abundance_matrix]))
+        
         for i, j in positions:
-            if predators_abundance_matrix[i][j] > 0:
-                pounded_matrix[i][j] = -predators_abundance_matrix[i][j] -1 if predators_abundance_matrix[i][j] > 0 else predators_abundance_matrix[i][j]
+            pounded_matrix[i][j] = maxi - predators_abundance_matrix[i][j] if predators_abundance_matrix[i][j] >= 0 else -1
                 
 
         dx, dy = betterMove(pounded_matrix, rnd=True)
+        print('HUIR', dx-1, dy-1)
+        print(predators_matrix)
         new_x, new_y = x + dx -1, y + dy -1
         (new_real_x, new_real_y) = real_x + dx -1, real_y + dy -1
         if new_x < 0 or new_y < 0:

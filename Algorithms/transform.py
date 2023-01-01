@@ -1,4 +1,3 @@
-from asyncio.windows_events import INFINITE
 from random import randint
 from Algorithms.AStar import AStar
 import math
