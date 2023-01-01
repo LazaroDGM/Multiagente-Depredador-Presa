@@ -1,6 +1,7 @@
 from simulator.environment import Environment
 from simulators.simulator_03.entities import Food, Obstacle, Plant
 import numpy as np
+import random
 
 VOID = 0
 FOOD = 1
@@ -10,6 +11,7 @@ HIDING_PLACE = -2
 class Environment03(Environment):
 
     def __init__(self,
+        map,
         plant_radius,
         food_ratio,
         food_generation_period
@@ -20,6 +22,7 @@ class Environment03(Environment):
 
         self.food = Food()
         self.obstacle = Obstacle()
+        self._rand = random.Random()
 
         # Diccionario de plantas-(posicion, proxima reproduccion)
         self.plants = {}
@@ -32,8 +35,9 @@ class Environment03(Environment):
 
         # Variables contadoras
         self.cicle = 0 # Tiempo actual del Medio
+        self.count_foods = 0
         
-        
+        self._init_map(map)
 
     
     def _init_map(self, map):
@@ -42,17 +46,18 @@ class Environment03(Environment):
         self._map.resize((row, col))
         for i in range(map.shape[0]):
             for j in range(map.shape[1]):
-                if isinstance(map[i,j], (Food, Obstacle, Plant)):
+                if isinstance(map[i,j], (Obstacle, Plant)):
                     self._map[i][j] = map[i,j]
                     if isinstance(map[i][j], Plant):
-                        self.plants[map[i][j]] = ((i, j), 0)
+                        self.plants[map[i][j]] = ((i, j), 1)
+        self.shape_map = self._map.shape
     
     def free_for_food(self, s):
         '''
         Funcion para saber si una casilla esta libre para generar una comida
         '''
-        if issubclass(s, set):
-            if self.food in s:
+        if isinstance(s, set):
+            if self.food not in s:
                 return True
         return False
 
@@ -62,7 +67,7 @@ class Environment03(Environment):
         La cantidad de comida generada es en proporcion al mapa.
         '''
         reshaped = matrix.reshape(matrix.size)
-        food = Food(self.energy_ratio)
+        #food = Food()
 
         emptys = np.array(list(filter(self.free_for_food, reshaped)))
         emptys.resize(emptys.size)
@@ -72,7 +77,7 @@ class Environment03(Environment):
         idx = np.random.choice(emptys.shape[0], min(count, emptys.size), replace=False)
         selection = emptys[idx]
         for s in selection:
-            s.add(food)
+            s.add(self.food)
         self.count_foods += len(selection)
 
     def gen_food(self):
@@ -86,7 +91,15 @@ class Environment03(Environment):
                 max_c = min(self._map.shape[1], c+self.plant_radius+1)
                 extract = self._map[min_r:max_r, min_c:max_c]
 
-                self._gen_food(self.food_ratio*extract.size, extract)
+                self._gen_food(int(self.food_ratio*extract.size), extract)
                 cicle_food = int(self._rand.expovariate(1/self.food_generation_period)) + self.cicle + 1
                 print('Nueva produccion de comida en: ', cicle_food)
                 self.plants[plant] = ((r,c), cicle_food)
+
+    def next_step(self):
+        self.cicle += 1
+        print(self.count_foods)
+        self.gen_food()
+
+    def outputs(self):
+        return None
