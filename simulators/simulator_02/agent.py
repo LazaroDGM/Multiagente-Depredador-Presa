@@ -1,7 +1,4 @@
 from email.policy import default
-from turtle import distance, pos, position
-from xml.dom.minidom import Element
-from xxlimited import foo
 from simulator.agent import Agent, BrooksAgent
 from simulator.entities import Food, Obstacle
 from Algorithms.AStar import AStar
@@ -55,7 +52,7 @@ class scaredPreyAgentPropierties:
             cls._behaviors = [
                 #(cls.__condicion_para_esconderse, cls.__accion_de_esconderse),
                 #(cls.__condicion_para_buscar_escondite, cls.__accion_de_buscar_escondite),
-                #(cls.__condicion_para_huir, cls.__accion_de_huir),
+                (cls.__condicion_para_huir, cls.__accion_de_huir),
                 (cls.__condicion_para_permanecer, cls.__accion_de_permanecer),
                 (cls.__condicion_para_comer, cls.__accion_de_comer),
                 (cls.__condicion_para_buscar_comida, cls.__accion_de_buscar_comida),
@@ -103,7 +100,7 @@ class scaredPreyAgentPropierties:
             for j in range(len(P[0][i])):
                 elem = P[0][i][j]
                 distance_m =scaredPreyAgentPropierties.manhathan_distance(x, y, i, j)
-                if elem == type(PredatorAgent) and min_distance > distance_m:
+                if type(PredatorAgent) in elem and min_distance > distance_m:
                     return True
         # if closer_predator == (-1, -1): return -1
         # return closer_predator
@@ -164,8 +161,11 @@ class scaredPreyAgentPropierties:
         pounded_matrix = [[0, 0, 0], 
                                         [0, 0, 0], 
                                         [0, 0, 0]] 
+        maxi = 0
         for i, j in positions:
-            pounded_matrix[i][j] = -1 if hideplaces_matrix[i][j] == -1 else hideplaces_matrix[i][j] - predators_abundance_matrix[i][j]
+            maxi = max(maxi, max(hideplaces_abundance_matrix[i][j], predators_abundance_matrix[i][j]))
+        for i, j in positions:
+            pounded_matrix[i][j] = hideplaces_matrix[i][j] if hideplaces_matrix[i][j] <= 0 else maxi + hideplaces_abundance_matrix[i][j] - predators_abundance_matrix[i][j]
 
         dx, dy = betterMove(pounded_matrix, rnd=True)
         (new_x, new_y) = x + dx -1, y + dy -1
@@ -195,8 +195,11 @@ class scaredPreyAgentPropierties:
         pounded_matrix = [[0, 0, 0], 
                                         [0, 0, 0], 
                                         [0, 0, 0]] 
+        # maxi = max([max(array) for array in predators_abundance_matrix])
         for i, j in positions:
-            pounded_matrix[i][j] = -predators_abundance_matrix[i][j]
+            if predators_abundance_matrix[i][j] > 0:
+                pounded_matrix[i][j] = -predators_abundance_matrix[i][j] -1 if predators_abundance_matrix[i][j] > 0 else predators_abundance_matrix[i][j]
+                
 
         dx, dy = betterMove(pounded_matrix, rnd=True)
         new_x, new_y = x + dx -1, y + dy -1

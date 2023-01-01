@@ -1,5 +1,7 @@
+from asyncio.windows_events import INFINITE
 from random import randint
 from Algorithms.AStar import AStar
+import math
 
 positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
 
@@ -30,7 +32,7 @@ def transform(matrix, xpansion_distance = 2, re_transforming = False, high_rank_
     for i, j in positions:
         if final_matrix[i][j] == -1: continue
         for k in range(len(matrix[i][j])):
-            test_elem = f'M[{i}][{j}][{k}]:   {matrix[i][j][k]}   ->    {int((maxi + mini - matrix[i][j][k]) * (high_rank_value / maxi))}'
+            # test_elem = f'M[{i}][{j}][{k}]:   {matrix[i][j][k]}   ->    {int((maxi + mini - matrix[i][j][k]) * (high_rank_value / maxi))}'
             elem = matrix[i][j][k] if re_transforming else int((maxi + mini - matrix[i][j][k]) * (high_rank_value / maxi))
             temp_matrix[i][j].append(elem)
             final_matrix[i][j] += elem
@@ -57,10 +59,10 @@ def transform_again(abundance_matrix, xpansion_distance = 2, high_rank_value = 4
     return transform(final_matrix, xpansion_distance, re_transforming=True, high_rank_value=high_rank_value)
 
 def betterMove(abundance_matrix, xpansion_distance = 2, high_rank_value = 4, rnd = True):
-    maxx = 0
+    maxx = -math.inf
     sameImportance = []
     for i, j in positions:
-        if abundance_matrix[i][j] > maxx:
+        if abundance_matrix[i][j] > maxx and abundance_matrix[i][j] != -1:
             maxx = abundance_matrix[i][j]
             sameImportance.clear()
             sameImportance.append((i, j))
