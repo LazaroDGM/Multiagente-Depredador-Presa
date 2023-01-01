@@ -13,7 +13,7 @@ directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 
 positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
 
 class PredatorAgentPropierties:
-    def __new__(cls, digestion_time, max_energy, alpha, beta):
+    def __new__(cls, digestion_time, max_energy, alpha, beta, velocity):
         if not hasattr(cls, 'instance'):
             cls.instance = super(PredatorAgentPropierties, cls).__new__(cls)
             cls.digestion_time = digestion_time
@@ -21,12 +21,14 @@ class PredatorAgentPropierties:
             cls.alpha = alpha
             cls.beta = beta
             cls._behaviors = [
+                (cls.__esperar_caminar, cls.__wait),
                 (cls.__condicion_para_permanecer, cls.__accion_de_permanecer),
                 (cls.__condicion_para_comer, cls.__accion_de_comer),
                 (cls.__condicion_para_cazar, cls.__accion_de_cazar),
                 (cls.__condicion_para_caminar, cls.__accion_de_caminar),
             ]
             cls.rand = random.Random()
+            cls.velocity = velocity
         return cls.instance
 
 
@@ -85,6 +87,8 @@ class PredatorAgentPropierties:
             raise Exception()
         if new_x != x or new_y != y:
              self.energy -= 1
+        if (new_real_x, new_real_y) != P[2]:
+            self.wait = self.prop.velocity  
         return (new_real_x, new_real_y), False
 
     #### Regla 4 ####
@@ -100,19 +104,31 @@ class PredatorAgentPropierties:
             if (x + i) in range(0, len(matrix)) and (y + j) in range(0, len(matrix[x + i])) and matrix[x + i][y + j] not in [Obstacle()]:                          # modificar para agregar obstaculos
                 default_pos.append((real_x + i, real_y + j))
         if len(default_pos) == 0: return (x, y), False
-        return (default_pos[random.randint(0, len(default_pos) - 1)], False)
+        (new_real_x, new_real_y) = default_pos[random.randint(0, len(default_pos) - 1)]
+        if (new_real_x, new_real_y) != P[2]:
+            self.wait = self.prop.velocity  
+        return ((new_real_x, new_real_y), False)
 
+    def __esperar_caminar(self, P):
+        if self.wait > 0:
+            return True
+        return False
+
+    def __wait(self, P):
+        self.wait -= 1
+        return P[2], False
         
         
 
         
 
 class PredatorAgent(BrooksAgent):
-    def __init__(self, digestion_time, max_energy, alpha, beta) -> None:
-        self.prop = PredatorAgentPropierties(digestion_time, max_energy, alpha, beta)
+    def __init__(self, digestion_time, max_energy, alpha, beta, velocity) -> None:
+        self.prop = PredatorAgentPropierties(digestion_time, max_energy, alpha, beta, velocity)
         self.eating = 0
         self.behaviors = self.prop._behaviors
         self.energy = max_energy
+        self.wait = 0
         self.rand = lambda: random.randint(0, 100) > 70
 
     def next(self, P):
@@ -122,6 +138,8 @@ class PredatorAgent(BrooksAgent):
             self.energy = min(self.energy + 1 * self.prop.max_energy,
                                 self.prop.max_energy)
             self.eating -= 1
+        elif self.wait > 0:
+            return
         elif self.eating <= 0:
             self.energy -= 1
         #self.next_predators.clear()
@@ -140,7 +158,7 @@ class PredatorAgent(BrooksAgent):
 
 
 class scaredPreyAgentPropierties:
-    def __new__(cls, digestion_time, max_energy, alpha, beta):
+    def __new__(cls, digestion_time, max_energy, alpha, beta, velocity):
         if not hasattr(cls, 'instance'):
             cls.instance = super(scaredPreyAgentPropierties, cls).__new__(cls)
             cls.digestion_time = digestion_time
@@ -158,6 +176,7 @@ class scaredPreyAgentPropierties:
                 (cls.__condicion_para_caminar, cls.__accion_de_caminar),
                 
             ]
+            cls.velocity = velocity
             cls.rand = random.Random()
         return cls.instance
 
@@ -313,7 +332,7 @@ class scaredPreyAgentPropierties:
             self.energy -= 1
 
         if (new_real_x, new_real_y) != P[2]:
-            self.wait = 2
+            self.wait = self.prop.velocity
         return (new_real_x, new_real_y), False
 
     #### Regla 4 ####
@@ -350,7 +369,7 @@ class scaredPreyAgentPropierties:
         if new_x != x or new_y != y:
              self.energy -= 1
         if (new_real_x, new_real_y) != P[2]:
-            self.wait = 2
+            self.wait = self.prop.velocity
         return (new_real_x, new_real_y), False
 
     #### Regla 7 ####
@@ -368,7 +387,7 @@ class scaredPreyAgentPropierties:
         if len(default_pos) == 0: return (x, y), False
         (new_real_x, new_real_y) = default_pos[random.randint(0, len(default_pos) - 1)]
         if (new_real_x, new_real_y) != P[2]:
-            self.wait = 2
+            self.wait = self.prop.velocity
         return ((new_real_x, new_real_y), False)
 
     def __esperar_caminar(self, P):
@@ -390,8 +409,8 @@ class scaredPreyAgentPropierties:
 
 class scaredPreyAgent(BrooksAgent):
     
-    def __init__(self, digestion_time, max_energy, alpha, beta) -> None:
-        self.prop = scaredPreyAgentPropierties(digestion_time, max_energy, alpha, beta)
+    def __init__(self, digestion_time, max_energy, alpha, beta, velocity) -> None:
+        self.prop = scaredPreyAgentPropierties(digestion_time, max_energy, alpha, beta, velocity)
         self.behaviors = self.prop._behaviors
         self.eating = 0
         self.energy = max_energy
@@ -407,6 +426,8 @@ class scaredPreyAgent(BrooksAgent):
             self.energy = min(self.energy + Food().energy_ratio * self.prop.max_energy,
                                 self.prop.max_energy)
             self.eating -= 1
+        elif self.wait > 0:
+            return
         elif self.eating <= 0:
             self.energy -= 1
         #self.next_predators.clear()

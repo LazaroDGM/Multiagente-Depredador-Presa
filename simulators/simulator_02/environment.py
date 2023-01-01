@@ -10,11 +10,11 @@ PREY = 1
 
 class Environment02(EnvironmentManyAgents):
 
-    def __init__(self, map, initial_count_animals, breeding_period, breeding_ratio, digestion_time, vision_radius, max_energy, food_generation_period, food_ratio, energy_ratio, special_parameters) -> None:
-        super().__init__(map, initial_count_animals, breeding_period, breeding_ratio, digestion_time, vision_radius, max_energy, food_generation_period, food_ratio, energy_ratio, special_parameters, [PredatorAgent, scaredPreyAgent])
+    def __init__(self, map, initial_count_animals, breeding_period, breeding_ratio, breeding_population, digestion_time, vision_radius, max_energy, food_generation_period, food_ratio, energy_ratio, special_parameters) -> None:
+        super().__init__(map, initial_count_animals, breeding_period, breeding_ratio, breeding_population, digestion_time, vision_radius, max_energy, food_generation_period, food_ratio, energy_ratio, special_parameters, [PredatorAgent, scaredPreyAgent])
 
     def outputs(self):
-        return len(self.agents_groups[1]), self.count_foods
+        return len(self.agents_groups[1]), len(self.agents_groups[0]), self.count_foods
     
     def transform(self, actions):
         food = self.food       

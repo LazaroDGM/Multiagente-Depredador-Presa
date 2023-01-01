@@ -169,6 +169,7 @@ class EnvironmentManyAgents(EnvironmentFood):
                  initial_count_animals,
                  breeding_period,
                  breeding_ratio,
+                 breeding_population,
                  digestion_time,
                  vision_radius,
                  max_energy,
@@ -193,7 +194,7 @@ class EnvironmentManyAgents(EnvironmentFood):
 
         ### Estados internos del Medio ###
         self.cicle_breeding = [int(self._rand.expovariate(1/period)) + 1 for period in self.breeding_period]
-        
+        self.breeding_population = breeding_population
         ### Variables Observables ###
         self.agents_groups = [{} for i in range(len(initial_count_animals))]
         self.count_foods = 0
@@ -239,7 +240,10 @@ class EnvironmentManyAgents(EnvironmentFood):
     def gen_agents(self):
         for i in range(len(self.agents_groups)):
             if self.cicle == self.cicle_breeding[i]:
-                count_agents = len(self.agents_groups[i])
+                count_agents = 0
+                for agent in self.agents_groups[i]:
+                    if agent.energy >= self.breeding_population[i]:
+                        count_agents += 1
                 if count_agents > 0:
                     self._gen_animals(int(self.breeding_ratio[i] * count_agents)+1, i)
                     self.cicle_breeding[i] = int(self._rand.expovariate(1/self.breeding_period[i])) + self.cicle + 1
