@@ -21,12 +21,16 @@ o = set([Obstacle()])
 v = set()
 map = np.array(
     [
-        [v,v,v,v,o,v,v,v],
-        [v,v,v,v,v,v,v,v],
-        [v,v,v,v,o,v,v,v],
-        [o,o,o,o,o,v,v,v],
-        [v,v,o,v,v,o,v,v],
-        [v,v,v,v,v,o,o,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
+        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],        
     ]
 )
 
@@ -36,16 +40,16 @@ simulation = sim.StartSimulation(
     tick=0.1,
     stop_steps=10000,
     map= map,
-    initial_count_animals= [0,3],
-    breeding_period= [500,70],
-    breeding_ratio= [0.3, 0.2],
-    vision_radius= [5,5],
+    initial_count_animals= [1,3],
+    breeding_period= [200,70],
+    breeding_ratio= [0.2, 0.5],
+    vision_radius= [5,3],
     food_generation_period= 50,
     food_ratio= 0.125,
     energy_ratio= 1,
     digestion_time= [3,3],
-    max_energy= [200, 200],
-    special_parameters=[[0,0],[0.7,0.7]],
+    max_energy= [200, 100],
+    special_parameters=[[1,0.3],[1,1]],
 )
 
 #sim = Simulator01(EnvironmentSimulator01)
@@ -83,7 +87,7 @@ env = Environment02(
     initial_count_animals= [0,3],
     breeding_period= [500,200],
     breeding_ratio= [0.3, 0.2],
-    vision_radius= [5,4],
+    vision_radius= [5,3],
     food_generation_period= 20,
     food_ratio= 0.125,
     energy_ratio= 1,

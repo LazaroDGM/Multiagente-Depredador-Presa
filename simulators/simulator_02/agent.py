@@ -13,7 +13,7 @@ directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 
 positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
 
 class PredatorAgentPropierties:
-    def __new__(cls, digestion_time, max_energy, alpha = 1, beta = 1):
+    def __new__(cls, digestion_time, max_energy, alpha, beta):
         if not hasattr(cls, 'instance'):
             cls.instance = super(PredatorAgentPropierties, cls).__new__(cls)
             cls.digestion_time = digestion_time
@@ -38,14 +38,14 @@ class PredatorAgentPropierties:
             for j in range(len(P[0][i])):
                 elem = P[0][i][j]
                 distance_m = PredatorAgentPropierties.manhathan_distance(x, y, i, j)
-                if type(scaredPreyAgent) in elem and min_distance > distance_m:
+                if scaredPreyAgent in elem and min_distance > distance_m:
                     return True
         return False
     def __en_rango_presa(self, P):
         matriz = P[0]
         (x, y) = P[1]
         (real_x, real_y) = P[2]
-        if Food() in matriz[x][y]  :
+        if scaredPreyAgent in matriz[x][y]  :
             self.future_position = (real_x, real_y)
             return True
         return False
@@ -53,7 +53,7 @@ class PredatorAgentPropierties:
         
     #### Regla 1 ####
     def __condicion_para_permanecer(self, P):
-        return self.eating > 0 or ((self.prop.max_energy * self.prop.beta) > self.energy and self.rand()) or (self.prop.__proximo_depredador(P) and self.hidden)
+        return self.eating > 0  or ((self.prop.max_energy * self.prop.beta) > self.energy and self.rand())
     def __accion_de_permanecer(self, P):
         return P[2], False
 
@@ -65,10 +65,10 @@ class PredatorAgentPropierties:
         return P[2], True
 
     #### Regla 3 ####
-    def __condicion_para_cazar(self, P):
+    def __condicion_para_cazar(self, P):        
         return self.prop.__proximo_presa(P) and (self.prop.max_energy * self.prop.beta) > self.energy
     def __accion_de_cazar(self, P):
-        prey_found = lambda ent: ent == type(scaredPreyAgent)
+        prey_found = lambda ent: ent in [scaredPreyAgent]
         obstacle_found = lambda ent: ent in [Obstacle()]                                                     # modificar lista para agragar obstaculos
         (x, y) = P[1]
         (real_x, real_y) = P[2]
@@ -76,6 +76,7 @@ class PredatorAgentPropierties:
         matrix = AStar(P[0], x, y, len(P[0]), prey_found, obstacle_found)
         abundance_matrix = transform(matrix)
         (dx, dy) = betterMove(abundance_matrix)
+        print(dx, dy)
 
         (new_x, new_y) = x + dx -1, y + dy -1
         (new_real_x, new_real_y) = real_x + dx - 1, real_y + dy - 1
@@ -108,18 +109,22 @@ class PredatorAgentPropierties:
 
 class PredatorAgent(BrooksAgent):
     def __init__(self, digestion_time, max_energy, alpha, beta) -> None:
-        self.prop = PredatorAgentPropierties(digestion_time, max_energy)
+        self.prop = PredatorAgentPropierties(digestion_time, max_energy, alpha, beta)
         self.eating = 0
         self.behaviors = self.prop._behaviors
         self.energy = max_energy
+        self.rand = lambda: random.randint(0, 100) > 70
 
     def next(self, P):
+        if self.eating > 1:
+            self.eating -= 1
         if self.eating == 1:
-            self.energy = max(self.energy + Food().energy_ratio * self.prop.max_energy,
+            self.energy = min(self.energy + 1 * self.prop.max_energy,
                                 self.prop.max_energy)
+            self.eating -= 1
         elif self.eating <= 0:
             self.energy -= 1
-        
+        #self.next_predators.clear()
         return
 
 
@@ -145,6 +150,7 @@ class scaredPreyAgentPropierties:
             cls._behaviors = [
                 #(cls.__condicion_para_esconderse, cls.__accion_de_esconderse),
                 #(cls.__condicion_para_buscar_escondite, cls.__accion_de_buscar_escondite),
+                (cls.__esperar_caminar, cls.__wait),
                 (cls.__condicion_para_huir, cls.__accion_de_huir),
                 (cls.__condicion_para_permanecer, cls.__accion_de_permanecer),
                 (cls.__condicion_para_comer, cls.__accion_de_comer),
@@ -306,6 +312,8 @@ class scaredPreyAgentPropierties:
         if new_x != x or new_y != y:
             self.energy -= 1
 
+        if (new_real_x, new_real_y) != P[2]:
+            self.wait = 2
         return (new_real_x, new_real_y), False
 
     #### Regla 4 ####
@@ -341,6 +349,8 @@ class scaredPreyAgentPropierties:
             raise Exception()
         if new_x != x or new_y != y:
              self.energy -= 1
+        if (new_real_x, new_real_y) != P[2]:
+            self.wait = 2
         return (new_real_x, new_real_y), False
 
     #### Regla 7 ####
@@ -356,10 +366,19 @@ class scaredPreyAgentPropierties:
             if (x + i) in range(0, len(matrix)) and (y + j) in range(0, len(matrix[x + i])) and matrix[x + i][y + j] not in [Obstacle()]:                          # modificar para agregar obstaculos
                 default_pos.append((real_x + i, real_y + j))
         if len(default_pos) == 0: return (x, y), False
-        return (default_pos[random.randint(0, len(default_pos) - 1)], False)
+        (new_real_x, new_real_y) = default_pos[random.randint(0, len(default_pos) - 1)]
+        if (new_real_x, new_real_y) != P[2]:
+            self.wait = 2
+        return ((new_real_x, new_real_y), False)
 
-        
-        
+    def __esperar_caminar(self, P):
+        if self.wait > 0:
+            return True
+        return False
+
+    def __wait(self, P):
+        self.wait -= 1
+        return P[2], False
         
         
         
@@ -379,6 +398,7 @@ class scaredPreyAgent(BrooksAgent):
         self.hidden = False
         self.rand = lambda: random.randint(0, 100) > 70
         self.future_position = (-1, -1)
+        self.wait= 0
     
     def next(self, P):
         if self.eating > 1:
@@ -389,7 +409,7 @@ class scaredPreyAgent(BrooksAgent):
             self.eating -= 1
         elif self.eating <= 0:
             self.energy -= 1
-        self.next_predators.clear()
+        #self.next_predators.clear()
         return
     
     def __repr__(self) -> str:
