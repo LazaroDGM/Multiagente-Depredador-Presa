@@ -19,7 +19,7 @@ class Obstacle(object):
     '''
     def __new__(cls):
         if not hasattr(cls, 'instance'):
-            cls.instance = super(Food, cls).__new__(cls)            
+            cls.instance = super(Obstacle, cls).__new__(cls)            
         return cls.instance
 
     def __repr__(self) -> str:

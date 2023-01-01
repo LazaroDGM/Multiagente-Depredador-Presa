@@ -1,5 +1,6 @@
 from random import randint
 from Algorithms.AStar import AStar
+import math
 
 positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
 
@@ -30,12 +31,12 @@ def transform(matrix, xpansion_distance = 2, re_transforming = False, high_rank_
     for i, j in positions:
         if final_matrix[i][j] == -1: continue
         for k in range(len(matrix[i][j])):
-            test_elem = f'M[{i}][{j}][{k}]:   {matrix[i][j][k]}   ->    {int((maxi + mini - matrix[i][j][k]) * (high_rank_value / maxi))}'
+            # test_elem = f'M[{i}][{j}][{k}]:   {matrix[i][j][k]}   ->    {int((maxi + mini - matrix[i][j][k]) * (high_rank_value / maxi))}'
             elem = matrix[i][j][k] if re_transforming else int((maxi + mini - matrix[i][j][k]) * (high_rank_value / maxi))
             temp_matrix[i][j].append(elem)
             final_matrix[i][j] += elem
-    print("matriz con pesos reales: ")
-    PrintMatrix(temp_matrix)
+    #print("matriz con pesos reales: ")
+    #PrintMatrix(temp_matrix)
 
     for i, j in positions:
         if final_matrix[i][j] == -1: continue
@@ -57,10 +58,10 @@ def transform_again(abundance_matrix, xpansion_distance = 2, high_rank_value = 4
     return transform(final_matrix, xpansion_distance, re_transforming=True, high_rank_value=high_rank_value)
 
 def betterMove(abundance_matrix, xpansion_distance = 2, high_rank_value = 4, rnd = True):
-    maxx = 0
+    maxx = -math.inf
     sameImportance = []
     for i, j in positions:
-        if abundance_matrix[i][j] > maxx:
+        if abundance_matrix[i][j] > maxx and abundance_matrix[i][j] != -1:
             maxx = abundance_matrix[i][j]
             sameImportance.clear()
             sameImportance.append((i, j))
@@ -94,12 +95,12 @@ obstacle_found = lambda ent : ent == -1                                         
 x, y = P[1]
 
 matrix2 = AStar(P[0], x, y, len(P[0]), food_found, obstacle_found)
-print('AStar: ')
-PrintMatrix(matrix2)
+#print('AStar: ')
+#PrintMatrix(matrix2)
 
 abundance_matrix = transform(matrix2)
-print('after transform: ')
-PrintMatrix(abundance_matrix)
+#print('after transform: ')
+#PrintMatrix(abundance_matrix)
 
-print('better move:  ')
-print(betterMove(abundance_matrix, rnd=False))
+#print('better move:  ')
+#print(betterMove(abundance_matrix, rnd=False))
