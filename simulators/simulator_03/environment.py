@@ -294,3 +294,7 @@ class Environment03(Environment):
 
     def outputs(self):
         return None
+
+    def reset(self):
+        self.prop_prey.delete()
+        self.prop_predator.delete()        
