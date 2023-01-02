@@ -1,5 +1,5 @@
 from simulator.environment import Environment
-from simulators.simulator_03.entities import Food, Obstacle, Plant
+from simulators.simulator_03.entities import Food, Obstacle, Plant, Burrow, Floor
 import numpy as np
 import random
 
@@ -14,11 +14,17 @@ class Environment03(Environment):
         map,
         plant_radius,
         food_ratio,
-        food_generation_period
+        food_generation_period,
+        initial_count_prey,
+        initial_count_predator,
+        params_prey,
+        params_predator,
     ) -> None:
         self.plant_radius = plant_radius
         self.food_ratio = food_ratio
         self.food_generation_period = food_generation_period
+        self.initial_count_prey = initial_count_prey
+        self.initial_count_predator = initial_count_predator
 
         self.food = Food()
         self.obstacle = Obstacle()
@@ -49,16 +55,19 @@ class Environment03(Environment):
                 if isinstance(map[i,j], (Obstacle, Plant)):
                     self._map[i][j] = map[i,j]
                     if isinstance(map[i][j], Plant):
-                        self.plants[map[i][j]] = ((i, j), 1)
+                        self.plants[(i,j)] = 1
+                elif map[i][j] == 'BURROW':
+                    self._map[i][j] = Burrow()
+                elif map[i][j] is None or map[i][j] == 'FLOOR':
+                    self._map[i][j] = Floor()
         self.shape_map = self._map.shape
     
     def free_for_food(self, s):
         '''
         Funcion para saber si una casilla esta libre para generar una comida
         '''
-        if isinstance(s, set):
-            if self.food not in s:
-                return True
+        if isinstance(s, Floor):
+            return not s.hasFood()
         return False
 
     def _gen_food(self, count, matrix):
@@ -76,13 +85,13 @@ class Environment03(Environment):
         # int(self.food_ratio * self.shape_map[0]*self.shape_map[1])
         idx = np.random.choice(emptys.shape[0], min(count, emptys.size), replace=False)
         selection = emptys[idx]
-        for s in selection:
-            s.add(self.food)
+        for s in selection:            
+            s.AddFood()
         self.count_foods += len(selection)
 
     def gen_food(self):
         # Generacion de Comida
-        for plant, ((r, c), cicle_food) in self.plants.items():
+        for (r, c), cicle_food in self.plants.items():
             if self.cicle == cicle_food:
                 #self._remove_food()                
                 min_r = max(0, r-self.plant_radius)
@@ -94,7 +103,9 @@ class Environment03(Environment):
                 self._gen_food(int(self.food_ratio*extract.size), extract)
                 cicle_food = int(self._rand.expovariate(1/self.food_generation_period)) + self.cicle + 1
                 print('Nueva produccion de comida en: ', cicle_food)
-                self.plants[plant] = ((r,c), cicle_food)
+                self.plants[(r,c)] = cicle_food
+
+    
 
     def next_step(self):
         self.cicle += 1

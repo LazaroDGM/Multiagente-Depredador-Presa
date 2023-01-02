@@ -72,7 +72,7 @@ class Floor(object):
         return self.predator is not None
     
     def hasFood(self):
-        return self.food is None
+        return self.food is not None
 
     def AddFood(self):
         if self.hasFood():
