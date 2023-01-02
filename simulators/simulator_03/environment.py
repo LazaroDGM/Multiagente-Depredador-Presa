@@ -1,7 +1,7 @@
 from simulator.environment import Environment
 from simulators.simulator_03.entities import Food, Obstacle, Plant, Burrow, Floor
-from simulators.simulator_03.agent_prey import ParamsPrey, PreyAgentPropierties, PreyAgent
-from simulators.simulator_03.agent_predator import ParamsPredator, PredatorAgentPropierties, PredatorAgent
+from simulators.simulator_03.agent_prey import ParamsPrey, PreyAgentPropierties, PerceptionPrey, PreyAgent
+from simulators.simulator_03.agent_predator import ParamsPredator, PredatorAgentPropierties, PerceptionPredator, PredatorAgent
 import numpy as np
 import random
 
@@ -120,8 +120,56 @@ class Environment03(Environment):
 
         close_preys = {}
         close_predators = {}
-        #TODO
-        raise NotImplementedError()
+        close_food = {}
+        
+        for i in range(extract.shape[0]):
+            for j in range(extract.shape[1]):
+                box = self._map[i][j]
+                if isinstance(box, Floor):
+                    if box.hasPrey():
+                        close_preys[(i,j)] = box.prey
+                    if box.hasPredator():
+                        close_predators[(i,j)] = box.predator
+                    if box.hasFood():
+                        close_food[(i,j)] = box.food
+                elif isinstance(box, Burrow):
+                    if box.hasPrey():
+                        close_preys[(i,j)] = box.prey
+        return PerceptionPrey(
+            position=(r,c),
+            close_preys= close_preys,
+            close_predators= close_predators,
+            close_food= close_food
+        )
+    
+    def seePredator(self, predator):
+        r, c = self.preys[predator]
+        min_r = max(0, r-self.prop_prey.vision_radius)
+        min_c = max(0, c-self.prop_prey.vision_radius)
+        max_r = min(self._map.shape[0], r+self.prop_prey.vision_radius+1)
+        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)
+        extract = self._map[min_r:max_r, min_c:max_c]
+
+        close_preys = {}
+        close_predators = {}
+        close_food = {}
+        
+        for i in range(extract.shape[0]):
+            for j in range(extract.shape[1]):
+                box = self._map[i][j]
+                if isinstance(box, Floor):
+                    if box.hasPrey():
+                        close_preys[(i,j)] = box.prey
+                    if box.hasPredator():
+                        close_predators[(i,j)] = box.predator
+                    if box.hasFood():
+                        close_food[(i,j)] = box.food
+        
+        return PerceptionPredator(
+            position= (r,c),
+            close_preys= close_preys,
+            close_food= close_food
+        )
 
 
     def transform(self, actions_predators, actions_preys):

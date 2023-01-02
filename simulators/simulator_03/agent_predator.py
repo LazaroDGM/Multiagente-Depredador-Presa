@@ -6,6 +6,20 @@ import random
 ###################### PREDATOR ################################
 ################################################################
 
+####################### PERCEPTION #############################
+
+class PerceptionPredator():
+    def __init__(self,
+        position,
+        close_preys,
+        close_predators,
+        close_food
+        ) -> None:
+        self.position = position
+        self.close_preys = close_preys
+        self.close_predators = close_predators
+        self.close_food = close_food
+
 ######################### PARAMS ###############################
 class ParamsPredator():
     '''
