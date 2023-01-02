@@ -7,5 +7,9 @@ class FoodMemory:
         self.slots = [[], [], [], []]
     def Tick(self):
         raise NotImplementedError()
-    def Remember(self):
+    def Remember(self, pos, food_ratio):
         raise NotImplementedError()
+
+
+
+################################# write below ###########################################
