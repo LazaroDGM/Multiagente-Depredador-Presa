@@ -1,5 +1,6 @@
 from simulator.environment import Environment
 from simulators.simulator_03.entities import Food, Obstacle, Plant, Burrow, Floor
+from simulators.simulator_03.agent_prey import ParamsPrey, PreyAgentPropierties, PreyAgent
 import numpy as np
 import random
 
@@ -17,7 +18,7 @@ class Environment03(Environment):
         food_generation_period,
         initial_count_prey,
         initial_count_predator,
-        params_prey,
+        params_prey : ParamsPrey,
         params_predator,
     ) -> None:
         self.plant_radius = plant_radius
@@ -25,6 +26,9 @@ class Environment03(Environment):
         self.food_generation_period = food_generation_period
         self.initial_count_prey = initial_count_prey
         self.initial_count_predator = initial_count_predator
+        self.prop_prey = PreyAgentPropierties(params_prey, map)
+        self.prop_predator = None
+
 
         self.food = Food()
         self.obstacle = Obstacle()
@@ -104,6 +108,20 @@ class Environment03(Environment):
                 cicle_food = int(self._rand.expovariate(1/self.food_generation_period)) + self.cicle + 1
                 print('Nueva produccion de comida en: ', cicle_food)
                 self.plants[(r,c)] = cicle_food
+
+    def seePrey(self, prey):
+        r, c = self.preys[prey]
+        min_r = max(0, r-self.prop_prey.vision_radius)
+        min_c = max(0, c-self.prop_prey.vision_radius)
+        max_r = min(self._map.shape[0], r+self.prop_prey.vision_radius+1)
+        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)
+        extract = self._map[min_r:max_r, min_c:max_c]
+
+        close_preys = {}
+        close_predators = {}
+        #TODO
+        raise NotImplementedError()
+
 
     def transform(self, actions_predators, actions_preys):
         
