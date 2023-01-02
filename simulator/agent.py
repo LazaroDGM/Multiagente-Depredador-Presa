@@ -56,12 +56,24 @@ class ProactiveAgent(Agent):
         super().__init__()
 
     def brf(self, P):
+        '''
+        Dada la percepcion actual, y disponiendo de las creencias actuales
+        se formulan nuevas creencias
+        '''
         raise NotImplementedError()
 
     def options(self, P):
+        '''
+        Dada la percepcion actual, y disponiendo de las creencias e intenciones
+        actuales, se formulan nuevos deseos
+        '''
         raise NotImplementedError()
 
     def filter(self, P):
+        '''
+        Dada la percepcion actual y disponiendo de las creencias, deseos e intenciones actuales,
+        se formulan nuevos intenciones y se ejecuta la accion
+        '''
         raise NotImplementedError()
 
     def action(self, P):        

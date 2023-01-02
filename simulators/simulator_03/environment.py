@@ -68,7 +68,7 @@ class Environment03(Environment):
                         self.plants[(i,j)] = 1
                 elif map[i][j] == 'BURROW':
                     self._map[i][j] = Burrow()
-                elif map[i][j] is None or map[i][j] == 'FLOOR':
+                elif map[i][j] is None:
                     self._map[i][j] = Floor()
         self.shape_map = self._map.shape
     

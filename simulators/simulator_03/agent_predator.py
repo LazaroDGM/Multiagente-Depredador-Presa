@@ -2,6 +2,9 @@ from simulator.agent import ProactiveAgent
 import numpy as np
 import random
 
+BURROW = 'BURROW'
+FLOOR = None
+
 ################################################################
 ###################### PREDATOR ################################
 ################################################################
@@ -44,11 +47,15 @@ class ParamsPredator():
             max_energy,
             velocity,
             vision_radius,
+            lost_energy_wait,
+            lost_energy_walk,
         ) -> None:
         self.digestion_time = digestion_time
         self.max_energy = max_energy
         self.velocity = velocity
         self.vision_radius = vision_radius
+        self.lost_energy_wait = lost_energy_wait,
+        self.lost_energy_walk = lost_energy_walk,
 
 ###################### PROPIERTIES #################################
 class PredatorAgentPropierties:
@@ -64,6 +71,8 @@ class PredatorAgentPropierties:
             cls.velocity = params.velocity
             cls.vision_radius = params.vision_radius
             cls.map = np.copy(map)
+            cls.lost_energy_wait = params.lost_energy_wait,
+            cls.lost_energy_walk = params.lost_energy_walk,
             cls.rand = random.Random()
         return cls.instance
     
@@ -82,6 +91,39 @@ class PredatorAgent(ProactiveAgent):
 
         self.energy = self.prop.max_energy
         self.eating = 0
+        self.wait_move = 1
     
     def set_global_map(self, map):
         self._map = np.copy(map)
+
+    ### ACTIONS ###
+    def __mov(self, P : PerceptionPredator, new_position):
+        new_r, new_c = new_position
+        if P.position == new_position:
+            if self.prop.map[new_r][new_c] == FLOOR:
+                self.energy -= self.prop.lost_energy_wait
+                self.wait_move = self.prop.velocity
+            else:
+                raise Exception('Permaneciendo en un lugar invalido')
+        else:
+            old_r, old_c = P.position
+            if self.prop.map[old_r][old_c] == FLOOR:
+                self.energy -= self.prop.lost_energy_walk
+                self.wait_move = self.prop.velocity
+            else:
+                raise Exception('Intentando caminar a un lugar invalido')
+        return ActionPredator(new_position= new_position, eat= False)
+
+    def __wait_move(self, P : PerceptionPredator):
+        self.wait_move -= 1
+        return ActionPredator(new_position= P.position, eat= False)
+
+    def __eat(self, P: PerceptionPredator):
+        self.eating =  self.prop.digestion_time
+        return ActionPredator(new_position= P.position, eat= True)
+
+    def __wait_eat(self, P: PerceptionPredator):
+        self.eating -= 1
+        return ActionPredator(new_position= P.position, eat= False)
+
+    
