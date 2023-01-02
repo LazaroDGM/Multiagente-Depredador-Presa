@@ -209,7 +209,7 @@ class PreyAgent(ProactiveAgent):
             raise Exception('Intencion de moverse, sin camino')        
 
         
-        if P.close_preys.get(self.current_path[1], None) is not None:
+        if P.close_preys.get(self.current_path[0], None) is not None:
             if len(self.current_path) > 1:
                 future_position = self.current_path[1]
             future_position = self.current_path[0]
@@ -221,6 +221,7 @@ class PreyAgent(ProactiveAgent):
             counts = [1]* len(adjacents)
             counts[-1] += (len(adjacents) - 1) * 9
             new_position = self.prop.rand.sample(adjacents, k= 1, counts= counts)[0]
+            self.current_path[1] = new_position
         else:
             new_position = self.current_path[0]
         return self.__mov(P, new_position)
