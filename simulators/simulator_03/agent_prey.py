@@ -1,4 +1,5 @@
 from simulator.agent import ProactiveAgent
+from simulator_03.memory import PreyMemory, PredatorMemory
 import numpy as np
 import random
 
@@ -52,6 +53,8 @@ class ParamsPrey():
             lost_energy_walk,
             lost_energy_wait_burrow,
             lost_energy_walk_burrow,
+            memory_prey_wait_time,
+            memory_predator_wait_time
         ) -> None:
         self.digestion_time = digestion_time
         self.max_energy = max_energy
@@ -61,6 +64,8 @@ class ParamsPrey():
         self.lost_energy_walk = lost_energy_walk,
         self.lost_energy_wait_burrow = lost_energy_wait_burrow,
         self.lost_energy_walk_burrow = lost_energy_walk_burrow,
+        self.memory_prey_wait_time = memory_prey_wait_time,
+        self.memory_predator_wait_time = memory_predator_wait_time,
 
 ###################### PROPIERTIES #################################
 class PreyAgentPropierties:
@@ -80,6 +85,8 @@ class PreyAgentPropierties:
             cls.lost_energy_walk = params.lost_energy_walk,
             cls.lost_energy_wait_burrow = params.lost_energy_wait_burrow,
             cls.lost_energy_walk_burrow = params.lost_energy_walk_burrow,
+            cls.memory_prey_wait_time = params.memory_prey_wait_time,
+            cls.memory_predator_wait_time = params.memory_predator_wait_time,
             cls.rand = random.Random()
         return cls.instance
     
@@ -95,6 +102,8 @@ class PreyAgent(ProactiveAgent):
     def __init__(self, propierties: PreyAgentPropierties) -> None:
         super().__init__()
         self.prop = propierties
+        self.prey_memory = PreyMemory(self.prop.memory_prey_wait_time)
+        self.predator_memory = PredatorMemory(self.prop.memory_predator_wait_time)
 
         self.energy = self.prop.max_energy
         self.eating = 0
