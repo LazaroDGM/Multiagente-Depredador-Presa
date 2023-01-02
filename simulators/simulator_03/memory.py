@@ -31,19 +31,19 @@ class FoodMemory:
     def Remember(self, pos, food_ratio):
         location = self.memories_location(food_ratio)
         current_slot = self.slots[location]
-        if len(current_slot) < self.weights[location]: 
-            current_slot.append(pos)
-            return
 
         try:
             ind = current_slot.index(pos)
             current_slot.pop(ind)
             current_slot.append(pos)
         except:
+            if len(current_slot) < self.weights[location]: 
+                current_slot.append(pos)
+                return
             choix = abs(int(self.rnd.normalvariate(0, 2.5)))
             for i in range(len(current_slot)):
                 manhathan_distance = max(abs(current_slot[i][0] - pos[0]), abs(current_slot[i][1] - pos[1]))
-                if choix < manhathan_distance:
+                if choix <= manhathan_distance:
                     # current_slot[i: len(current_slot) - 1] = current_slot[i: len(current_slot)]                                                       # estas dos lineas pueden ahorrar la re-copia del array
                     # current_slot[-1] = pos                                                                                                                                  # al hacerle pop()
                     current_slot.pop(i)
