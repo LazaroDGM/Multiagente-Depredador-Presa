@@ -49,3 +49,35 @@ class BrooksAgent(StateAgent):
                 return rule_action(self, P)
         return None
     
+
+class ProactiveAgent(Agent):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def brf(self, P):
+        '''
+        Dada la percepcion actual, y disponiendo de las creencias actuales
+        se formulan nuevas creencias
+        '''
+        raise NotImplementedError()
+
+    def options(self, P):
+        '''
+        Dada la percepcion actual, y disponiendo de las creencias e intenciones
+        actuales, se formulan nuevos deseos
+        '''
+        raise NotImplementedError()
+
+    def filter(self, P):
+        '''
+        Dada la percepcion actual y disponiendo de las creencias, deseos e intenciones actuales,
+        se formulan nuevos intenciones y se ejecuta la accion
+        '''
+        raise NotImplementedError()
+
+    def action(self, P):        
+        self.brf(P)
+        self.options(P)
+        Ac = self.filter(P)
+        return Ac
