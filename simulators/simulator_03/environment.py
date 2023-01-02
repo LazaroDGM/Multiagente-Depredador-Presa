@@ -171,6 +171,39 @@ class Environment03(Environment):
             close_food= close_food
         )
 
+    def remove_dead_agents(self):
+        delete_preys = []
+        for prey, (i, j) in self.preys.items():
+            prey : PreyAgent
+            if prey.energy <= 0:
+                delete_preys.append((i,j))
+                box = self._map[i][j]
+                if isinstance(box, (Burrow, Floor)):
+                    if not box.hasPrey():
+                        raise Exception('Presa lista para morir, no esta en la casilla')
+                    box.RemovePrey()
+                else:
+                    raise Exception('Presa lista para morirse, que no esta en ningun lugar')
+        for (i, j) in delete_preys:
+            self._map[i][j].RemovePrey()
+        del(delete_preys)
+
+        delete_predators = []
+        for predator, (i, j) in self.predators.items():
+            predator : PredatorAgent
+            if predator.energy <= 0:
+                delete_predators.append((i,j))
+                box = self._map[i][j]
+                if isinstance(box, Floor):
+                    if not box.hasPredator():
+                        raise Exception('Depredador lista para morir, no esta en la casilla')
+                    box.RemovePredator()
+                else:
+                    raise Exception('Predator lista para morirse, que no esta en ningun lugar')
+        for (i, j) in delete_predators:
+            self._map[i][j].RemovePredator()
+        del(delete_predators)
+
 
     def transform(self, actions_predators, actions_preys):
         
@@ -255,6 +288,7 @@ class Environment03(Environment):
 
     def next_step(self):
         self.cicle += 1
+        self.remove_dead_agents()
         print(self.count_foods)
         self.gen_food()
 
