@@ -49,3 +49,23 @@ class BrooksAgent(StateAgent):
                 return rule_action(self, P)
         return None
     
+
+class ProactiveAgent(Agent):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def brf(self, P):
+        raise NotImplementedError()
+
+    def options(self, P):
+        raise NotImplementedError()
+
+    def filter(self, P):
+        raise NotImplementedError()
+
+    def action(self, P):        
+        self.brf(P)
+        self.options(P)
+        Ac = self.filter(P)
+        return Ac
