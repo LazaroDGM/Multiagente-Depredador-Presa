@@ -19,6 +19,19 @@ class PerceptionPrey():
         self.close_preys = close_preys
         self.close_predators = close_predators
         self.close_food = close_food
+
+########################## ACTION ##############################
+
+class ActionPrey():
+    def __init__(self,
+        new_position,
+        eat = False,
+        die = False
+        ) -> None:
+
+        self.new_position = new_position
+        self.eat = eat
+        self.die = die
         
 
 ######################### PARAMS ###############################

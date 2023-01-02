@@ -20,6 +20,19 @@ class PerceptionPredator():
         self.close_predators = close_predators
         self.close_food = close_food
 
+########################## ACTION ##############################
+
+class ActionPredator():
+    def __init__(self,
+        new_position,
+        eat = False,
+        die = False
+        ) -> None:
+
+        self.new_position = new_position
+        self.eat = eat
+        self.die = die
+
 ######################### PARAMS ###############################
 class ParamsPredator():
     '''

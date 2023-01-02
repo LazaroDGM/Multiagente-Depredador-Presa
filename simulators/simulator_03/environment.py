@@ -176,8 +176,9 @@ class Environment03(Environment):
         
         delete_prey = []
         new_positions_predators = {}
-        for action in actions_predators:
-            predator, new_position, eat = action
+        for predator, action in actions_predators:
+            new_position = action.new_position
+            eat = action.eat
             new_r, new_c = new_position
             old_r, old_c = old_position = self.predators[predator]
             box = self._map[old_r][old_c]
@@ -209,8 +210,9 @@ class Environment03(Environment):
                 self.predators[predator] = (new_r, new_c)
 
         new_positions_preys = {}
-        for action in actions_preys:
-            prey, new_position, eat = action
+        for prey, action in actions_preys:
+            new_position = action.new_position
+            eat = action.eat
             if prey in delete_prey:
                 self.preys.pop(prey)
                 continue
