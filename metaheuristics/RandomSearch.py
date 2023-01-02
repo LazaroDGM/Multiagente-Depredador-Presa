@@ -16,7 +16,7 @@ def RandomSearch(function, random_generation, fitness_eval, max_count_solution, 
     if minimize:
         fitness_eval = lambda x : - fitness_eval(x)
 
-    best_solutions = [inf] * 10
+    best_solutions = [-inf] * 10
     count = 0
     while count < max_count_solution:
         rand_vector = random_generation()

@@ -38,7 +38,7 @@ class Simulator():
         simulations = []
         for _ in range(count_simulations):
             outputs = self.StartSimulation(stop_steps, reset, *args, **kvargs)            
-            simulations.append(outputs[0])
+            simulations.append(outputs[1])
         return simulations
 
 class Simulator2D(Simulator):

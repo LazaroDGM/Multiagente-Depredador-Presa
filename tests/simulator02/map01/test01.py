@@ -4,6 +4,7 @@ from simulator.simulator import Simulator
 from simulators.simulator_02.simulator import Simulator02
 import numpy as np
 import matplotlib.pyplot as plt
+import stats.stats as st
 
 def generate_result():
     o = set([Obstacle()])
@@ -66,9 +67,9 @@ def generate_result():
 
     sim = Simulator(Environment02)
 
-    _, simulation = sim.StartManySimulations(
-        count_simulations=2,
-        stop_steps=2000,
+    simulation = sim.StartManySimulations(
+        count_simulations=30,
+        stop_steps=5000,
         map= map,
         initial_count_animals= [2,5],
         breeding_period= [200,50],
@@ -90,9 +91,27 @@ def generate_result():
 def view_results():
     with open('results/simulator02/map01/01.npz', 'rb') as ft:
         obj = np.load(ft)
-        results = obj['results'].T
+        results = obj['results']
+        #print(results.shape)
 
-        plt.plot(range(results.shape[1]), results[0])
-        plt.plot(range(results.shape[1]), results[1])
-        plt.plot(range(results.shape[1]), results[2])
+        for result in results:
+            plt.plot(range(result.shape[0]), results.T[0], linewidth=0.8)
+        m = st.select_from_results(results, 0)
+        mean = m.mean(axis=0)
+        std = m.std(axis=0)
+        plt.plot(range(result.shape[0]), mean, '-.', color= 'black', linewidth= 4)
+        plt.plot(range(result.shape[0]), mean + std, '--', color= 'black', linewidth= 2)
+        plt.plot(range(result.shape[0]), mean - std, '--', color= 'black', linewidth= 2)
         plt.show()
+
+        for result in results:
+            plt.plot(range(result.shape[0]), results.T[1], linewidth=0.8)
+        m = st.select_from_results(results, 1)
+        mean = m.mean(axis=0)
+        std = m.std(axis=0)
+        plt.plot(range(result.shape[0]), mean, '-.', color= 'black', linewidth= 4)
+        plt.plot(range(result.shape[0]), mean + std, '--', color= 'black', linewidth= 2)
+        plt.plot(range(result.shape[0]), mean - std, '--', color= 'black', linewidth= 2)
+        plt.show()
+        
+        print(m.shape)
