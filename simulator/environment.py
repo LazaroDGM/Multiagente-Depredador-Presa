@@ -296,5 +296,7 @@ class EnvironmentManyAgents(EnvironmentFood):
         self.gen_agents()
         self._removes_agent()
 
+    def reset(self):
+        self.food.delete()
         
     

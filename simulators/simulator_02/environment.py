@@ -68,3 +68,6 @@ class Environment02(EnvironmentManyAgents):
                     self._map[old_position[0]][old_position[1]].remove(agent)
                     self._map[position[0]][position[1]].add(agent)
                     self.agents_groups[type_agent][agent] = position
+
+    def reset(self):
+        self.food.delete()

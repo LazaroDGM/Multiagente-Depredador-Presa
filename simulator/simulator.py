@@ -8,7 +8,7 @@ class Simulator():
     def __init__(self, ClassEnvironment) -> None:
         self.class_enviroment = ClassEnvironment
 
-    def StartSimulation(self, stop_steps, *args, **kvargs):
+    def StartSimulation(self, stop_steps, reset= True, *args, **kvargs):
         '''
         Funcion que comienza la simulacion y genera un conjunto de salidas
         que son las variables observables.
@@ -30,12 +30,14 @@ class Simulator():
             environment.next_step()
             outputs.append(environment.outputs())            
             step += 1
+        if reset:
+            environment.reset()
         return environment, outputs
 
-    def StartManySimulations(self, count_simulations, stop_steps, *args, **kvargs):
+    def StartManySimulations(self, count_simulations, stop_steps, reset= True, *args, **kvargs):
         simulations = []
         for _ in range(count_simulations):
-            outputs = self.StartSimulation(stop_steps, *args, **kvargs)            
+            outputs = self.StartSimulation(stop_steps, reset, *args, **kvargs)            
             simulations.append(outputs)
         return simulations
 

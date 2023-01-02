@@ -9,6 +9,12 @@ class Food(object):
             cls.energy_ratio = energy_ratio
         return cls.instance
 
+    @classmethod
+    def delete(cls):
+        if hasattr(cls, 'instance'):
+            delattr(cls, 'instance')
+            cls.energy_ratio = 0
+
     def __repr__(self) -> str:
         return 'f'
 

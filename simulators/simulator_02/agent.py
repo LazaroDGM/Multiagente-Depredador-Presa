@@ -78,7 +78,7 @@ class PredatorAgentPropierties:
         matrix = AStar(P[0], x, y, len(P[0]), prey_found, obstacle_found)
         abundance_matrix = transform(matrix)
         (dx, dy) = betterMove(abundance_matrix)
-        print(dx, dy)
+
 
         (new_x, new_y) = x + dx -1, y + dy -1
         (new_real_x, new_real_y) = real_x + dx - 1, real_y + dy - 1
@@ -322,8 +322,6 @@ class scaredPreyAgentPropierties:
                 
 
         dx, dy = betterMove(pounded_matrix, rnd=True)
-        print('HUIR', dx-1, dy-1)
-        print(predators_matrix)
         new_x, new_y = x + dx -1, y + dy -1
         (new_real_x, new_real_y) = real_x + dx -1, real_y + dy -1
         if new_x < 0 or new_y < 0:
