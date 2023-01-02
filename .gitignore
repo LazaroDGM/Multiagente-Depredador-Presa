@@ -1,7 +1,3 @@
-# Customized
-main.py
-test/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -131,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Customized
+main.py
+/results
