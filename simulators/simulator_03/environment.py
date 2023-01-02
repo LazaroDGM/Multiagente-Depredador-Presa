@@ -29,6 +29,11 @@ class Environment03(Environment):
         self.initial_count_predator = initial_count_predator
         self.prop_prey = PreyAgentPropierties(params_prey, map)
         self.prop_predator = PredatorAgentPropierties(params_predator, map)
+        
+        self._see_functions = {
+            PreyAgent: self.seePrey,
+            PredatorAgent: self.seePredator
+        }
 
 
         self.food = Food()
@@ -288,9 +293,23 @@ class Environment03(Environment):
 
     def next_step(self):
         self.cicle += 1
-        self.remove_dead_agents()
-        print(self.count_foods)
+        self.remove_dead_agents()        
         self.gen_food()
+
+        actions_predators = []
+        for predator in self.predator.keys():            
+            P = self.see(predator)
+            action = predator.action(P)
+            actions_predators.append((predator, action))
+
+        actions_preys = []
+        for prey in self.preys.keys():  
+            P = self.see(prey)
+            action = prey.action(P)
+            actions_preys.append((prey, action))
+
+        self.transform(actions_predators=actions_predators, actions_preys=actions_preys)
+
 
     def outputs(self):
         return None
