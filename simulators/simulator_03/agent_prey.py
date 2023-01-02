@@ -1,5 +1,7 @@
 from simulator.agent import ProactiveAgent
-from simulator_03.memory import PreyMemory, PredatorMemory
+from simulators.simulator_03.memory import PreyMemory, PredatorMemory
+from simulators.simulator_03.entities import Plant, Obstacle
+import Algorithms.util as util
 import numpy as np
 import random
 
@@ -108,6 +110,9 @@ class PreyAgent(ProactiveAgent):
         self.energy = self.prop.max_energy
         self.eating = 0
         self.wait_move = 1
+
+        #
+        self.current_path = []
     
     def set_global_map(self, map):
         self._map = np.copy(map)
@@ -165,4 +170,59 @@ class PreyAgent(ProactiveAgent):
             self.predator_memory.Remember(predator)
 
         # Olvidando Comidas
-        # TODO        
+        # TODO
+
+        # Actualizando avance del Camino Actual
+        if self.current_path is not None:
+            if P.position != self.current_path[0]:                
+                self.current_path.pop(0)
+                if len(self.current_path) > 0:
+                    if self.current_path[0] != P.position:
+                        raise Exception('Se hizo un movimiento fuera del camino actual')
+
+    ##################### OPTIONS #############################
+
+    def options(self, P):
+        raise NotImplementedError()
+
+    ##################### FILTER ##############################
+
+    def filter(self, P):
+
+        # Acciones que siempre se deben hacer en condiciones determinadas
+        if self.wait_move > 0:
+            Ac = self.__wait_move(P)
+            return Ac
+        if self.eating > 0:
+            Ac = self.__wait_eat(P)
+            return Ac
+
+        # Acciones que dependen de varios factores probabilisticos
+        # TODO
+        raise NotImplementedError()
+
+    #################### INTENTIONS ###########################
+
+    def intention_walk_to(self, P : PerceptionPrey):
+                
+        if self.current_path is None or len(self.current_path) == 0:
+            raise Exception('Intencion de moverse, sin camino')        
+
+        
+        if P.close_preys.get(self.current_path[1], None) is not None:
+            if len(self.current_path) > 1:
+                future_position = self.current_path[1]
+            future_position = self.current_path[0]
+            
+            extract = util.extract_radius_matrix(self.prop.map, P.position, 1)
+            adjacents = util.adjacent_box(extract, future_position,
+                isValid= lambda box: not (isinstance(box, Plant) or isinstance(box, Obstacle)))
+            adjacents.append(future_position)
+            counts = [1]* len(adjacents)
+            counts[-1] += (len(adjacents) - 1) * 9
+            new_position = self.prop.rand.sample(adjacents, k= 1, counts= counts)[0]
+        else:
+            new_position = self.current_path[0]
+        return self.__mov(P, new_position)
+
+        
