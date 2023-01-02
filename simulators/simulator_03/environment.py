@@ -37,7 +37,7 @@ class Environment03(Environment):
         self.preys = {}
 
         # Diccionario de depredadores-posicion
-        self.predator = {}
+        self.predators = {}
 
         # Variables contadoras
         self.cicle = 0 # Tiempo actual del Medio
@@ -105,7 +105,84 @@ class Environment03(Environment):
                 print('Nueva produccion de comida en: ', cicle_food)
                 self.plants[(r,c)] = cicle_food
 
-    
+    def transform(self, actions_predators, actions_preys):
+        
+        delete_prey = []
+        new_positions_predators = {}
+        for action in actions_predators:
+            predator, new_position, eat = action
+            new_r, new_c = new_position
+            old_r, old_c = old_position = self.predators[predator]
+            box = self._map[old_r][old_c]
+            if not (isinstance(box, Floor) and box.predator == predator):
+                raise Exception('Depredador en mapa, no coincide con el depredador actual')
+            if abs(new_r - old_r) > 1 or abs(new_c - old_c) > 1:
+                raise Exception('Movimiento errado del depredador')
+            
+            if eat == True:
+                if new_position != old_position:
+                    raise Exception('Depredador que se mueve y come a la vez')
+                if not box.hasPrey():
+                    raise Exception('Depredador comiendo en una casilla sin Presa')
+                prey = box.RemovePrey()
+                delete_prey.append(prey)
+                new_positions_predators[new_position] = predator
+            elif new_position == old_position:
+                new_positions_predators[new_position] = predator
+            elif new_positions_predators.get(new_position, None) is None:
+                new_positions_predators[new_position] = predator
+
+        for new_position, predator in new_positions_predators.items():
+            if new_position != self.predators[predator]:
+                old_r, old_c = self.predators[predator]
+                self._map[old_r][old_c].RemovePredator()
+        for (new_r, new_c), predator in new_positions_predators.items():
+            if (new_r, new_c) != self.predators[predator]:              
+                self._map[new_r][new_c].AddPredator(predator)
+                self.predators[predator] = (new_r, new_c)
+
+        new_positions_preys = {}
+        for action in actions_preys:
+            prey, new_position, eat = action
+            if prey in delete_prey:
+                self.preys.pop(prey)
+                continue
+
+            new_r, new_c = new_position
+            old_r, old_c = old_position = self.preys[prey]
+            box = self._map[old_r][old_c]
+            if not (isinstance(box, Floor) and box.prey == prey):
+                raise Exception('Presa en mapa, no coincide con la presa actual')
+            if not (isinstance(box, Burrow) and box.prey == prey):
+                raise Exception('Presa en mapa, no coincide con la presa actual')
+            if abs(new_r - old_r) > 1 or abs(new_c - old_c) > 1:
+                raise Exception('Movimiento errado de la presa')
+            if eat == True:
+                if new_position != old_position:
+                    raise Exception('Presa que se mueve y come a la vez')
+                if not box.hasFood():
+                    raise Exception('Presa comiendo en una casilla sin Comida')
+                box.RemoveFood()                
+                new_positions_preys[new_position] = prey
+            elif new_position == old_position:
+                new_positions_preys[new_position] = prey
+            elif new_positions_preys.get(new_position, None) is None:
+                new_positions_preys[new_position] = prey
+
+        for new_position, prey in new_positions_preys.items():
+            if new_position != self.preys[prey]:
+                old_r, old_c = self.preys[prey]
+                self._map[old_r][old_c].RemovePrey()
+        for (new_r, new_c), prey in new_positions_preys.items():
+            if (new_r, new_c) != self.preys[prey]:              
+                self._map[new_r][new_c].AddPrey(prey)
+                self.preys[prey] = (new_r, new_c)  
+                
+        del(new_positions_preys)
+        del(new_positions_predators)
+        del(delete_prey)
+            
+
 
     def next_step(self):
         self.cicle += 1

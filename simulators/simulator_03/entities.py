@@ -35,22 +35,25 @@ class Plant(object):
 class Burrow():
 
     def __init__(self) -> None:
-        self.agent = None
+        self.prey = None
 
     def isEmpty(self):
-        return self.agent is None
+        return self.prey is None
 
-    def Add(self, agent):
-        if not self.isEmpty():
+    def hasPrey(self):
+        return self.prey is not None
+
+    def AddPrey(self, prey):
+        if self.hasPrey():
             raise Exception('Annadiendo agente en una madriguera ocupada')
-        self.agent = agent
+        self.prey = prey
 
-    def Remove(self):
+    def RemovePrey(self):
         if self.isEmpty():
             raise Exception('Eliminando agente de una madriguera vacia')
-        agent = self.agent
-        self.agent = None
-        return agent
+        prey = self.prey
+        self.prey = None
+        return prey
 
 class Floor(object):
 
