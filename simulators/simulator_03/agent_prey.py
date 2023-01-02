@@ -1,5 +1,5 @@
 from simulator.agent import ProactiveAgent
-from simulators.simulator_03.memory import PreyMemory, PredatorMemory
+from simulators.simulator_03.memory import PreyMemory, PredatorMemory, FoodMemory
 from simulators.simulator_03.entities import Plant, Obstacle
 import Algorithms.util as util
 import numpy as np
@@ -56,7 +56,11 @@ class ParamsPrey():
             lost_energy_wait_burrow,
             lost_energy_walk_burrow,
             memory_prey_wait_time,
-            memory_predator_wait_time
+            memory_predator_wait_time,
+            forget_tick,
+            weight_memory_food,
+            breeding_point,
+            food_energy_ratio
         ) -> None:
         self.digestion_time = digestion_time
         self.max_energy = max_energy
@@ -68,6 +72,11 @@ class ParamsPrey():
         self.lost_energy_walk_burrow = lost_energy_walk_burrow,
         self.memory_prey_wait_time = memory_prey_wait_time,
         self.memory_predator_wait_time = memory_predator_wait_time,
+        self.forget_tick = forget_tick
+        self.weight_memory_food = weight_memory_food,
+        self.breeding_point = breeding_point
+        self.food_energy_ratio = food_energy_ratio
+
 
 ###################### PROPIERTIES #################################
 class PreyAgentPropierties:
@@ -89,6 +98,10 @@ class PreyAgentPropierties:
             cls.lost_energy_walk_burrow = params.lost_energy_walk_burrow,
             cls.memory_prey_wait_time = params.memory_prey_wait_time,
             cls.memory_predator_wait_time = params.memory_predator_wait_time,
+            cls.forget_tick = params.forget_tick
+            cls.weight_memory_food = params.weight_memory_food
+            cls.breeding_point = params.breeding_point
+            cls.food_energy_ratio = params.food_energy_ratio
             cls.rand = random.Random()
         return cls.instance
     
@@ -104,12 +117,14 @@ class PreyAgent(ProactiveAgent):
     def __init__(self, propierties: PreyAgentPropierties) -> None:
         super().__init__()
         self.prop = propierties
+        self.food_memory = FoodMemory(weight= self.prop.weight_memory_food, forget_tick= self.prop.forget_tick)
         self.prey_memory = PreyMemory(self.prop.memory_prey_wait_time)
         self.predator_memory = PredatorMemory(self.prop.memory_predator_wait_time)
 
         self.energy = self.prop.max_energy
         self.eating = 0
         self.wait_move = 1
+        self.extra_energy = 0
 
         #
         self.current_path = []
@@ -146,11 +161,16 @@ class PreyAgent(ProactiveAgent):
         return ActionPrey(new_position= P.position, eat= False)
 
     def __eat(self, P: PerceptionPrey):
-        self.eating =  self.prop.digestion_time
+        self.eating = self.prop.digestion_time
         return ActionPrey(new_position= P.position, eat= True)
 
     def __wait_eat(self, P: PerceptionPrey):
         self.eating -= 1
+        if self.eating == 0:
+            self.energy += self.prop.food_energy_ratio * self.prop.max_energy
+            extra = max(0, self.energy - self.prop.max_energy)
+            self.extra_energy += extra
+            self.energy -= extra
         return ActionPrey(new_position= P.position, eat= False)
 
     ################ BRF ###################
@@ -170,7 +190,11 @@ class PreyAgent(ProactiveAgent):
             self.predator_memory.Remember(predator)
 
         # Olvidando Comidas
-        # TODO
+        self.food_memory.Tick()
+        # Recordando Posicion donde se veia comida
+        count_food = len(P.close_food)
+        ratio_food = count_food / ((self.prop.vision_radius * 2 + 1) ** 2)
+        self.food_memory.Remember(P.position, ratio_food)
 
         # Actualizando avance del Camino Actual
         if self.current_path is not None:
@@ -209,7 +233,7 @@ class PreyAgent(ProactiveAgent):
             raise Exception('Intencion de moverse, sin camino')        
 
         
-        if P.close_preys.get(self.current_path[0], None) is not None:
+        if P.close_preys.get(self.current_path[1], None) is not None:
             if len(self.current_path) > 1:
                 future_position = self.current_path[1]
             future_position = self.current_path[0]
@@ -226,4 +250,7 @@ class PreyAgent(ProactiveAgent):
             new_position = self.current_path[0]
         return self.__mov(P, new_position)
 
+    def intention_scape(self, P: PerceptionPrey):
+        
+        raise NotImplementedError()
         
