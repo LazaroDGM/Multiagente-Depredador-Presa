@@ -224,3 +224,7 @@ class EnvironmentSimulator01(Environment):
             
     def outputs(self):
         return self.count_agents, self.count_foods
+
+
+    def reset(self):
+        Food().delete()
