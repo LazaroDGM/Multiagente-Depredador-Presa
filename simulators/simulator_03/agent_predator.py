@@ -3,11 +3,11 @@ import numpy as np
 import random
 
 ################################################################
-######################### PREY #################################
+###################### PREDATOR ################################
 ################################################################
 
 ######################### PARAMS ###############################
-class ParamsPrey():
+class ParamsPredator():
     '''
     Clase contenedora de parametros de una Presa. Se debe utilizar como
     parametro para la inicializar una instancia de Presa
@@ -24,14 +24,14 @@ class ParamsPrey():
         self.vision_radius = vision_radius
 
 ###################### PROPIERTIES #################################
-class PreyAgentPropierties:
+class PredatorAgentPropierties:
     '''
     Clase contenedora de parametros de una Presa. Es una clase singleton y
     la contienen como propiedad todas las presas creadas
     '''
-    def __new__(cls, params: ParamsPrey, map):
+    def __new__(cls, params: ParamsPredator, map):
         if not hasattr(cls, 'instance'):
-            cls.instance = super(PreyAgentPropierties, cls).__new__(cls)
+            cls.instance = super(PredatorAgentPropierties, cls).__new__(cls)
             cls.digestion_time = params.digestion_time
             cls.max_energy = params.max_energy
             cls.velocity = params.velocity
@@ -45,11 +45,11 @@ class PreyAgentPropierties:
         del(cls.instance)
 
 ####################### AGENT PREY #################################
-class PreyAgent(ProactiveAgent):
+class PredatorAgent(ProactiveAgent):
     '''
     Clase para modelar una presa. Contiene las propiedades locales de la presa y las globales
     '''
-    def __init__(self, propierties: PreyAgentPropierties) -> None:
+    def __init__(self, propierties: PredatorAgentPropierties) -> None:
         super().__init__()
         self.prop = propierties
 

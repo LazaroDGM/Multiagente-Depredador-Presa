@@ -1,6 +1,7 @@
 from simulator.environment import Environment
 from simulators.simulator_03.entities import Food, Obstacle, Plant, Burrow, Floor
 from simulators.simulator_03.agent_prey import ParamsPrey, PreyAgentPropierties, PreyAgent
+from simulators.simulator_03.agent_predator import ParamsPredator, PredatorAgentPropierties, PredatorAgent
 import numpy as np
 import random
 
@@ -19,7 +20,7 @@ class Environment03(Environment):
         initial_count_prey,
         initial_count_predator,
         params_prey : ParamsPrey,
-        params_predator,
+        params_predator : ParamsPredator,
     ) -> None:
         self.plant_radius = plant_radius
         self.food_ratio = food_ratio
@@ -27,7 +28,7 @@ class Environment03(Environment):
         self.initial_count_prey = initial_count_prey
         self.initial_count_predator = initial_count_predator
         self.prop_prey = PreyAgentPropierties(params_prey, map)
-        self.prop_predator = None
+        self.prop_predator = PredatorAgentPropierties(params_predator, map)
 
 
         self.food = Food()
