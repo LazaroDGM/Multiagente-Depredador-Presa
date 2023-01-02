@@ -297,7 +297,7 @@ class Environment03(Environment):
         self.gen_food()
 
         actions_predators = []
-        for predator in self.predator.keys():            
+        for predator in self.predators.keys():            
             P = self.see(predator)
             action = predator.action(P)
             actions_predators.append((predator, action))
