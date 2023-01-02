@@ -31,7 +31,7 @@ class PreyMemory:
                 self.preys.pop(0)
                 self.times.pop(0)
     
-    def Add(self, prey):
+    def Remember(self, prey):
         try:
             index = self.preys.index(prey)
             self.preys.pop(index)
@@ -60,7 +60,7 @@ class PredatorMemory:
                 self.predators.pop(0)
                 self.times.pop(0)
     
-    def Add(self, predator):
+    def Remember(self, predator):
         try:
             index = self.predators.index(predator)
             self.predators.pop(index)

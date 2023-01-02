@@ -148,4 +148,21 @@ class PreyAgent(ProactiveAgent):
         self.eating -= 1
         return ActionPrey(new_position= P.position, eat= False)
 
-    
+    ################ BRF ###################
+
+    def brf(self, P: PerceptionPrey):
+
+        # Olvidando Presas
+        self.prey_memory.Tick()
+        # Recordando Presas cercanas        
+        for prey in P.close_preys.values():
+            self.prey_memory.Remember(prey)
+
+        # Olvidando Depredadores
+        self.predator_memory.Tick()
+        # Recordando Depredadores cercanos
+        for predator in P.close_predators.values():
+            self.predator_memory.Remember(predator)
+
+        # Olvidando Comidas
+        # TODO        
