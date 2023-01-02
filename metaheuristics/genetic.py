@@ -43,10 +43,10 @@ def merch(vectors):
             new_solutions.append(merch)
     return new_solutions
 
-def geneticeval(parameters_number: int, fitness_function, simulation_times :int = 30):
+def geneticeval(parameters_number: int, fitness_function, function, simulation_times :int = 30):
     heapp = []
-    for sol in generate_population():
-        heappush(heapp, (-fitness_function(sol), sol))
+    for sol in generate_population(vector_length=parameters_number):
+        heappush(heapp, (-fitness_function(function(sol)), sol))
     better_solutions = []
     for i in range(simulation_times):
         for a in range(10):
@@ -76,3 +76,4 @@ def geneticeval(parameters_number: int, fitness_function, simulation_times :int 
 # print(len(arrai))
 # print(sum(arrai[0]))
 # print(max(map(lambda array: sum(array), arrai)))
+
