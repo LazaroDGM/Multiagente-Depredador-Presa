@@ -35,20 +35,16 @@ def AStarPlus(numpy_array, x, y, vision, found, obstacle):
                 if cell in visited_cells: continue                                                                                                             # cell already visited
                 visited_cells.add((_x_pos, _y_pos))
                 manhathan_distance = max(abs(_x_pos - x), abs(_y_pos - y))
-                obstacle_in_cell = False
-                for agent in numpy_array[_x_pos][_y_pos]:
-                    if obstacle(agent): 
-                        obstacle_in_cell = True
-                        break
-                    if found(agent):
-                        if current_direction == 0:
-                            matrix[j + 1][k + 1].append(1)
-                        else: 
-                            matrix[int((current_direction - 1) / 3)][(current_direction - 1) % 3].append(current_cost + 1)
-                            if min_d_way > current_cost + 1:
-                                min_d_way = current_cost + 1
-                                the_way = current_way + [cell]
-                if obstacle_in_cell: continue
+                
+                if obstacle(numpy_array[_x_pos][_y_pos]): continue
+                if found(_x_pos, _y_pos):
+                    if current_direction == 0:
+                        matrix[j + 1][k + 1].append(1)
+                    else: 
+                        matrix[int((current_direction - 1) / 3)][(current_direction - 1) % 3].append(current_cost + 1)
+                        if min_d_way > current_cost + 1:
+                            min_d_way = current_cost + 1
+                            the_way = current_way + [cell]
                 next_direction = (j+1)*3 + k+2       if          current_direction == 0        else            current_direction
                 heappush(heap, (manhathan_distance + current_cost + 1, (next_direction, (current_way + [cell], (manhathan_distance, cell)))))
         
