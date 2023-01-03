@@ -253,7 +253,7 @@ class PreyAgent(ProactiveAgent):
             return self.intention_scape()
         if self.hungry_desire > 0.4:
             if self.current_path != None and len(self.current_path) > 0:
-                self.__intention_search_food(P)
+                self.__intention_go_to_eat(P)
                 if self.current_path != None and len(self.current_path) > 0:
                     return self.intention_walk_to(P)
                 else: return 
@@ -307,7 +307,7 @@ class PreyAgent(ProactiveAgent):
         return (new_x, new_y), False
 
         
-    def __intention_search_food(self, P: PerceptionPrey):
+    def __intention_go_to_eat(self, P: PerceptionPrey):
         food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_food, obstacle=lambda cell: cell is Obstacle())
         self.current_path = path
 
