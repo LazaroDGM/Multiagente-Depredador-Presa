@@ -14,7 +14,7 @@ def AStarPlus(numpy_array, x, y, vision, found, obstacle):
     heapify(heap)
     visited_cells = set()
     
-    heappush(heap, (0, (0, (0, ([], (x, y))))))                       # 1- costo, 2- direccion de partida del camino, 3- dist. manhathan, 4- camino o trace hsat el objetivo, 5- posicion correspondiente
+    heappush(heap, (0, (0, (0, ([(x, y)], (x, y))))))                       # 1- costo, 2- direccion de partida del camino, 3- dist. manhathan, 4- camino o trace hsat el objetivo, 5- posicion correspondiente
     visited_cells.add((x, y))
 
     min_d_way = math.inf
@@ -54,7 +54,6 @@ def AStarPlus(numpy_array, x, y, vision, found, obstacle):
             matrix[i][j] = [-1]
             continue
         #print(f'position analized: {(x + i - 1, y + j - 1)}')
-        for ent in numpy_array[x + i - 1][y + j - 1]:
-            if obstacle(ent):
-                matrix[i][j] = [-1]
+        if obstacle(numpy_array[x + i - 1][y + j - 1]):
+            matrix[i][j] = [-1]
     return matrix, the_way
