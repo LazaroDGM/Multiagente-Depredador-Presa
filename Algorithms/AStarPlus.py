@@ -49,7 +49,7 @@ def AStarPlus(numpy_array, x, y, vision, found, obstacle, stop_with = 3):
                             min_d_way = current_cost + 1
                             the_way = current_way + [cell]
                 next_direction = (j+1)*3 + k+2       if          current_direction == 0        else            current_direction
-                heappush(heap, (manhathan_distance + current_cost + 1, (next_direction, (current_way + [cell], (manhathan_distance, cell)))))
+                heappush(heap, (manhathan_distance + current_cost + 1, (next_direction, (manhathan_distance, (current_way + [cell], cell)))))
         if founded >= stop_with:
             break
 

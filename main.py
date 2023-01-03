@@ -42,7 +42,7 @@ sim.StartSimulation(
     initial_count_predator=0,
     params_prey= ParamsPrey(
         digestion_time=3,
-        max_energy= 50,
+        max_energy= 100,
         velocity= 0,
         vision_radius= 3,
         lost_energy_wait=0.5,
@@ -54,7 +54,7 @@ sim.StartSimulation(
         breeding_point=50,
         food_energy_ratio=0.8,
         forget_tick= 10,
-        weight_memory_food= 20
+        weight_memory_food= 100
     ),
     params_predator= ParamsPredator(
         digestion_time=5,

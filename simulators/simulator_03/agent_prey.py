@@ -212,16 +212,18 @@ class PreyAgent(ProactiveAgent):
         self.food_memory.Tick()
         # Recordando Posicion donde se veia comida
         count_food = len(P.close_food)
-        ratio_food = count_food / ((self.prop.vision_radius * 2 + 1) ** 2)
+        ratio_food = float(count_food) / ((float(self.prop.vision_radius) * 2.0 + 1.0) ** 2.0)
         self.food_memory.Remember(P.position, ratio_food)
 
         # Actualizando avance del Camino Actual
         if self.current_path is not None:
-            if len(self.current_path) > 0 and P.position != self.current_path[0]:
+            if len(self.current_path) > 0 and P.position == self.current_path[0]:
                 self.current_path.pop(0)
-                if len(self.current_path) > 0:
-                    if self.current_path[0] != P.position:
-                        raise Exception('Se hizo un movimiento fuera del camino actual')
+                if len(self.current_path) == 1:
+                    self.current_path = None
+                #if len(self.current_path) > 0:
+                #    if self.current_path[0] != P.position:
+                #        raise Exception('Se hizo un movimiento fuera del camino actual')
             else:
                 self.objetive == NOTHING
                 self.current_path = None
@@ -261,19 +263,25 @@ class PreyAgent(ProactiveAgent):
         if self.scape_desire < len(P.close_predators):
             return self.intention_scape()
         # Hambriento
-        elif self.objetive in [FIND_EAT, GO_EAT,] or self.hungry_desire >= self.energy:            
+        elif self.objetive in [FIND_EAT, GO_EAT] or self.hungry_desire >= self.energy:            
             if self.current_path is None:
                 if len(P.close_food) > 0:
-                    self.__intention_go_to_eat(P)
-                    self.objetive = GO_EAT
-                    self.intention_walk_to(P)
+                    if P.position in P.close_food:
+                        self.objetive = EAT
+                        self.current_path = None
+                        return self.__eat(P)
+                    else:
+                        self.__intention_go_to_eat(P)
+                        self.objetive = GO_EAT
+                        return self.intention_walk_to(P)
                 else:
                     self.__intention_search_food(P)
                     self.objetive = FIND_EAT
                     return self.intention_walk_to(P)
             elif len(self.current_path) > 0:
-                if len(self.current_path) == 1 and P.position in P.close_food:
+                if P.position in P.close_food:
                     self.objetive = EAT
+                    self.current_path = None
                     return self.__eat(P)
                 elif self.objetive == GO_EAT:                    
                     return self.intention_walk_to(P)
@@ -285,6 +293,8 @@ class PreyAgent(ProactiveAgent):
                     else:
                         self.objetive = FIND_EAT
                         return self.intention_walk_to(P)
+            raise Exception()
+                
         else:
             return self.intention_walk_random(P)
         #elif self.breeding_desire >= len(self.prey_memory):
@@ -318,7 +328,7 @@ class PreyAgent(ProactiveAgent):
         return self.__mov(P, self.current_path[0])
 
     def intention_scape(self, P: PerceptionPrey):
-        predators_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_predators, obstacle=lambda cell: cell is Obstacle())
+        predators_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_predators, obstacle=lambda cell: cell is Obstacle() or cell is Plant(), vision=1000000)
         predators_abundance_matrix = transform(predators_matrix, xpansion_distance= 1)
         (x, y) = P.position
         pounded_matrix = [[0, 0, 0], 
@@ -336,7 +346,7 @@ class PreyAgent(ProactiveAgent):
 
         
     def __intention_go_to_eat(self, P: PerceptionPrey):
-        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_food, obstacle=lambda cell: cell is Obstacle())
+        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_food, obstacle=lambda cell: cell is Obstacle() or cell is Plant(), vision= 1000000)
 
         (x, y) = P.position
         
@@ -358,8 +368,8 @@ class PreyAgent(ProactiveAgent):
         else:
             nearest_memory_food_cell = (-1, -1)
             while(nearest_memory_food_cell == (-1, -1)):
-                new_pos = (random.randint(0, self.prop.map.shape[0]), random.randint(0, self.prop.map.shape[1]))
+                new_pos = (random.randint(0, self.prop.map.shape[0] - 1), random.randint(0, self.prop.map.shape[1] - 1))
                 if self.prop.map[new_pos[0]][new_pos[1]] != Obstacle() and self.prop.map[new_pos[0]][new_pos[1]] != Plant():
                     nearest_memory_food_cell = new_pos
-        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) == nearest_memory_food_cell, obstacle=lambda cell: cell is Obstacle(), stop_with=1, vision=100)
+        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) == nearest_memory_food_cell, obstacle=lambda cell: cell is Obstacle() or cell is Plant(), stop_with=1, vision=1000000)
         self.current_path = path

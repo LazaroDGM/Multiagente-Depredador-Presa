@@ -134,15 +134,14 @@ class Environment03(Environment):
         min_r = max(0, r-self.prop_prey.vision_radius)
         min_c = max(0, c-self.prop_prey.vision_radius)
         max_r = min(self._map.shape[0], r+self.prop_prey.vision_radius+1)
-        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)
-        extract = self._map[min_r:max_r, min_c:max_c]
+        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)        
 
         close_preys = {}
         close_predators = {}
         close_food = []
         
-        for i in range(extract.shape[0]):
-            for j in range(extract.shape[1]):
+        for i in range(min_r, max_r):
+            for j in range(min_c, max_c):
                 box = self._map[i][j]
                 if isinstance(box, Floor):
                     if box.hasPrey():
@@ -166,15 +165,14 @@ class Environment03(Environment):
         min_r = max(0, r-self.prop_prey.vision_radius)
         min_c = max(0, c-self.prop_prey.vision_radius)
         max_r = min(self._map.shape[0], r+self.prop_prey.vision_radius+1)
-        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)
-        extract = self._map[min_r:max_r, min_c:max_c]
+        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)        
 
         close_preys = {}
         close_predators = {}
         close_food = {}
         
-        for i in range(extract.shape[0]):
-            for j in range(extract.shape[1]):
+        for i in range(range(min_r, max_r)):
+            for j in range(min_c, max_c):
                 box = self._map[i][j]
                 if isinstance(box, Floor):
                     if box.hasPrey():
@@ -195,7 +193,7 @@ class Environment03(Environment):
         for prey, (i, j) in self.preys.items():
             prey : PreyAgent
             if prey.energy <= 0:
-                delete_preys.append((i,j))
+                delete_preys.append(prey)
                 box = self._map[i][j]
                 if isinstance(box, (Burrow, Floor)):
                     if not box.hasPrey():
@@ -203,15 +201,15 @@ class Environment03(Environment):
                     box.RemovePrey()
                 else:
                     raise Exception('Presa lista para morirse, que no esta en ningun lugar')
-        for (i, j) in delete_preys:
-            self._map[i][j].RemovePrey()
+        for prey in delete_preys:
+            self.preys.pop(prey)
         del(delete_preys)
 
         delete_predators = []
         for predator, (i, j) in self.predators.items():
             predator : PredatorAgent
             if predator.energy <= 0:
-                delete_predators.append((i,j))
+                delete_predators.append(predator)
                 box = self._map[i][j]
                 if isinstance(box, Floor):
                     if not box.hasPredator():
@@ -219,8 +217,8 @@ class Environment03(Environment):
                     box.RemovePredator()
                 else:
                     raise Exception('Predator lista para morirse, que no esta en ningun lugar')
-        for (i, j) in delete_predators:
-            self._map[i][j].RemovePredator()
+        for predator in delete_predators:
+            self.predators.pop(predator)
         del(delete_predators)
 
 

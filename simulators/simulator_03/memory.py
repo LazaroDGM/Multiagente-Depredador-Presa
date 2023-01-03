@@ -10,7 +10,7 @@ class FoodMemory:
                                 int(weight * 0.2),
                                 int(weight * 0.1)]
         self.len = sum(self.weights)
-        self.memories_location = lambda ratio: 0 if ratio >0.6 else 1 if ratio > 0.4 else 2 if ratio > 0.2 else 3 if ratio > 0.0 else -1
+        self.memories_location = lambda ratio: 0 if ratio >0.6 else 1 if ratio > 0.4 else 2 if ratio > 0.2 else 3
         self.forget_tick = forget_tick
         self.current_tick = 0
         self.rnd = random.Random()
@@ -32,9 +32,9 @@ class FoodMemory:
             
 
     def Remember(self, pos, food_ratio):
-        location = self.memories_location(food_ratio)
-        if location == -1:
+        if food_ratio == 0.0:
             return
+        location = self.memories_location(food_ratio)
         current_slot = self.slots[location]
 
         try:
