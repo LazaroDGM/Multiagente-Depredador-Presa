@@ -32,7 +32,7 @@ map = np.array(
 
 sim = Simulator03(Environment03)
 sim.StartSimulation(
-    tick= 0.5,
+    tick= 0.1,
     stop_steps=1000,
     map= map,
     food_generation_period=40,
@@ -42,8 +42,8 @@ sim.StartSimulation(
     initial_count_predator=0,
     params_prey= ParamsPrey(
         digestion_time=3,
-        max_energy= 100,
-        velocity= 3,
+        max_energy= 50,
+        velocity= 0,
         vision_radius= 3,
         lost_energy_wait=0.5,
         lost_energy_wait_burrow=0.2,
