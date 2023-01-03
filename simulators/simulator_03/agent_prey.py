@@ -222,8 +222,10 @@ class PreyAgent(ProactiveAgent):
     ##################### OPTIONS #############################
 
     def options(self, P):
-        raise NotImplementedError()
-
+        
+        self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 4))
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, (0.8* self.prop.map.size) / 4))
+        
     ##################### FILTER ##############################
 
     def filter(self, P):
