@@ -71,6 +71,20 @@ class Environment03(Environment):
                 elif map[i][j] is None:
                     self._map[i][j] = Floor()
         self.shape_map = self._map.shape
+
+        #self._map.resize(self._map.size)
+        #emptys = np.array(list(filter(lambda box: isinstance(box, (Burrow, Floor)), self._map)))
+        #self._map.resize(self.shape_map)
+        #idx = np.random.choice(emptys.shape[0], min(1, emptys.size), replace=False)
+        #selection = emptys[idx]
+        #for s in selection:            
+        #    prey = PreyAgent(self.prop_prey)
+        #    s.AddPrey(prey)
+        #    self.preys[]
+        prey = PreyAgent(self.prop_prey)
+        self._map[0][0].AddPrey(prey)
+        self.preys[prey]= (0,0)
+
     
     def free_for_food(self, s):
         '''
@@ -258,9 +272,9 @@ class Environment03(Environment):
             new_r, new_c = new_position
             old_r, old_c = old_position = self.preys[prey]
             box = self._map[old_r][old_c]
-            if not (isinstance(box, Floor) and box.prey == prey):
+            if isinstance(box, Floor) and not box.prey == prey:
                 raise Exception('Presa en mapa, no coincide con la presa actual')
-            if not (isinstance(box, Burrow) and box.prey == prey):
+            if isinstance(box, Burrow) and not box.prey == prey:
                 raise Exception('Presa en mapa, no coincide con la presa actual')
             if abs(new_r - old_r) > 1 or abs(new_c - old_c) > 1:
                 raise Exception('Movimiento errado de la presa')

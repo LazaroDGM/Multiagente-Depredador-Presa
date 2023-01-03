@@ -54,8 +54,8 @@ class ParamsPredator():
         self.max_energy = max_energy
         self.velocity = velocity
         self.vision_radius = vision_radius
-        self.lost_energy_wait = lost_energy_wait,
-        self.lost_energy_walk = lost_energy_walk,
+        self.lost_energy_wait = lost_energy_wait
+        self.lost_energy_walk = lost_energy_walk
 
 ###################### PROPIERTIES #################################
 class PredatorAgentPropierties:
@@ -71,8 +71,8 @@ class PredatorAgentPropierties:
             cls.velocity = params.velocity
             cls.vision_radius = params.vision_radius
             cls.map = np.copy(map)
-            cls.lost_energy_wait = params.lost_energy_wait,
-            cls.lost_energy_walk = params.lost_energy_walk,
+            cls.lost_energy_wait = params.lost_energy_wait
+            cls.lost_energy_walk = params.lost_energy_walk
             cls.rand = random.Random()
         return cls.instance
     

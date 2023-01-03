@@ -59,6 +59,8 @@ class FoodMemory:
         
         
     def Forget(self, slot_to_forget):
+        if len(self.slots[slot_to_forget]) <= 0:
+            return
         self.slots[slot_to_forget].pop(0)
 
 

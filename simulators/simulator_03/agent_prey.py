@@ -77,14 +77,14 @@ class ParamsPrey():
         self.max_energy = max_energy
         self.velocity = velocity
         self.vision_radius = vision_radius
-        self.lost_energy_wait = lost_energy_wait,
-        self.lost_energy_walk = lost_energy_walk,
-        self.lost_energy_wait_burrow = lost_energy_wait_burrow,
-        self.lost_energy_walk_burrow = lost_energy_walk_burrow,
-        self.memory_prey_wait_time = memory_prey_wait_time,
-        self.memory_predator_wait_time = memory_predator_wait_time,
+        self.lost_energy_wait = lost_energy_wait
+        self.lost_energy_walk = lost_energy_walk
+        self.lost_energy_wait_burrow = lost_energy_wait_burrow
+        self.lost_energy_walk_burrow = lost_energy_walk_burrow
+        self.memory_prey_wait_time = memory_prey_wait_time
+        self.memory_predator_wait_time = memory_predator_wait_time
         self.forget_tick = forget_tick
-        self.weight_memory_food = weight_memory_food,
+        self.weight_memory_food = weight_memory_food
         self.breeding_point = breeding_point
         self.food_energy_ratio = food_energy_ratio
 
@@ -103,12 +103,12 @@ class PreyAgentPropierties:
             cls.velocity = params.velocity
             cls.vision_radius = params.vision_radius
             cls.map = np.copy(map)
-            cls.lost_energy_wait = params.lost_energy_wait,
-            cls.lost_energy_walk = params.lost_energy_walk,
-            cls.lost_energy_wait_burrow = params.lost_energy_wait_burrow,
-            cls.lost_energy_walk_burrow = params.lost_energy_walk_burrow,
-            cls.memory_prey_wait_time = params.memory_prey_wait_time,
-            cls.memory_predator_wait_time = params.memory_predator_wait_time,
+            cls.lost_energy_wait = params.lost_energy_wait
+            cls.lost_energy_walk = params.lost_energy_walk
+            cls.lost_energy_wait_burrow = params.lost_energy_wait_burrow
+            cls.lost_energy_walk_burrow = params.lost_energy_walk_burrow
+            cls.memory_prey_wait_time = params.memory_prey_wait_time
+            cls.memory_predator_wait_time = params.memory_predator_wait_time
             cls.forget_tick = params.forget_tick
             cls.weight_memory_food = params.weight_memory_food
             cls.breeding_point = params.breeding_point
@@ -143,7 +143,7 @@ class PreyAgent(ProactiveAgent):
         self.scape_desire = 0
 
         # Objetives
-        self.current_path = []
+        self.current_path = None
         self.objetive = NOTHING
     
     def set_global_map(self, map):
@@ -262,8 +262,9 @@ class PreyAgent(ProactiveAgent):
                     return self.__eat(P)
                 elif len(P.close_food) > 0:
                     self.__intention_go_to_eat(P)
+                    print('Iendo a comer')
                     return self.intention_walk_to(P)
-                return self.intention_walk_random(P)
+            return self.intention_walk_random(P)
         else:
             return self.intention_walk_random(P)
         #elif self.breeding_desire >= len(self.prey_memory):
@@ -272,11 +273,7 @@ class PreyAgent(ProactiveAgent):
 
     #################### INTENTIONS ###########################
     def intention_walk_random(self, P: PerceptionPrey):
-        extract = util.extract_radius_matrix(self.prop.map, P.position, 1)
-        adjs = util.adjacent_box(extract, P.position,
-            isValid= lambda box: not (isinstance(box, Plant) or isinstance(box, Obstacle)))
-        selected = self.prop.rand.choice(adjs)
-        self.__mov(P, selected)
+        return self.__mov(P, P.position)
     def intention_walk_to(self, P: PerceptionPrey):
                 
         if self.current_path is None or len(self.current_path) == 0:
