@@ -297,28 +297,26 @@ class PreyAgent(ProactiveAgent):
         dx, dy = betterMove(pounded_matrix, rnd=True)
 
         new_x, new_y = x + dx -1, y + dy -1
-        if new_x < 0 or new_y < 0:
-            raise Exception()
-        if new_x != x or new_y != y:
-            self.energy -= 1
-            self.wait = self.prop.velocity
-        return (new_x, new_y), False
+        return self.__mov(P, (new_x, new_y))
 
         
     def __intention_go_to_eat(self, P: PerceptionPrey):
         food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_food, obstacle=lambda cell: cell is Obstacle())
-        self.current_path = path
 
         (x, y) = P.position
         
         food_abundance_matrix = transform(food_matrix)
         (dx, dy) = betterMove(food_abundance_matrix)
+         
+        sugestion = x + dx -1, y + dy -1
+        self.current_path = path
+        return sugestion
 
-        (new_x, new_y) = x + dx -1, y + dy -1
 
-        if new_x < 0 or new_y < 0:
-            raise Exception()
-        if new_x != x or new_y != y:
-            self.energy -= 1
-            self.wait = self.prop.velocity
-        # return (new_x, new_y), False
+
+    def __intention_search_food(self, P: PerceptionPrey):
+        chosed_memory_slot_index = random.choices([0, 1, 2, 3], [weight for weight in self.food_memory.weights], k = 4)
+        sugested_slot = self.food_memory.slots[chosed_memory_slot_index]
+        nearest_memory_food_cell = min(  [    max(abs(P.position[0] - pos[0]), abs(P.position[1] - pos[1]))            for pos in sugested_slot            ]  )                  # positcion con menor distancia de manhathan
+        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) == nearest_memory_food_cell, obstacle=lambda cell: cell is Obstacle(), stop_with=1)
+        self.current_path = path
