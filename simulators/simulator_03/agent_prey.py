@@ -1,7 +1,10 @@
+from turtle import position
 from simulator.agent import ProactiveAgent
 from simulators.simulator_03.memory import PreyMemory, PredatorMemory, FoodMemory
 from simulators.simulator_03.entities import Plant, Obstacle
 import Algorithms.util as util
+from Algorithms.AStarPlus import AStarPlus
+from Algorithms.transform import transform, betterMove
 import numpy as np
 import random
 
@@ -263,6 +266,28 @@ class PreyAgent(ProactiveAgent):
         return self.__mov(P, new_position)
 
     def intention_scape(self, P: PerceptionPrey):
+        predators_matrix = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_predators, obstacle=lambda cell: cell is Obstacle())
+        predators_abundance_matrix = transform(predators_matrix, xpansion_distance= 1)
+        (x, y) = P.position
+        pounded_matrix = [[0, 0, 0], 
+                                        [0, 0, 0], 
+                                        [0, 0, 0]] 
+        maxi = max(max([array for array in predators_abundance_matrix]))
+        positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)]
+        for i, j in positions:
+            pounded_matrix[i][j] = maxi - predators_abundance_matrix[i][j] if predators_abundance_matrix[i][j] >= 0 else -1
+                
+        dx, dy = betterMove(pounded_matrix, rnd=True)
+
+        new_x, new_y = x + dx -1, y + dy -1
+        if new_x < 0 or new_y < 0:
+            raise Exception()
+        if new_x != x or new_y != y:
+            self.energy -= 1
+
+        if (new_x, new_y) != P.position:
+            self.wait = self.prop.velocity
+        return (new_x, new_y), False
+
         
-        raise NotImplementedError()
         
