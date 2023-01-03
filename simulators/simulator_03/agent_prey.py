@@ -1,3 +1,4 @@
+from importlib.resources import path
 from turtle import position
 from simulator.agent import ProactiveAgent
 from simulators.simulator_03.memory import PreyMemory, PredatorMemory, FoodMemory
@@ -139,6 +140,7 @@ class PreyAgent(ProactiveAgent):
         # Desires
         self.breeding_desire = 0
         self.hungry_desire = 0
+        self.scape_desire = 0
 
         # Objetives
         self.current_path = []
@@ -226,7 +228,7 @@ class PreyAgent(ProactiveAgent):
 
     ##################### FILTER ##############################
 
-    def filter(self, P):
+    def filter(self, P: PerceptionPrey):
 
         # Acciones que siempre se deben hacer en condiciones determinadas
         if self.wait_move > 0:
@@ -238,11 +240,26 @@ class PreyAgent(ProactiveAgent):
 
         # Acciones que dependen de varios factores probabilisticos
         # TODO
-        raise NotImplementedError()
+
+        #~~~ Agente Arriesgado ~~~#
+        # if self.breeding_desire > 0.5 and self.hungry_desire < 0.7:
+        # if self.scape_desire > 0.5:
+        # if self.hungry_desire > 0.5
+
+        #~~~ Agente Precavido ~~~#
+        if self.scape_desire > 0.8:
+            return self.intention_scape()
+        if self.hungry_desire > 0.4:
+            if self.current_path != None and len(self.current_path) > 0:
+                self.__intention_search_food(P)
+                if self.current_path != None and len(self.current_path) > 0:
+                    return self.intention_walk_to(P)
+                else: return 
 
     #################### INTENTIONS ###########################
-
-    def intention_walk_to(self, P : PerceptionPrey):
+    def intention_walk_random(self, P: PerceptionPrey):
+        raise NotImplementedError()
+    def intention_walk_to(self, P: PerceptionPrey):
                 
         if self.current_path is None or len(self.current_path) == 0:
             raise Exception('Intencion de moverse, sin camino')        
@@ -266,7 +283,7 @@ class PreyAgent(ProactiveAgent):
         return self.__mov(P, new_position)
 
     def intention_scape(self, P: PerceptionPrey):
-        predators_matrix = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_predators, obstacle=lambda cell: cell is Obstacle())
+        predators_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_predators, obstacle=lambda cell: cell is Obstacle())
         predators_abundance_matrix = transform(predators_matrix, xpansion_distance= 1)
         (x, y) = P.position
         pounded_matrix = [[0, 0, 0], 
@@ -284,10 +301,24 @@ class PreyAgent(ProactiveAgent):
             raise Exception()
         if new_x != x or new_y != y:
             self.energy -= 1
-
-        if (new_x, new_y) != P.position:
             self.wait = self.prop.velocity
         return (new_x, new_y), False
 
         
+    def __intention_search_food(self, P: PerceptionPrey):
+        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_food, obstacle=lambda cell: cell is Obstacle())
+        self.current_path = path
+
+        (x, y) = P.position
         
+        food_abundance_matrix = transform(food_matrix)
+        (dx, dy) = betterMove(food_abundance_matrix)
+
+        (new_x, new_y) = x + dx -1, y + dy -1
+
+        if new_x < 0 or new_y < 0:
+            raise Exception()
+        if new_x != x or new_y != y:
+            self.energy -= 1
+            self.wait = self.prop.velocity
+        # return (new_x, new_y), False
