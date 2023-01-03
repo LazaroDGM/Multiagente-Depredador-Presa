@@ -223,10 +223,14 @@ class PreyAgent(ProactiveAgent):
 
     ##################### OPTIONS #############################
 
-    def options(self, P):
+    def options(self, P: PerceptionPrey):
         
         self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 4))
-        self.breeding_desire = abs(self.prop.rand.normalvariate(0, (0.8* self.prop.map.size) / 4))
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, (0.8* self.prop.map.size) / 8))
+        if len(P.close_predators) > 0:
+            self.scape_desire = abs(self.prop.rand.normalvariate(0, 0.02 * self.prop.vision_radius ))
+        else:
+            self.scape_desire = 0
         
     ##################### FILTER ##############################
 
@@ -249,25 +253,36 @@ class PreyAgent(ProactiveAgent):
         # if self.hungry_desire > 0.5
 
         #~~~ Agente Precavido ~~~#
-        if self.scape_desire > 0.8:
+        if self.scape_desire < len(P.close_predators):
             return self.intention_scape()
-        if self.hungry_desire > 0.4:
+        # Hambriento
+        elif self.hungry_desire >= self.energy:
             if self.current_path != None and len(self.current_path) > 0:
-                self.__intention_go_to_eat(P)
-                if self.current_path != None and len(self.current_path) > 0:
+                if len(self.current_path) == 1 and P.position in P.close_food:
+                    return self.__eat(P)
+                elif len(P.close_food) > 0:
+                    self.__intention_go_to_eat(P)
                     return self.intention_walk_to(P)
-                else: return 
+                return self.intention_walk_random(P)
+        else:
+            return self.intention_walk_random(P)
+        #elif self.breeding_desire >= len(self.prey_memory):
+        #    if self.objetive == GESTATE:
+
 
     #################### INTENTIONS ###########################
     def intention_walk_random(self, P: PerceptionPrey):
-        raise NotImplementedError()
+        extract = util.extract_radius_matrix(self.prop.map, P.position, 1)
+        adjs = util.adjacent_box(extract, P.position,
+            isValid= lambda box: not (isinstance(box, Plant) or isinstance(box, Obstacle)))
+        selected = self.prop.rand.choice(adjs)
+        self.__mov(P, selected)
     def intention_walk_to(self, P: PerceptionPrey):
                 
         if self.current_path is None or len(self.current_path) == 0:
             raise Exception('Intencion de moverse, sin camino')        
 
-        
-        if P.close_preys.get(self.current_path[1], None) is not None:
+        if len(self.current_path) > 1 and P.close_preys.get(self.current_path[1], None) is not None:
             if len(self.current_path) > 1:
                 future_position = self.current_path[1]
             future_position = self.current_path[0]

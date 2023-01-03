@@ -3,7 +3,7 @@ from simulator.simulator import Simulator2D
 import drawing.util as draw
 import pygame
 
-class Simulator02(Simulator2D):
+class Simulator03(Simulator2D):
     def __init__(self, ClassEnvironment) -> None:
         super().__init__(ClassEnvironment)
 
