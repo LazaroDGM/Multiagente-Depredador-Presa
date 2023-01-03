@@ -125,7 +125,7 @@ class Environment03(Environment):
 
         close_preys = {}
         close_predators = {}
-        close_food = {}
+        close_food = []
         
         for i in range(extract.shape[0]):
             for j in range(extract.shape[1]):
@@ -136,7 +136,7 @@ class Environment03(Environment):
                     if box.hasPredator():
                         close_predators[(i,j)] = box.predator
                     if box.hasFood():
-                        close_food[(i,j)] = box.food
+                        close_food.append((i,j))
                 elif isinstance(box, Burrow):
                     if box.hasPrey():
                         close_preys[(i,j)] = box.prey
