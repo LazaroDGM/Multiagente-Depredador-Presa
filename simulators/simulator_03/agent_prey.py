@@ -8,11 +8,13 @@ from Algorithms.AStarPlus import AStarPlus
 from Algorithms.transform import transform, betterMove
 import numpy as np
 import random
+import math
 
 BURROW = 'BURROW'
 FLOOR = None
 
 EAT = 'EAT'
+GO_EAT= 'GO_EAT'
 FIND_EAT = 'FIND EAT'
 GESTATE = 'GESTATE'
 ESCAPE = 'ESCAPE'
@@ -77,14 +79,14 @@ class ParamsPrey():
         self.max_energy = max_energy
         self.velocity = velocity
         self.vision_radius = vision_radius
-        self.lost_energy_wait = lost_energy_wait,
-        self.lost_energy_walk = lost_energy_walk,
-        self.lost_energy_wait_burrow = lost_energy_wait_burrow,
-        self.lost_energy_walk_burrow = lost_energy_walk_burrow,
-        self.memory_prey_wait_time = memory_prey_wait_time,
-        self.memory_predator_wait_time = memory_predator_wait_time,
+        self.lost_energy_wait = lost_energy_wait
+        self.lost_energy_walk = lost_energy_walk
+        self.lost_energy_wait_burrow = lost_energy_wait_burrow
+        self.lost_energy_walk_burrow = lost_energy_walk_burrow
+        self.memory_prey_wait_time = memory_prey_wait_time
+        self.memory_predator_wait_time = memory_predator_wait_time
         self.forget_tick = forget_tick
-        self.weight_memory_food = weight_memory_food,
+        self.weight_memory_food = weight_memory_food
         self.breeding_point = breeding_point
         self.food_energy_ratio = food_energy_ratio
 
@@ -103,12 +105,12 @@ class PreyAgentPropierties:
             cls.velocity = params.velocity
             cls.vision_radius = params.vision_radius
             cls.map = np.copy(map)
-            cls.lost_energy_wait = params.lost_energy_wait,
-            cls.lost_energy_walk = params.lost_energy_walk,
-            cls.lost_energy_wait_burrow = params.lost_energy_wait_burrow,
-            cls.lost_energy_walk_burrow = params.lost_energy_walk_burrow,
-            cls.memory_prey_wait_time = params.memory_prey_wait_time,
-            cls.memory_predator_wait_time = params.memory_predator_wait_time,
+            cls.lost_energy_wait = params.lost_energy_wait
+            cls.lost_energy_walk = params.lost_energy_walk
+            cls.lost_energy_wait_burrow = params.lost_energy_wait_burrow
+            cls.lost_energy_walk_burrow = params.lost_energy_walk_burrow
+            cls.memory_prey_wait_time = params.memory_prey_wait_time
+            cls.memory_predator_wait_time = params.memory_predator_wait_time
             cls.forget_tick = params.forget_tick
             cls.weight_memory_food = params.weight_memory_food
             cls.breeding_point = params.breeding_point
@@ -143,7 +145,7 @@ class PreyAgent(ProactiveAgent):
         self.scape_desire = 0
 
         # Objetives
-        self.current_path = []
+        self.current_path = None
         self.objetive = NOTHING
     
     def set_global_map(self, map):
@@ -215,17 +217,26 @@ class PreyAgent(ProactiveAgent):
 
         # Actualizando avance del Camino Actual
         if self.current_path is not None:
-            if P.position != self.current_path[0]:                
+            if len(self.current_path) > 0 and P.position != self.current_path[0]:
                 self.current_path.pop(0)
                 if len(self.current_path) > 0:
                     if self.current_path[0] != P.position:
                         raise Exception('Se hizo un movimiento fuera del camino actual')
+            else:
+                self.objetive == NOTHING
+                self.current_path = None
 
     ##################### OPTIONS #############################
 
-    def options(self, P):
-        raise NotImplementedError()
-
+    def options(self, P: PerceptionPrey):
+        
+        self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 4))
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, (0.8* self.prop.map.size) / 8))
+        if len(P.close_predators) > 0:
+            self.scape_desire = abs(self.prop.rand.normalvariate(0, 0.02 * self.prop.vision_radius ))
+        else:
+            self.scape_desire = 0
+        
     ##################### FILTER ##############################
 
     def filter(self, P: PerceptionPrey):
@@ -247,40 +258,64 @@ class PreyAgent(ProactiveAgent):
         # if self.hungry_desire > 0.5
 
         #~~~ Agente Precavido ~~~#
-        if self.scape_desire > 0.8:
+        if self.scape_desire < len(P.close_predators):
             return self.intention_scape()
-        if self.hungry_desire > 0.4:
-            if self.current_path != None and len(self.current_path) > 0:
-                self.__intention_go_to_eat(P)
-                if self.current_path != None and len(self.current_path) > 0:
+        # Hambriento
+        elif self.objetive in [FIND_EAT, GO_EAT,] or self.hungry_desire >= self.energy:            
+            if self.current_path is None:
+                if len(P.close_food) > 0:
+                    self.__intention_go_to_eat(P)
+                    self.objetive = GO_EAT
+                    self.intention_walk_to(P)
+                else:
+                    self.__intention_search_food(P)
+                    self.objetive = FIND_EAT
                     return self.intention_walk_to(P)
-                else: return 
+            elif len(self.current_path) > 0:
+                if len(self.current_path) == 1 and P.position in P.close_food:
+                    self.objetive = EAT
+                    return self.__eat(P)
+                elif self.objetive == GO_EAT:                    
+                    return self.intention_walk_to(P)
+                elif self.objetive == FIND_EAT:
+                    if len(P.close_food) > 0 and 0.8 * self.hungry_desire >= self.energy:                    
+                        self.__intention_go_to_eat(P)
+                        self.objetive = GO_EAT
+                        return self.intention_walk_to(P)
+                    else:
+                        self.objetive = FIND_EAT
+                        return self.intention_walk_to(P)
+        else:
+            return self.intention_walk_random(P)
+        #elif self.breeding_desire >= len(self.prey_memory):
+        #    if self.objetive == GESTATE:
+
 
     #################### INTENTIONS ###########################
     def intention_walk_random(self, P: PerceptionPrey):
-        raise NotImplementedError()
+        return self.__mov(P, P.position)
     def intention_walk_to(self, P: PerceptionPrey):
                 
         if self.current_path is None or len(self.current_path) == 0:
             raise Exception('Intencion de moverse, sin camino')        
 
-        
-        if P.close_preys.get(self.current_path[1], None) is not None:
-            if len(self.current_path) > 1:
-                future_position = self.current_path[1]
-            future_position = self.current_path[0]
-            
-            extract = util.extract_radius_matrix(self.prop.map, P.position, 1)
-            adjacents = util.adjacent_box(extract, future_position,
-                isValid= lambda box: not (isinstance(box, Plant) or isinstance(box, Obstacle)))
-            adjacents.append(future_position)
-            counts = [1]* len(adjacents)
-            counts[-1] += (len(adjacents) - 1) * 9
-            new_position = self.prop.rand.sample(adjacents, k= 1, counts= counts)[0]
-            self.current_path[1] = new_position
-        else:
-            new_position = self.current_path[0]
-        return self.__mov(P, new_position)
+        #if len(self.current_path) > 1 and P.close_preys.get(self.current_path[1], None) is not None:
+        #    if len(self.current_path) > 1:
+        #        future_position = self.current_path[1]
+        #    future_position = self.current_path[0]
+        #    
+        #    extract = util.extract_radius_matrix(self.prop.map, P.position, 1)
+        #    adjacents = util.adjacent_box(extract, future_position,
+        #        isValid= lambda box: not (isinstance(box, Plant) or isinstance(box, Obstacle)))
+        #    adjacents.append(future_position)
+        #    counts = [1]* len(adjacents)
+        #    counts[-1] += (len(adjacents) - 1) * 9
+        #    new_position = self.prop.rand.sample(adjacents, k= 1, counts= counts)[0]
+        #    self.current_path[1] = new_position
+        #else:
+        #    new_position = self.current_path[0]
+        #return self.__mov(P, new_position)
+        return self.__mov(P, self.current_path[0])
 
     def intention_scape(self, P: PerceptionPrey):
         predators_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_predators, obstacle=lambda cell: cell is Obstacle())
@@ -315,8 +350,16 @@ class PreyAgent(ProactiveAgent):
 
 
     def __intention_search_food(self, P: PerceptionPrey):
-        chosed_memory_slot_index = random.choices([0, 1, 2, 3], [weight for weight in self.food_memory.weights], k = 4)
-        sugested_slot = self.food_memory.slots[chosed_memory_slot_index]
-        nearest_memory_food_cell = min(  [    max(abs(P.position[0] - pos[0]), abs(P.position[1] - pos[1]))            for pos in sugested_slot            ]  )                  # positcion con menor distancia de manhathan
-        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) == nearest_memory_food_cell, obstacle=lambda cell: cell is Obstacle(), stop_with=1)
+        if self.food_memory.count() > 0:
+            nearest_memory_food_cell = self.food_memory.suggestion()
+            #chosed_memory_slot_index = random.choices([0, 1, 2, 3], [weight for weight in self.food_memory.weights])[0]
+            #sugested_slot = self.food_memory.slots[chosed_memory_slot_index]
+            #nearest_memory_food_cell = min(  [    max(abs(P.position[0] - pos[0]), abs(P.position[1] - pos[1]))            for pos in sugested_slot            ]  )                  # positcion con menor distancia de manhathan
+        else:
+            nearest_memory_food_cell = (-1, -1)
+            while(nearest_memory_food_cell == (-1, -1)):
+                new_pos = (random.randint(0, self.prop.map.shape[0]), random.randint(0, self.prop.map.shape[1]))
+                if self.prop.map[new_pos[0]][new_pos[1]] != Obstacle() and self.prop.map[new_pos[0]][new_pos[1]] != Plant():
+                    nearest_memory_food_cell = new_pos
+        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) == nearest_memory_food_cell, obstacle=lambda cell: cell is Obstacle(), stop_with=1, vision=100)
         self.current_path = path

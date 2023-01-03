@@ -9,10 +9,13 @@ class FoodMemory:
                                 int(weight * 0.3),
                                 int(weight * 0.2),
                                 int(weight * 0.1)]
-        self.memories_location = lambda ratio: 0 if ratio >0.6 else 1 if ratio > 0.4 else 2 if ratio > 0.2 else 3
+        self.len = sum(self.weights)
+        self.memories_location = lambda ratio: 0 if ratio >0.6 else 1 if ratio > 0.4 else 2 if ratio > 0.2 else 3 if ratio > 0.0 else -1
         self.forget_tick = forget_tick
         self.current_tick = 0
         self.rnd = random.Random()
+
+        self.max_abundance = 4 * self.weights[0] + 3 * self.weights[1] + 2* self.weights[2] + self.weights[3]
 
     def Tick(self):
         self.current_tick += 1
@@ -30,6 +33,8 @@ class FoodMemory:
 
     def Remember(self, pos, food_ratio):
         location = self.memories_location(food_ratio)
+        if location == -1:
+            return
         current_slot = self.slots[location]
 
         try:
@@ -56,6 +61,8 @@ class FoodMemory:
         
         
     def Forget(self, slot_to_forget):
+        if len(self.slots[slot_to_forget]) <= 0:
+            return
         self.slots[slot_to_forget].pop(0)
 
 
@@ -64,6 +71,23 @@ class FoodMemory:
             for item in self.slots[i]:
                 print(item)
             print()
+
+    def __len__(self):
+        return self.len
+    def count(self):
+        return sum(len(slot) for slot in self.slots)
+
+    def gen_abundance(self):
+        abundance = 4 * len(self.slots[0]) + 3 * len(self.slots[1]) +  2 * len(self.slots[2]) + len(self.slots[3])
+        return abundance/self.max_abundance
+
+    def suggestion(self):
+        l = []
+        l = l + (self.slots[0] * 4)
+        l = l + (self.slots[1] * 3)
+        l = l + (self.slots[2] * 2)
+        l = l + (self.slots[3] * 1)
+        return random.choice(l)
 
 # memo = FoodMemory()
 
