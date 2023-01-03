@@ -217,11 +217,14 @@ class PreyAgent(ProactiveAgent):
 
         # Actualizando avance del Camino Actual
         if self.current_path is not None:
-            if P.position != self.current_path[0]:                
+            if len(self.current_path) > 0 and P.position != self.current_path[0]:
                 self.current_path.pop(0)
                 if len(self.current_path) > 0:
                     if self.current_path[0] != P.position:
                         raise Exception('Se hizo un movimiento fuera del camino actual')
+            else:
+                self.objetive == NOTHING
+                self.current_path = None
 
     ##################### OPTIONS #############################
 
@@ -258,7 +261,7 @@ class PreyAgent(ProactiveAgent):
         if self.scape_desire < len(P.close_predators):
             return self.intention_scape()
         # Hambriento
-        elif self.hungry_desire >= self.energy:            
+        elif self.objetive in [FIND_EAT, GO_EAT,] or self.hungry_desire >= self.energy:            
             if self.current_path is None:
                 if len(P.close_food) > 0:
                     self.__intention_go_to_eat(P)
