@@ -8,6 +8,13 @@ import random
 BURROW = 'BURROW'
 FLOOR = None
 
+EAT = 'EAT'
+FIND_EAT = 'FIND EAT'
+GESTATE = 'GESTATE'
+ESCAPE = 'ESCAPE'
+NOTHING = 'NOTHING'
+WAIT = 'WAIT'
+
 ################################################################
 ######################### PREY #################################
 ################################################################
@@ -126,8 +133,13 @@ class PreyAgent(ProactiveAgent):
         self.wait_move = 1
         self.extra_energy = 0
 
-        #
+        # Desires
+        self.breeding_desire = 0
+        self.hungry_desire = 0
+
+        # Objetives
         self.current_path = []
+        self.objetive = NOTHING
     
     def set_global_map(self, map):
         self._map = np.copy(map)
