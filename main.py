@@ -5,7 +5,14 @@ from simulators.simulator_03.agent_prey import ParamsPrey
 from simulator.simulator import Simulator
 import numpy as np
 import time
-from tests.simulator03.map01.test02 import generate_result, view_results
+from tests.simulator03.map01.test03 import generate_result, view_results
+
+#start = time.time()
+#generate_result()
+#step = time.time()
+#print(step - start)
+#view_results()
+#exit()
 
 B = 'BURROW'
 O = Obstacle()
@@ -19,23 +26,23 @@ map = np.array(
         [N,N,N,N,O,O,O,O,N,N,N,N,N,N,N,N,N,N,N,O,O,O,O,N,N,N,N,N],
         [N,N,N,N,O,B,B,O,O,N,N,N,N,N,N,O,O,O,P,O,N,N,N,N,N,N,N,N],
         [N,N,N,O,O,B,B,B,O,N,N,N,N,N,O,O,N,N,O,N,N,N,N,O,O,O,N,N],
-        [N,N,N,O,B,B,B,B,O,N,N,N,N,N,O,N,N,N,N,N,N,N,O,O,N,N,N,N],
+        [N,N,N,O,B,B,B,B,B,N,N,N,N,N,O,N,N,N,N,N,N,N,O,O,N,N,N,N],
         [N,N,N,O,B,B,B,B,B,N,N,N,N,N,O,N,N,N,N,N,N,N,O,N,N,N,N,N],
-        [N,N,N,N,O,O,O,O,O,N,N,N,N,N,O,N,N,O,O,O,N,N,N,N,N,N,N,N],
+        [N,N,N,N,B,B,O,O,O,N,N,N,N,N,O,N,N,O,O,O,N,N,N,N,N,N,N,N],
         [N,N,N,N,N,N,N,N,N,N,N,N,N,N,O,O,O,O,N,O,O,N,N,N,P,N,N,N],
         [N,N,N,N,N,N,N,N,N,N,N,N,O,O,O,N,N,N,N,N,O,O,N,N,N,N,N,N],
         [N,N,N,N,N,N,N,N,N,N,O,O,O,N,N,N,N,N,N,N,N,O,N,N,N,N,N,N],
         [N,N,N,N,N,N,N,N,N,O,O,N,N,N,N,P,N,N,N,O,O,O,N,N,N,N,N,N],
-        [N,N,P,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,O,O,O,N,N,N,N],
-        [N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,O,O,O,O,O,O,B,O,N,N],
+        [N,N,P,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,O,O,N,N,N,N,N],
+        [N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,O,O,O,O,O,B,B,O,N,N],
         [N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,B,B,B,B,B,B,B,O,N,N],
-        [N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,O,O,B,B,B,B,B,O,N,N],
+        [N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,B,B,B,B,B,B,B,O,N,N],
     ]
 )
 
-sim = Simulator(Environment03)
+sim = Simulator03(Environment03)
 _, results= sim.StartSimulation(
-    #tick= 0.0,
+    tick= 0.0,
     stop_steps=30000,
     map= map,
     food_generation_period=100,
@@ -61,6 +68,7 @@ _, results= sim.StartSimulation(
         gestate_again_time= 0,
         gestate_time= 10,
         max_life= 30000,
+        reproduction_ratio=5
     ),
     params_predator= ParamsPredator(
         digestion_time=5,

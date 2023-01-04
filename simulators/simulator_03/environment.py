@@ -252,7 +252,7 @@ class Environment03(Environment):
                         if box.hasPrey():
                             continue
                         emptys.append((i,j))
-                news_positions = self._rand.sample(emptys, min(len(emptys), 1))
+                news_positions = self._rand.sample(emptys, min(len(emptys), action.count_reproduce))
                 for position in news_positions:
                     prey = PreyAgent(self.prop_prey)
                     self._map[position[0]][position[1]].AddPrey(prey)

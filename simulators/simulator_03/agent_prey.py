@@ -49,12 +49,14 @@ class ActionPrey():
     def __init__(self,
         new_position,
         eat = False,
-        reproduce = False
+        reproduce = False,
+        count_reproduce = 1
         ) -> None:
 
         self.new_position = new_position
         self.eat = eat
         self.reproduce = reproduce
+        self.count_reproduce = count_reproduce
         
 
 ######################### PARAMS ###############################
@@ -80,7 +82,8 @@ class ParamsPrey():
             food_energy_ratio,
             gestate_time,
             gestate_again_time,
-            max_life
+            max_life,
+            reproduction_ratio
         ) -> None:
         self.digestion_time = digestion_time
         self.max_energy = max_energy
@@ -99,6 +102,7 @@ class ParamsPrey():
         self.gestate_time = gestate_time
         self.gestate_again_time = gestate_again_time
         self.max_life = max_life
+        self.reproduction_ratio = reproduction_ratio
 
 
 ###################### PROPIERTIES #################################
@@ -128,6 +132,7 @@ class PreyAgentPropierties:
             cls.gestate_time = params.gestate_time
             cls.gestate_again_time = params.gestate_again_time
             cls.max_life = params.max_life
+            cls.reproduction_ratio = params.reproduction_ratio
             cls.rand = random.Random()
         return cls.instance
     
@@ -218,7 +223,10 @@ class PreyAgent(ProactiveAgent):
         self.gestating -= 1
         if self.gestating <= 0:
             self.gestate_wait = self.prop.gestate_again_time
-            return ActionPrey(new_position= P.position, eat= False, reproduce=True)
+            return ActionPrey(new_position= P.position,
+                            eat= False,
+                            reproduce=True,
+                            count_reproduce= int(abs(self.prop.rand.normalvariate(self.prop.reproduction_ratio, 2)))+1)
         return ActionPrey(new_position= P.position, eat= False)
 
     ################ BRF ###################
@@ -334,6 +342,8 @@ class PreyAgent(ProactiveAgent):
 
         if self.objetive == GO_GESTATE:
             if self.prop.map[P.position[0]][P.position[1]] == BURROW:
+                if 0.2 <= self.prop.rand.uniform(0,1):
+                    return self.intention_walk_random(P,[Obstacle(), Plant(), None])
                 self.objetive = GESTATE
                 return self.__gestate(P)
             return self.intention_walk_to(P)
@@ -373,7 +383,7 @@ class PreyAgent(ProactiveAgent):
 
 
     #################### INTENTIONS ###########################
-    def intention_walk_random(self, P: PerceptionPrey):
+    def intention_walk_random(self, P: PerceptionPrey, obstacles= [Plant(), Obstacle()]):
         r,c = P.position
         min_r = max(0, r-1)
         min_c = max(0, c-1)
@@ -383,7 +393,7 @@ class PreyAgent(ProactiveAgent):
         possibles = [(r,c)]
         for i in range(min_r, max_r):
             for j in range(min_c, max_c):                
-                if self.prop.map[i][j] in [Plant(), Obstacle()]:
+                if self.prop.map[i][j] in obstacles:
                     continue
                 if P.close_preys.get((i,j), None) is not None:
                     continue
