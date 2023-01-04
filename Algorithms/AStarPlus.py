@@ -37,7 +37,7 @@ def AStarPlus(numpy_array, x, y, vision, found, obstacle, stop_with = 3):
                 visited_cells.add((_x_pos, _y_pos))
                 manhathan_distance = max(abs(_x_pos - x), abs(_y_pos - y))
                 
-                if obstacle(numpy_array[_x_pos][_y_pos]): continue
+                if obstacle(_x_pos,_y_pos): continue
                 if found(_x_pos, _y_pos):
                     if current_direction == 0:
                         matrix[j + 1][k + 1].append(1)
@@ -61,6 +61,6 @@ def AStarPlus(numpy_array, x, y, vision, found, obstacle, stop_with = 3):
             matrix[i][j] = [-1]
             continue
         #print(f'position analized: {(x + i - 1, y + j - 1)}')
-        if obstacle(numpy_array[x + i - 1][y + j - 1]):
+        if obstacle(x + i - 1, y + j - 1):
             matrix[i][j] = [-1]
     return matrix, the_way
