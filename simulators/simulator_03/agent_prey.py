@@ -349,7 +349,7 @@ class PreyAgent(ProactiveAgent):
                         continue
                     if abs(i - future_position[0]) <= 1 and abs(j - future_position[1]) <= 1:
                         possibles.append((i,j))
-            new_position = self.prop.rand.choice(([self.current_path[0]] * (len(possibles))) + possibles)
+            new_position = self.prop.rand.choice([self.current_path[0]] + possibles)
         self.current_path[0] = new_position
         return self.__mov(P, self.current_path[0])
 
