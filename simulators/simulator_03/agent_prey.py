@@ -16,6 +16,10 @@ FLOOR = None
 EAT = 'EAT'
 GO_EAT= 'GO_EAT'
 FIND_EAT = 'FIND EAT'
+EAT_GESTATE = 'EAT_GESTATE'
+GO_EAT_GESTATE= 'GO_EAT_GESTATE'
+FIND_EAT_GESTATE = 'FIND_EAT_GESTATE'
+GO_GESTATE = 'GO_GESTATE'
 GESTATE = 'GESTATE'
 ESCAPE = 'ESCAPE'
 NOTHING = 'NOTHING'
@@ -192,6 +196,11 @@ class PreyAgent(ProactiveAgent):
             self.energy -= extra
         return ActionPrey(new_position= P.position, eat= False)
 
+    def __gestate(self, P: PerceptionPrey):
+        self.wait_move = 1
+        self.extra_energy -= self.prop.breeding_point
+        return ActionPrey(new_position= P.position, reproduce= True)
+
     ################ BRF ###################
 
     def brf(self, P: PerceptionPrey):
@@ -295,6 +304,37 @@ class PreyAgent(ProactiveAgent):
                 self.__intention_search_food(P)
                 self.objetive = FIND_EAT
                 return self.intention_walk_to(P)
+
+        if self.objetive == EAT_GESTATE and \
+            self.prop.breeding_point <= self.extra_energy:
+
+            self.objetive = GESTATE
+            self.current_path = None
+            return self.__gestate(P)
+
+        elif self.objetive in [GO_EAT_GESTATE, FIND_EAT_GESTATE]:
+            if self.objetive == FIND_EAT_GESTATE:
+                if P.position in P.close_food:
+                    self.objetive = EAT_GESTATE
+                    self.current_path = None
+                    return self.__eat(P)
+                if len(P.close_food) > 0:
+                    self.__intention_go_to_eat(P)
+                    self.objetive = GO_EAT_GESTATE
+                    return self.intention_walk_to(P)
+                else:
+                    return self.intention_walk_to(P)
+            elif self.objetive == GO_EAT_GESTATE:
+                if P.position in P.close_food:
+                    self.objetive = EAT_GESTATE
+                    self.current_path = None
+                    return self.__eat(P)
+                return self.intention_walk_to(P)
+        elif self.breeding_desire >= len(self.prey_memory) and \
+                self.food_memory.gen_abundance() >= 0.5:
+            self.__intention_search_food(P)
+            self.objetive = FIND_EAT_GESTATE
+            return self.intention_walk_random(P)
         else:
             return self.intention_walk_random(P)
         #elif self.breeding_desire >= len(self.prey_memory):

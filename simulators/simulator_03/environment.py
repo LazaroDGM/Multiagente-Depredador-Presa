@@ -234,6 +234,28 @@ class Environment03(Environment):
         for predator in delete_predators:
             self.predators.pop(predator)
         del(delete_predators)
+    
+    def gen_preys(self):
+        count_new_preys = 0
+        for prey in self.preys:
+            prey : PreyAgent
+            if prey.objetive == 'GESTATE':
+                count_new_preys+=1
+        if count_new_preys > 0:
+            emptys = []
+            for i in range(self.shape_map[0]):
+                for j in range(self.shape_map[1]):
+                    box= self._map[i][j]
+                    if box == Plant() or box == Obstacle():
+                        continue
+                    if box.hasPrey():
+                        continue
+                    emptys.append((i,j))
+            news_positions = self._rand.sample(emptys, min(len(emptys), count_new_preys))
+            for position in news_positions:
+                prey = PreyAgent(self.prop_prey)
+                self._map[position[0]][position[1]].AddPrey(prey)
+                self.preys[prey] = position                
 
 
     def transform(self, actions_predators, actions_preys):
@@ -323,6 +345,7 @@ class Environment03(Environment):
         self.cicle += 1
         self.remove_dead_agents()        
         self.gen_food()
+        self.gen_preys()
 
         actions_predators = []
         for predator in self.predators.keys():            

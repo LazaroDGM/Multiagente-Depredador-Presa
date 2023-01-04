@@ -52,7 +52,7 @@ sim.StartSimulation(
         memory_predator_wait_time=50,
         memory_prey_wait_time=70,
         breeding_point=50,
-        food_energy_ratio=0.4,
+        food_energy_ratio=0.2,
         forget_tick= 100,
         weight_memory_food= 20
     ),
