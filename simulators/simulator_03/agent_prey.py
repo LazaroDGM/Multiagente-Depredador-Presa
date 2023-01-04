@@ -434,7 +434,7 @@ class PreyAgent(ProactiveAgent):
         
     def __intention_go_to_eat(self, P: PerceptionPrey):
         food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_food, obstacle=lambda x, y: self.prop.map[x][y] == Obstacle() or self.prop.map[x][y] == Plant() or P.close_preys.get((x,y),None) is not None, vision= 1000000)
-        print(path)
+        #print(path)
         #(x, y) = P.position
         #print(food_matrix)
         #food_abundance_matrix = transform(food_matrix, xpansion_distance=0)
@@ -459,7 +459,7 @@ class PreyAgent(ProactiveAgent):
                 extra.append(new_pos)
 
         nearest_memory_food_cell = self.food_memory.suggestion(extra_positions=extra, remove_position=P.position)
-        print('Buscando comida', nearest_memory_food_cell)
+        #print('Buscando comida', nearest_memory_food_cell)
         food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) == nearest_memory_food_cell, obstacle=lambda x, y: self.prop.map[x][y] == Obstacle() or self.prop.map[x][y] == Plant() or P.close_preys.get((x,y),None) is not None, stop_with=1, vision=1000000)
-        print(path)        
+        #print(path)        
         self.current_path = path

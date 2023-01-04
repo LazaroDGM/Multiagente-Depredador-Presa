@@ -140,7 +140,7 @@ class Environment03(Environment):
 
                 self._gen_food(int(self.food_ratio*extract.size), extract)
                 cicle_food = int(self._rand.expovariate(1/self.food_generation_period)) + self.cicle + 1
-                print('Nueva produccion de comida en: ', cicle_food)
+                #print('Nueva produccion de comida en: ', cicle_food)
                 self.plants[(r,c)] = cicle_food
 
     def seePrey(self, prey):

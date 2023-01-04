@@ -3,6 +3,16 @@ from simulators.simulator_03.simulator import Simulator03
 from simulators.simulator_03.agent_predator import ParamsPredator
 from simulators.simulator_03.agent_prey import ParamsPrey
 import numpy as np
+import time
+from tests.simulator03.map01.test02 import generate_result, view_results
+
+start = time.time()
+#generate_result()
+end = time.time()
+print(end - start)
+view_results()
+
+exit()
 
 B = 'BURROW'
 O = Obstacle()
