@@ -10,7 +10,7 @@ class FoodMemory:
                                 int(weight * 0.2),
                                 int(weight * 0.1)]
         self.len = sum(self.weights)
-        self.memories_location = lambda ratio: 0 if ratio >0.3 else 1 if ratio > 0.2 else 2 if ratio > 0.1 else 3
+        self.memories_location = lambda ratio: 0 if ratio >0.25 else 1 if ratio > 0.2 else 2 if ratio > 0.1 else 3
         self.forget_tick = forget_tick
         self.current_tick = 0
         self.rnd = random.Random()

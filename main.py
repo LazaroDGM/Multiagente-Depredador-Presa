@@ -31,14 +31,14 @@ map = np.array(
 )
 
 sim = Simulator03(Environment03)
-sim.StartSimulation(
+_, results= sim.StartSimulation(
     tick= 0.0,
     stop_steps=10000,
     map= map,
     food_generation_period=70,
     plant_radius= 3,
     food_ratio= 0.1,
-    initial_count_prey=25,
+    initial_count_prey=1,
     initial_count_predator=0,
     params_prey= ParamsPrey(
         digestion_time=3,
@@ -50,8 +50,8 @@ sim.StartSimulation(
         lost_energy_walk=1,
         lost_energy_walk_burrow=0.4,
         memory_predator_wait_time=50,
-        memory_prey_wait_time=70,
-        breeding_point=50,
+        memory_prey_wait_time=100,
+        breeding_point=300,
         food_energy_ratio=0.2,
         forget_tick= 100,
         weight_memory_food= 20
@@ -65,6 +65,13 @@ sim.StartSimulation(
         lost_energy_walk=1,
     )
 )
+results = np.array(results).T
+
+print(results)
+import matplotlib.pyplot as plt
+plt.plot(range(len(results[0])), results[0])
+plt.plot(range(len(results[0])), results[1])
+plt.show()
 #env = Environment03(
 #    map= map,
 #    food_generation_period=40,

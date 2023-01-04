@@ -318,7 +318,8 @@ class Environment03(Environment):
                     raise Exception('Presa que se mueve y come a la vez')
                 if not box.hasFood():
                     raise Exception('Presa comiendo en una casilla sin Comida')
-                box.RemoveFood()                
+                box.RemoveFood() 
+                self.count_foods -=1               
                 new_positions_preys[new_position] = prey
             elif new_position == old_position:
                 new_positions_preys[new_position] = prey
@@ -363,7 +364,7 @@ class Environment03(Environment):
 
 
     def outputs(self):
-        return None
+        return len(self.preys), self.count_foods
 
     def reset(self):
         self.prop_prey.delete()

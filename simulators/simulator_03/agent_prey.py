@@ -197,8 +197,9 @@ class PreyAgent(ProactiveAgent):
         return ActionPrey(new_position= P.position, eat= False)
 
     def __gestate(self, P: PerceptionPrey):
-        self.wait_move = 1
-        self.extra_energy -= self.prop.breeding_point
+        self.wait_move = 0
+        self.extra_energy = 0
+        self.energy = self.prop.max_energy * 0.5
         return ActionPrey(new_position= P.position, reproduce= True)
 
     ################ BRF ###################
@@ -226,7 +227,8 @@ class PreyAgent(ProactiveAgent):
 
         # Actualizando avance del Camino Actual
         if self.current_path is None or len(self.current_path) == 0:
-            #self.objetive == NOTHING
+            if self.objetive == GESTATE:
+                self.objetive=NOTHING
             self.current_path = None
         else:
             if P.position == self.current_path[0]:
@@ -258,6 +260,7 @@ class PreyAgent(ProactiveAgent):
             Ac = self.__wait_eat(P)
             return Ac
 
+        
         # Acciones que dependen de varios factores probabilisticos
         # TODO
 
@@ -330,8 +333,8 @@ class PreyAgent(ProactiveAgent):
                     self.current_path = None
                     return self.__eat(P)
                 return self.intention_walk_to(P)
-        elif self.breeding_desire >= len(self.prey_memory) and \
-                self.food_memory.gen_abundance() >= 0.5:
+        elif 0.2 * self.breeding_desire >= len(self.prey_memory) and \
+                self.food_memory.gen_abundance() >= 0.55:
             self.__intention_search_food(P)
             self.objetive = FIND_EAT_GESTATE
             return self.intention_walk_random(P)
