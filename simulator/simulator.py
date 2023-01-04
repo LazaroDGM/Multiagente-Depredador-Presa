@@ -91,6 +91,7 @@ class Simulator():
         thread1.join()
         thread2.join()
         thread3.join()        
+        thread4.join()
 
         return simulations1 + simulations2 + simulations3 + simulations4
 

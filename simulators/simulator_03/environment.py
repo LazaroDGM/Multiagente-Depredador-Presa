@@ -206,7 +206,7 @@ class Environment03(Environment):
         delete_preys = []
         for prey, (i, j) in self.preys.items():
             prey : PreyAgent
-            if prey.energy <= 0:
+            if prey.energy <= 0 or prey.life <= 0:
                 delete_preys.append(prey)
                 box = self._map[i][j]
                 if isinstance(box, (Burrow, Floor)):

@@ -42,12 +42,12 @@ def generate_result():
         map= map,
         food_generation_period=100,
         plant_radius= 3,
-        food_ratio= 0.05,
+        food_ratio= 0.1,
         initial_count_prey=3,
         initial_count_predator=0,
         params_prey= ParamsPrey(
             digestion_time=3,
-            max_energy= 200,
+            max_energy= 100,
             velocity= 2,
             vision_radius= 3,
             lost_energy_wait=0.5,
@@ -57,12 +57,12 @@ def generate_result():
             memory_predator_wait_time=50,
             memory_prey_wait_time=100,
             breeding_point=75,
-            food_energy_ratio=0.2,
-            forget_tick= 100,
+            food_energy_ratio=0.5,
+            forget_tick= 30,
             weight_memory_food= 20,
             gestate_again_time= 0,
             gestate_time= 10,
-            max_life=30000
+            max_life= 30000,
         ),
         params_predator= ParamsPredator(
             digestion_time=5,
@@ -87,11 +87,11 @@ def generate_result():
 #)
 
     results = np.array(simulation)
-    with open('results/simulator03/map01/02.npz', 'wb') as ft:
+    with open('results/simulator03/map01/03.npz', 'wb') as ft:
         np.savez(ft, results= results)
 
 def view_results():
-    with open('results/simulator03/map01/02.npz', 'rb') as ft:
+    with open('results/simulator03/map01/03.npz', 'rb') as ft:
         obj = np.load(ft)
         results = obj['results']
         #print(results.shape)

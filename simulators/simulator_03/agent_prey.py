@@ -79,7 +79,8 @@ class ParamsPrey():
             breeding_point,
             food_energy_ratio,
             gestate_time,
-            gestate_again_time
+            gestate_again_time,
+            max_life
         ) -> None:
         self.digestion_time = digestion_time
         self.max_energy = max_energy
@@ -97,6 +98,7 @@ class ParamsPrey():
         self.food_energy_ratio = food_energy_ratio
         self.gestate_time = gestate_time
         self.gestate_again_time = gestate_again_time
+        self.max_life = max_life
 
 
 ###################### PROPIERTIES #################################
@@ -125,6 +127,7 @@ class PreyAgentPropierties:
             cls.food_energy_ratio = params.food_energy_ratio
             cls.gestate_time = params.gestate_time
             cls.gestate_again_time = params.gestate_again_time
+            cls.max_life = params.max_life
             cls.rand = random.Random()
         return cls.instance
     
@@ -145,6 +148,7 @@ class PreyAgent(ProactiveAgent):
         self.predator_memory = PredatorMemory(self.prop.memory_predator_wait_time)
 
         self.energy = self.prop.max_energy
+        self.life = self.prop.max_life
         self.eating = 0
         self.wait_move = 1
         self.extra_energy = 0
@@ -257,7 +261,7 @@ class PreyAgent(ProactiveAgent):
     def options(self, P: PerceptionPrey):
         
         self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 4))
-        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 40/2))
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 100/2))
         if len(P.close_predators) > 0:
             self.scape_desire = abs(self.prop.rand.normalvariate(0, 0.02 * self.prop.vision_radius ))
         else:
@@ -278,6 +282,7 @@ class PreyAgent(ProactiveAgent):
             Ac = self.__wait_gestate(P)
             return Ac
         self.gestate_wait -=1
+        self.life -= 1
         
         # Acciones que dependen de varios factores probabilisticos
         # TODO
@@ -327,11 +332,16 @@ class PreyAgent(ProactiveAgent):
                 self.objetive = FIND_EAT
                 return self.intention_walk_to(P)  
 
-        if self.objetive == EAT_GESTATE and \
+        if self.objetive == GO_GESTATE:
+            if self.prop.map[P.position[0]][P.position[1]] == BURROW:
+                self.objetive = GESTATE
+                return self.__gestate(P)
+            return self.intention_walk_to(P)
+        elif self.objetive == EAT_GESTATE and \
             self.prop.breeding_point <= self.extra_energy:
-            self.objetive = GESTATE
-            self.current_path = None
-            return self.__gestate(P)
+            self.__intention_go_to_gestate(P)
+            self.objetive = GO_GESTATE
+            return self.intention_walk_to(P)
         elif self.objetive in [GO_EAT_GESTATE, FIND_EAT_GESTATE]:
             if self.objetive == FIND_EAT_GESTATE:
                 if P.position in P.close_food:
@@ -350,9 +360,9 @@ class PreyAgent(ProactiveAgent):
                     self.current_path = None
                     return self.__eat(P)
                 return self.intention_walk_to(P)
-        elif 0.2 * self.breeding_desire >= len(self.prey_memory) and \
-                self.food_memory.gen_abundance() >= 0.55 and \
+        elif 1 * self.breeding_desire >= len(self.prey_memory) and \
                 self.gestate_wait <= 0:
+                #self.food_memory.gen_abundance() >= 0.55 and \
             self.__intention_search_food(P)
             self.objetive = FIND_EAT_GESTATE
             return self.intention_walk_random(P)
@@ -446,6 +456,25 @@ class PreyAgent(ProactiveAgent):
         self.current_path = path
         #return sugestion
 
+    def __intention_go_to_gestate(self, P: PerceptionPrey):
+        food_matrix, path = AStarPlus(numpy_array=self.prop.map,
+                    x=P.position[0],
+                    y=P.position[1],
+                    found=lambda x, y: self.prop.map[x][y] == BURROW,
+                    obstacle=lambda x, y: self.prop.map[x][y] == Obstacle() or \
+                            self.prop.map[x][y] == Plant() or \
+                            P.close_preys.get((x,y),None) is not None,
+                    vision= 1000000)
+        #print(path)
+        #(x, y) = P.position
+        #print(food_matrix)
+        #food_abundance_matrix = transform(food_matrix, xpansion_distance=0)
+        #(dx, dy) = betterMove(food_abundance_matrix)
+        # 
+        #sugestion = x + dx -1, y + dy -1
+        if len(path) == 0:
+            path = [P.position]
+        self.current_path = path
 
 
     def __intention_search_food(self, P: PerceptionPrey):                

@@ -2,17 +2,10 @@ from simulators.simulator_03.environment import Environment03, Plant, Obstacle
 from simulators.simulator_03.simulator import Simulator03
 from simulators.simulator_03.agent_predator import ParamsPredator
 from simulators.simulator_03.agent_prey import ParamsPrey
+from simulator.simulator import Simulator
 import numpy as np
 import time
 from tests.simulator03.map01.test02 import generate_result, view_results
-
-start = time.time()
-generate_result()
-end = time.time()
-print(end - start)
-view_results()
-
-exit()
 
 B = 'BURROW'
 O = Obstacle()
@@ -40,19 +33,19 @@ map = np.array(
     ]
 )
 
-sim = Simulator03(Environment03)
+sim = Simulator(Environment03)
 _, results= sim.StartSimulation(
-    tick= 0.0,
+    #tick= 0.0,
     stop_steps=30000,
     map= map,
     food_generation_period=100,
     plant_radius= 3,
-    food_ratio= 0.05,
+    food_ratio= 0.1,
     initial_count_prey=3,
     initial_count_predator=0,
     params_prey= ParamsPrey(
         digestion_time=3,
-        max_energy= 200,
+        max_energy= 100,
         velocity= 2,
         vision_radius= 3,
         lost_energy_wait=0.5,
@@ -62,11 +55,12 @@ _, results= sim.StartSimulation(
         memory_predator_wait_time=50,
         memory_prey_wait_time=100,
         breeding_point=75,
-        food_energy_ratio=0.2,
-        forget_tick= 100,
+        food_energy_ratio=0.5,
+        forget_tick= 30,
         weight_memory_food= 20,
-        gestate_again_time= 50,
-        gestate_time= 10
+        gestate_again_time= 0,
+        gestate_time= 10,
+        max_life= 30000,
     ),
     params_predator= ParamsPredator(
         digestion_time=5,
