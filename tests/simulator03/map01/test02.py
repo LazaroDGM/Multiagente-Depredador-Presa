@@ -36,8 +36,8 @@ def generate_result():
     )
 
     sim = Simulator(Environment03)
-    simulation= sim.StartManySimulations(
-        count_simulations=30,
+    simulation= sim.StartManySimulationsThreading(
+        #count_simulations=32,
         stop_steps=30000,
         map= map,
         food_generation_period=100,

@@ -7,7 +7,7 @@ import time
 from tests.simulator03.map01.test02 import generate_result, view_results
 
 start = time.time()
-#generate_result()
+generate_result()
 end = time.time()
 print(end - start)
 view_results()
