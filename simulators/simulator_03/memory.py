@@ -10,7 +10,7 @@ class FoodMemory:
                                 int(weight * 0.2),
                                 int(weight * 0.1)]
         self.len = sum(self.weights)
-        self.memories_location = lambda ratio: 0 if ratio >0.6 else 1 if ratio > 0.4 else 2 if ratio > 0.2 else 3
+        self.memories_location = lambda ratio: 0 if ratio >0.3 else 1 if ratio > 0.2 else 2 if ratio > 0.1 else 3
         self.forget_tick = forget_tick
         self.current_tick = 0
         self.rnd = random.Random()
@@ -81,12 +81,19 @@ class FoodMemory:
         abundance = 4 * len(self.slots[0]) + 3 * len(self.slots[1]) +  2 * len(self.slots[2]) + len(self.slots[3])
         return abundance/self.max_abundance
 
-    def suggestion(self):
+    def suggestion(self, remove_position = None):
         l = []
         l = l + (self.slots[0] * 4)
         l = l + (self.slots[1] * 3)
         l = l + (self.slots[2] * 2)
         l = l + (self.slots[3] * 1)
+        if remove_position is not None:
+            try:
+                l.remove(remove_position)
+            except:
+                pass
+        if len(l) == 0:
+            return None
         return random.choice(l)
 
 # memo = FoodMemory()

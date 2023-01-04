@@ -217,7 +217,7 @@ class PreyAgent(ProactiveAgent):
 
         # Actualizando avance del Camino Actual
         if self.current_path is None or len(self.current_path) == 0:
-            self.objetive == NOTHING
+            #self.objetive == NOTHING
             self.current_path = None
         else:
             if P.position == self.current_path[0]:
@@ -261,12 +261,15 @@ class PreyAgent(ProactiveAgent):
         if self.scape_desire < len(P.close_predators):
             return self.intention_scape()
         # Hambriento
-        elif self.objetive in [FIND_EAT, GO_EAT]:
-            if P.position in P.close_food:
-                self.objetive = EAT
-                self.current_path = None
-                return self.__eat(P)
-            elif self.objetive == FIND_EAT:
+        elif self.objetive == EAT:
+            if self.energy <= self.prop.max_energy * 0.8:
+                self.hungry_desire = math.inf
+        if self.objetive in [FIND_EAT, GO_EAT]:            
+            if self.objetive == FIND_EAT:
+                if P.position in P.close_food and self.energy <= self.prop.max_energy * 0.2:
+                    self.objetive = EAT
+                    self.current_path = None
+                    return self.__eat(P)
                 if len(P.close_food) > 0:
                     self.__intention_go_to_eat(P)
                     self.objetive = GO_EAT
@@ -274,16 +277,24 @@ class PreyAgent(ProactiveAgent):
                 else:
                     return self.intention_walk_to(P)
             elif self.objetive == GO_EAT:
+                if P.position in P.close_food:
+                    self.objetive = EAT
+                    self.current_path = None
+                    return self.__eat(P)
                 return self.intention_walk_to(P)
         elif self.hungry_desire >= self.energy:
-            if len(P.close_food) > 0:
+            if P.position in P.close_food:
+                self.objetive = EAT
+                self.current_path = None
+                return self.__eat(P)
+            elif len(P.close_food) > 0:
                 self.__intention_go_to_eat(P)
                 self.objetive = GO_EAT
                 return self.intention_walk_to(P)
             else:
                 self.__intention_search_food(P)
                 self.objetive = FIND_EAT
-                return self.intention_walk_to(P) 
+                return self.intention_walk_to(P)
         else:
             return self.intention_walk_random(P)
         #elif self.breeding_desire >= len(self.prey_memory):
@@ -292,7 +303,22 @@ class PreyAgent(ProactiveAgent):
 
     #################### INTENTIONS ###########################
     def intention_walk_random(self, P: PerceptionPrey):
-        return self.__mov(P, P.position)
+        r,c = P.position
+        min_r = max(0, r-1)
+        min_c = max(0, c-1)
+        max_r = min(self.prop.map.shape[0], r+1+1)
+        max_c = min(self.prop.map.shape[1], c+1+1)
+
+        possibles = [(r,c)]
+        for i in range(min_r, max_r):
+            for j in range(min_c, max_c):                
+                if self.prop.map[i][j] in [Plant(), Obstacle()]:
+                    continue
+                if P.close_preys.get((i,j), None) is not None:
+                    continue
+                possibles.append((i,j))
+        new_position = self.prop.rand.choice(possibles)
+        return self.__mov(P, new_position)
     def intention_walk_to(self, P: PerceptionPrey):
                 
         if self.current_path is None or len(self.current_path) == 0:
@@ -348,15 +374,10 @@ class PreyAgent(ProactiveAgent):
 
 
 
-    def __intention_search_food(self, P: PerceptionPrey):
-        if self.food_memory.count() > 0:
-            nearest_memory_food_cell = self.food_memory.suggestion()            
-            #chosed_memory_slot_index = random.choices([0, 1, 2, 3], [weight for weight in self.food_memory.weights])[0]
-            #sugested_slot = self.food_memory.slots[chosed_memory_slot_index]
-            #nearest_memory_food_cell = min(  [    max(abs(P.position[0] - pos[0]), abs(P.position[1] - pos[1]))            for pos in sugested_slot            ]  )                  # positcion con menor distancia de manhathan
-        else:
-            nearest_memory_food_cell = (-1, -1)
-            while(nearest_memory_food_cell == (-1, -1)):
+    def __intention_search_food(self, P: PerceptionPrey):        
+        nearest_memory_food_cell = self.food_memory.suggestion()          
+        if nearest_memory_food_cell is None:            
+            while nearest_memory_food_cell is None:
                 new_pos = (random.randint(0, self.prop.map.shape[0] - 1), random.randint(0, self.prop.map.shape[1] - 1))
                 if self.prop.map[new_pos[0]][new_pos[1]] != Obstacle() and \
                     self.prop.map[new_pos[0]][new_pos[1]] != Plant() and \
@@ -365,4 +386,6 @@ class PreyAgent(ProactiveAgent):
         print('BUscando comida', nearest_memory_food_cell)
         food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) == nearest_memory_food_cell, obstacle=lambda cell: cell == Obstacle() or cell == Plant(), stop_with=1, vision=1000000)
         print(path)
+        if len(path) == 0:
+            path.append(nearest_memory_food_cell)
         self.current_path = path

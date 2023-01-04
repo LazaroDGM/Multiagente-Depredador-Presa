@@ -32,17 +32,17 @@ map = np.array(
 
 sim = Simulator03(Environment03)
 sim.StartSimulation(
-    tick= 0.1,
+    tick= 0.0,
     stop_steps=10000,
     map= map,
-    food_generation_period=40,
-    plant_radius= 1,
-    food_ratio= 1,
+    food_generation_period=70,
+    plant_radius= 3,
+    food_ratio= 0.03,
     initial_count_prey=1,
     initial_count_predator=0,
     params_prey= ParamsPrey(
         digestion_time=3,
-        max_energy= 100,
+        max_energy= 70,
         velocity= 0,
         vision_radius= 3,
         lost_energy_wait=0.5,
@@ -53,7 +53,7 @@ sim.StartSimulation(
         memory_prey_wait_time=70,
         breeding_point=50,
         food_energy_ratio=0.8,
-        forget_tick= 10,
+        forget_tick= 100,
         weight_memory_food= 20
     ),
     params_predator= ParamsPredator(
