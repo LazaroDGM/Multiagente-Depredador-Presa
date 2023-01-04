@@ -374,18 +374,18 @@ class PreyAgent(ProactiveAgent):
 
 
 
-    def __intention_search_food(self, P: PerceptionPrey):        
-        nearest_memory_food_cell = self.food_memory.suggestion()          
-        if nearest_memory_food_cell is None:            
-            while nearest_memory_food_cell is None:
-                new_pos = (random.randint(0, self.prop.map.shape[0] - 1), random.randint(0, self.prop.map.shape[1] - 1))
-                if self.prop.map[new_pos[0]][new_pos[1]] != Obstacle() and \
-                    self.prop.map[new_pos[0]][new_pos[1]] != Plant() and \
-                        P.position != new_pos:
-                    nearest_memory_food_cell = new_pos
-        print('BUscando comida', nearest_memory_food_cell)
+    def __intention_search_food(self, P: PerceptionPrey):                
+        extra = []
+        while len(extra) < 4:
+            new_pos = (random.randint(0, self.prop.map.shape[0] - 1), random.randint(0, self.prop.map.shape[1] - 1))
+            if self.prop.map[new_pos[0]][new_pos[1]] != Obstacle() and \
+                self.prop.map[new_pos[0]][new_pos[1]] != Plant() and \
+                P.position != new_pos and \
+                new_pos not in extra:
+                extra.append(new_pos)
+
+        nearest_memory_food_cell = self.food_memory.suggestion(extra_positions=extra, remove_position=P.position)
+        print('Buscando comida', nearest_memory_food_cell)
         food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) == nearest_memory_food_cell, obstacle=lambda cell: cell == Obstacle() or cell == Plant(), stop_with=1, vision=1000000)
-        print(path)
-        if len(path) == 0:
-            path.append(nearest_memory_food_cell)
+        print(path)        
         self.current_path = path

@@ -81,19 +81,20 @@ class FoodMemory:
         abundance = 4 * len(self.slots[0]) + 3 * len(self.slots[1]) +  2 * len(self.slots[2]) + len(self.slots[3])
         return abundance/self.max_abundance
 
-    def suggestion(self, remove_position = None):
-        l = []
-        l = l + (self.slots[0] * 4)
-        l = l + (self.slots[1] * 3)
-        l = l + (self.slots[2] * 2)
-        l = l + (self.slots[3] * 1)
+    def suggestion(self, extra_positions=[], remove_position = None):
+        l = [] + extra_positions
+        l = l + (self.slots[0] * 8)
+        l = l + (self.slots[1] * 5)
+        l = l + (self.slots[2] * 3)
+        l = l + (self.slots[3] * 2)
+
         if remove_position is not None:
-            try:
-                l.remove(remove_position)
-            except:
-                pass
-        if len(l) == 0:
-            return None
+            exist = False
+            while exist:
+                try:
+                    l.remove(remove_position)
+                except:
+                    exist = True        
         return random.choice(l)
 
 # memo = FoodMemory()
