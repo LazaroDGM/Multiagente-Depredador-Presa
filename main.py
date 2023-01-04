@@ -37,7 +37,7 @@ sim.StartSimulation(
     map= map,
     food_generation_period=40,
     plant_radius= 1,
-    food_ratio= 0.2,
+    food_ratio= 1,
     initial_count_prey=1,
     initial_count_predator=0,
     params_prey= ParamsPrey(

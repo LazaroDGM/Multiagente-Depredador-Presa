@@ -216,19 +216,15 @@ class PreyAgent(ProactiveAgent):
         self.food_memory.Remember(P.position, ratio_food)
 
         # Actualizando avance del Camino Actual
-        if self.current_path is not None:
-            if len(self.current_path) > 0 and P.position == self.current_path[0]:
-                self.current_path.pop(0)
-                if len(self.current_path) == 1:
-                    self.current_path = None
-                #if len(self.current_path) > 0:
-                #    if self.current_path[0] != P.position:
-                #        raise Exception('Se hizo un movimiento fuera del camino actual')
-            else:
-                self.objetive == NOTHING
-                self.current_path = None
+        if self.current_path is None or len(self.current_path) == 0:
+            self.objetive == NOTHING
+            self.current_path = None
         else:
-            self.objetive = NOTHING
+            if P.position == self.current_path[0]:
+                self.current_path.pop(0)
+                if len(self.current_path) == 0:
+                    self.current_path = None
+                    self.objetive = NOTHING
 
     ##################### OPTIONS #############################
 
@@ -265,46 +261,29 @@ class PreyAgent(ProactiveAgent):
         if self.scape_desire < len(P.close_predators):
             return self.intention_scape()
         # Hambriento
-        elif self.objetive in [FIND_EAT, GO_EAT] or self.hungry_desire >= self.energy:            
-            if self.current_path is None:
+        elif self.objetive in [FIND_EAT, GO_EAT]:
+            if P.position in P.close_food:
+                self.objetive = EAT
+                self.current_path = None
+                return self.__eat(P)
+            elif self.objetive == FIND_EAT:
                 if len(P.close_food) > 0:
-                    if P.position in P.close_food:
-                        self.objetive = EAT
-                        self.current_path = None
-                        return self.__eat(P)
-                    elif P.position in P.close_food:
-                        self.objetive = EAT
-                        self.current_path = None
-                        return self.__eat(P)
-                    else:
-                        self.__intention_go_to_eat(P)
-                        self.objetive = GO_EAT
-                        return self.intention_walk_to(P)
+                    self.__intention_go_to_eat(P)
+                    self.objetive = GO_EAT
+                    return self.intention_walk_to(P)
                 else:
-                    self.__intention_search_food(P)
-                    self.objetive = FIND_EAT
                     return self.intention_walk_to(P)
-            elif len(self.current_path) > 0:
-                if P.position in P.close_food:
-                    self.objetive = EAT
-                    self.current_path = None
-                    return self.__eat(P)
-                elif self.objetive == GO_EAT:                    
-                    return self.intention_walk_to(P)
-                elif self.objetive == FIND_EAT:
-                    if P.position in P.close_food:
-                        self.objetive = EAT
-                        self.current_path = None
-                        return self.__eat(P)
-                    elif len(P.close_food) > 0 and 0.8 * self.hungry_desire >= self.energy:                    
-                        self.__intention_go_to_eat(P)
-                        self.objetive = GO_EAT
-                        return self.intention_walk_to(P)
-                    else:
-                        self.objetive = FIND_EAT
-                        return self.intention_walk_to(P)
-            raise Exception()
-                
+            elif self.objetive == GO_EAT:
+                return self.intention_walk_to(P)
+        elif self.hungry_desire >= self.energy:
+            if len(P.close_food) > 0:
+                self.__intention_go_to_eat(P)
+                self.objetive = GO_EAT
+                return self.intention_walk_to(P)
+            else:
+                self.__intention_search_food(P)
+                self.objetive = FIND_EAT
+                return self.intention_walk_to(P) 
         else:
             return self.intention_walk_random(P)
         #elif self.breeding_desire >= len(self.prey_memory):
@@ -358,14 +337,14 @@ class PreyAgent(ProactiveAgent):
     def __intention_go_to_eat(self, P: PerceptionPrey):
         food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_food, obstacle=lambda cell: cell == Obstacle() or cell == Plant(), vision= 1000000)
         print(path)
-        (x, y) = P.position
-        print(food_matrix)
-        food_abundance_matrix = transform(food_matrix)
-        (dx, dy) = betterMove(food_abundance_matrix)
-         
-        sugestion = x + dx -1, y + dy -1
+        #(x, y) = P.position
+        #print(food_matrix)
+        #food_abundance_matrix = transform(food_matrix, xpansion_distance=0)
+        #(dx, dy) = betterMove(food_abundance_matrix)
+        # 
+        #sugestion = x + dx -1, y + dy -1
         self.current_path = path
-        return sugestion
+        #return sugestion
 
 
 
