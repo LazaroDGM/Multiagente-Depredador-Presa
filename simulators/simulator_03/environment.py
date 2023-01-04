@@ -72,18 +72,32 @@ class Environment03(Environment):
                     self._map[i][j] = Floor()
         self.shape_map = self._map.shape
 
-        #self._map.resize(self._map.size)
-        #emptys = np.array(list(filter(lambda box: isinstance(box, (Burrow, Floor)), self._map)))
-        #self._map.resize(self.shape_map)
-        #idx = np.random.choice(emptys.shape[0], min(1, emptys.size), replace=False)
-        #selection = emptys[idx]
-        #for s in selection:            
-        #    prey = PreyAgent(self.prop_prey)
-        #    s.AddPrey(prey)
-        #    self.preys[]
-        prey = PreyAgent(self.prop_prey)
-        self._map[0][0].AddPrey(prey)
-        self.preys[prey]= (0,0)
+        count_preys = self.initial_count_prey
+        while count_preys > 0:
+            new_pos = (random.randint(0, self.shape_map[0] - 1), random.randint(0, self.shape_map[1] - 1))
+            box = self._map[new_pos[0]][new_pos[1]]
+            if box != Obstacle() and \
+                box != Plant() and \
+                isinstance(box, (Floor, Burrow)) and \
+                not box.hasPrey():
+                prey = PreyAgent(self.prop_prey)
+                box.AddPrey(prey)
+                self.preys[prey] = new_pos
+                count_preys -= 1
+        
+        count_predators = self.initial_count_predator
+        while count_predators > 0:
+            new_pos = (random.randint(0, self.shape_map[0] - 1), random.randint(0, self.shape_map[1] - 1))
+            box = self._map[new_pos[0]][new_pos[1]]
+            if box != Obstacle() and \
+                box != Plant() and \
+                isinstance(box, (Floor)) and \
+                not box.hasPrey() and \
+                not box.hasPredator():
+                predator = PredatorAgent(self.prop_predator)
+                box.AddPrey(predator)
+                self.preys[prey] = new_pos
+                count_predators -= 1
 
     
     def free_for_food(self, s):
@@ -247,7 +261,8 @@ class Environment03(Environment):
                 new_positions_predators[new_position] = predator
             elif new_position == old_position:
                 new_positions_predators[new_position] = predator
-            elif new_positions_predators.get(new_position, None) is None:
+            elif new_positions_predators.get(new_position, None) is None and \
+                    self._map[new_position[0]][new_position[1]].hasPredator():
                 new_positions_predators[new_position] = predator
 
         for new_position, predator in new_positions_predators.items():
@@ -270,9 +285,9 @@ class Environment03(Environment):
             new_r, new_c = new_position
             old_r, old_c = old_position = self.preys[prey]
             box = self._map[old_r][old_c]
-            if isinstance(box, Floor) and not box.prey == prey:
-                raise Exception('Presa en mapa, no coincide con la presa actual')
-            if isinstance(box, Burrow) and not box.prey == prey:
+            if not isinstance(box, (Floor, Burrow)):
+                raise Exception('La presa no esta ni en el suelo ni en la madriguera')
+            if not box.prey == prey:
                 raise Exception('Presa en mapa, no coincide con la presa actual')
             if abs(new_r - old_r) > 1 or abs(new_c - old_c) > 1:
                 raise Exception('Movimiento errado de la presa')
@@ -285,7 +300,8 @@ class Environment03(Environment):
                 new_positions_preys[new_position] = prey
             elif new_position == old_position:
                 new_positions_preys[new_position] = prey
-            elif new_positions_preys.get(new_position, None) is None:
+            elif new_positions_preys.get(new_position, None) is None and \
+                    not self._map[new_position[0]][new_position[1]].hasPrey():
                 new_positions_preys[new_position] = prey
 
         for new_position, prey in new_positions_preys.items():

@@ -45,12 +45,12 @@ class ActionPrey():
     def __init__(self,
         new_position,
         eat = False,
-        die = False
+        reproduce = False
         ) -> None:
 
         self.new_position = new_position
         self.eat = eat
-        self.die = die
+        self.reproduce = reproduce
         
 
 ######################### PARAMS ###############################
@@ -369,6 +369,8 @@ class PreyAgent(ProactiveAgent):
         #(dx, dy) = betterMove(food_abundance_matrix)
         # 
         #sugestion = x + dx -1, y + dy -1
+        if len(path) == 0:
+            path = [P.position]
         self.current_path = path
         #return sugestion
 

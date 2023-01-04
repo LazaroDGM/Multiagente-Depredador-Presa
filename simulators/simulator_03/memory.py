@@ -89,12 +89,12 @@ class FoodMemory:
         l = l + (self.slots[3] * 2)
 
         if remove_position is not None:
-            exist = False
+            exist = True
             while exist:
                 try:
                     l.remove(remove_position)
                 except:
-                    exist = True        
+                    exist = False        
         return random.choice(l)
 
 # memo = FoodMemory()
