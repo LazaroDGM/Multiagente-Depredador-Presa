@@ -235,31 +235,34 @@ class Environment03(Environment):
             self.predators.pop(predator)
         del(delete_predators)
     
-    def gen_preys(self):
-        count_new_preys = 0
-        for prey in self.preys:
-            prey : PreyAgent
-            if prey.objetive == 'GESTATE':
-                count_new_preys+=1
-        if count_new_preys > 0:
-            emptys = []
-            for i in range(self.shape_map[0]):
-                for j in range(self.shape_map[1]):
-                    box= self._map[i][j]
-                    if box == Plant() or box == Obstacle():
-                        continue
-                    if box.hasPrey():
-                        continue
-                    emptys.append((i,j))
-            news_positions = self._rand.sample(emptys, min(len(emptys), count_new_preys))
-            for position in news_positions:
-                prey = PreyAgent(self.prop_prey)
-                self._map[position[0]][position[1]].AddPrey(prey)
-                self.preys[prey] = position                
+    def gen_preys(self, actions_preys):        
+        for prey, action in actions_preys:            
+            if action.reproduce:                
+                r, c = self.preys[prey]
+                min_r = max(0, r-1)
+                min_c = max(0, c-1)
+                max_r = min(self._map.shape[0], r+1+1)
+                max_c = min(self._map.shape[1], c+1+1) 
+                emptys = []
+                for i in range(min_r, max_r):
+                    for j in range(min_c, max_c):
+                        box= self._map[i][j]
+                        if box == Plant() or box == Obstacle():
+                            continue
+                        if box.hasPrey():
+                            continue
+                        emptys.append((i,j))
+                news_positions = self._rand.sample(emptys, min(len(emptys), 1))
+                for position in news_positions:
+                    prey = PreyAgent(self.prop_prey)
+                    self._map[position[0]][position[1]].AddPrey(prey)
+                    self.preys[prey] = position                
 
 
     def transform(self, actions_predators, actions_preys):
         
+        self.gen_preys(actions_preys)
+
         delete_prey = []
         new_positions_predators = {}
         for predator, action in actions_predators:
@@ -345,8 +348,7 @@ class Environment03(Environment):
     def next_step(self):
         self.cicle += 1
         self.remove_dead_agents()        
-        self.gen_food()
-        self.gen_preys()
+        self.gen_food()        
 
         actions_predators = []
         for predator in self.predators.keys():            

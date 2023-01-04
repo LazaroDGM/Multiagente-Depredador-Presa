@@ -77,7 +77,9 @@ class ParamsPrey():
             forget_tick,
             weight_memory_food,
             breeding_point,
-            food_energy_ratio
+            food_energy_ratio,
+            gestate_time,
+            gestate_again_time
         ) -> None:
         self.digestion_time = digestion_time
         self.max_energy = max_energy
@@ -93,6 +95,8 @@ class ParamsPrey():
         self.weight_memory_food = weight_memory_food
         self.breeding_point = breeding_point
         self.food_energy_ratio = food_energy_ratio
+        self.gestate_time = gestate_time
+        self.gestate_again_time = gestate_again_time
 
 
 ###################### PROPIERTIES #################################
@@ -119,6 +123,8 @@ class PreyAgentPropierties:
             cls.weight_memory_food = params.weight_memory_food
             cls.breeding_point = params.breeding_point
             cls.food_energy_ratio = params.food_energy_ratio
+            cls.gestate_time = params.gestate_time
+            cls.gestate_again_time = params.gestate_again_time
             cls.rand = random.Random()
         return cls.instance
     
@@ -142,6 +148,8 @@ class PreyAgent(ProactiveAgent):
         self.eating = 0
         self.wait_move = 1
         self.extra_energy = 0
+        self.gestating = 0
+        self.gestate_wait = 0
 
         # Desires
         self.breeding_desire = 0
@@ -189,7 +197,7 @@ class PreyAgent(ProactiveAgent):
 
     def __wait_eat(self, P: PerceptionPrey):
         self.eating -= 1
-        if self.eating == 0:
+        if self.eating <= 0:
             self.energy += self.prop.food_energy_ratio * self.prop.max_energy
             extra = max(0, self.energy - self.prop.max_energy)
             self.extra_energy += extra
@@ -197,10 +205,17 @@ class PreyAgent(ProactiveAgent):
         return ActionPrey(new_position= P.position, eat= False)
 
     def __gestate(self, P: PerceptionPrey):
-        self.wait_move = 0
+        self.gestating = self.prop.gestate_time
         self.extra_energy = 0
         self.energy = self.prop.max_energy * 0.5
-        return ActionPrey(new_position= P.position, reproduce= True)
+        return ActionPrey(new_position= P.position, eat= False)
+
+    def __wait_gestate(self, P: PerceptionPrey):
+        self.gestating -= 1
+        if self.gestating <= 0:
+            self.gestate_wait = self.prop.gestate_again_time
+            return ActionPrey(new_position= P.position, eat= False, reproduce=True)
+        return ActionPrey(new_position= P.position, eat= False)
 
     ################ BRF ###################
 
@@ -242,7 +257,7 @@ class PreyAgent(ProactiveAgent):
     def options(self, P: PerceptionPrey):
         
         self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 4))
-        self.breeding_desire = abs(self.prop.rand.normalvariate(0, (0.8* self.prop.map.size) / 8))
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 40/2))
         if len(P.close_predators) > 0:
             self.scape_desire = abs(self.prop.rand.normalvariate(0, 0.02 * self.prop.vision_radius ))
         else:
@@ -259,7 +274,10 @@ class PreyAgent(ProactiveAgent):
         if self.eating > 0:
             Ac = self.__wait_eat(P)
             return Ac
-
+        if self.gestating > 0:
+            Ac = self.__wait_gestate(P)
+            return Ac
+        self.gestate_wait -=1
         
         # Acciones que dependen de varios factores probabilisticos
         # TODO
@@ -274,6 +292,7 @@ class PreyAgent(ProactiveAgent):
             return self.intention_scape()
         # Hambriento
         elif self.objetive == EAT:
+            # Comer para llenarse # TODO
             if self.energy <= self.prop.max_energy * 0.8:
                 self.hungry_desire = math.inf
         if self.objetive in [FIND_EAT, GO_EAT]:            
@@ -306,15 +325,13 @@ class PreyAgent(ProactiveAgent):
             else:
                 self.__intention_search_food(P)
                 self.objetive = FIND_EAT
-                return self.intention_walk_to(P)
+                return self.intention_walk_to(P)  
 
         if self.objetive == EAT_GESTATE and \
             self.prop.breeding_point <= self.extra_energy:
-
             self.objetive = GESTATE
             self.current_path = None
             return self.__gestate(P)
-
         elif self.objetive in [GO_EAT_GESTATE, FIND_EAT_GESTATE]:
             if self.objetive == FIND_EAT_GESTATE:
                 if P.position in P.close_food:
@@ -334,7 +351,8 @@ class PreyAgent(ProactiveAgent):
                     return self.__eat(P)
                 return self.intention_walk_to(P)
         elif 0.2 * self.breeding_desire >= len(self.prey_memory) and \
-                self.food_memory.gen_abundance() >= 0.55:
+                self.food_memory.gen_abundance() >= 0.55 and \
+                self.gestate_wait <= 0:
             self.__intention_search_food(P)
             self.objetive = FIND_EAT_GESTATE
             return self.intention_walk_random(P)
