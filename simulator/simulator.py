@@ -1,5 +1,7 @@
 import time
 import pygame
+import threading
+import multiprocessing
 class Simulator():
     '''
     Clase generica de un Simulador por pasos de tiempo
@@ -40,6 +42,58 @@ class Simulator():
             outputs = self.StartSimulation(stop_steps, reset, *args, **kvargs)            
             simulations.append(outputs[1])
         return simulations
+
+    def ThreadSimulations(self, conn, count_simulations, stop_steps, *args, **kvargs):
+        results = self.StartManySimulations(count_simulations, stop_steps, reset=False, *args, **kvargs)
+        conn.send(results)
+
+    def StartManySimulationsThreading(self, stop_steps, *args, **kvargs):
+        simulations1 = []
+        simulations2 = []
+        simulations3 = []
+        simulations4 = []
+
+
+        parent_conn1, child_conn1 = multiprocessing.Pipe()
+        thread1 = multiprocessing.Process(
+            target= self.ThreadSimulations,
+            args=(child_conn1, 8, stop_steps, *args),
+            kwargs=kvargs, daemon= True)
+
+        parent_conn2, child_conn2 = multiprocessing.Pipe()
+        thread2 = multiprocessing.Process(
+            target= self.ThreadSimulations,
+            args=(child_conn2, 8, stop_steps, *args),
+            kwargs=kvargs, daemon= True)
+
+        parent_conn3, child_conn3 = multiprocessing.Pipe()
+        thread3 = multiprocessing.Process(
+            target= self.ThreadSimulations,
+            args=(child_conn3, 7, stop_steps, *args),
+            kwargs=kvargs, daemon= True)   
+
+        parent_conn4, child_conn4 = multiprocessing.Pipe()
+        thread4 = multiprocessing.Process(
+            target= self.ThreadSimulations,
+            args=(child_conn4, 7, stop_steps, *args),
+            kwargs=kvargs, daemon= True)       
+
+        thread1.start()
+        thread2.start()
+        thread3.start()
+        thread4.start()
+
+        simulations1 = parent_conn1.recv()
+        simulations2 = parent_conn2.recv()
+        simulations3 = parent_conn3.recv()
+        simulations4 = parent_conn4.recv()
+
+        thread1.join()
+        thread2.join()
+        thread3.join()        
+        thread4.join()
+
+        return simulations1 + simulations2 + simulations3 + simulations4
 
 class Simulator2D(Simulator):
 
@@ -84,4 +138,5 @@ class Simulator2D(Simulator):
 
 
         
+
 

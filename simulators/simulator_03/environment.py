@@ -71,6 +71,34 @@ class Environment03(Environment):
                 elif map[i][j] is None:
                     self._map[i][j] = Floor()
         self.shape_map = self._map.shape
+
+        count_preys = self.initial_count_prey
+        while count_preys > 0:
+            new_pos = (random.randint(0, self.shape_map[0] - 1), random.randint(0, self.shape_map[1] - 1))
+            box = self._map[new_pos[0]][new_pos[1]]
+            if box != Obstacle() and \
+                box != Plant() and \
+                isinstance(box, (Floor, Burrow)) and \
+                not box.hasPrey():
+                prey = PreyAgent(self.prop_prey)
+                box.AddPrey(prey)
+                self.preys[prey] = new_pos
+                count_preys -= 1
+        
+        count_predators = self.initial_count_predator
+        while count_predators > 0:
+            new_pos = (random.randint(0, self.shape_map[0] - 1), random.randint(0, self.shape_map[1] - 1))
+            box = self._map[new_pos[0]][new_pos[1]]
+            if box != Obstacle() and \
+                box != Plant() and \
+                isinstance(box, (Floor)) and \
+                not box.hasPrey() and \
+                not box.hasPredator():
+                predator = PredatorAgent(self.prop_predator)
+                box.AddPrey(predator)
+                self.preys[prey] = new_pos
+                count_predators -= 1
+
     
     def free_for_food(self, s):
         '''
@@ -112,7 +140,7 @@ class Environment03(Environment):
 
                 self._gen_food(int(self.food_ratio*extract.size), extract)
                 cicle_food = int(self._rand.expovariate(1/self.food_generation_period)) + self.cicle + 1
-                print('Nueva produccion de comida en: ', cicle_food)
+                #print('Nueva produccion de comida en: ', cicle_food)
                 self.plants[(r,c)] = cicle_food
 
     def seePrey(self, prey):
@@ -120,15 +148,14 @@ class Environment03(Environment):
         min_r = max(0, r-self.prop_prey.vision_radius)
         min_c = max(0, c-self.prop_prey.vision_radius)
         max_r = min(self._map.shape[0], r+self.prop_prey.vision_radius+1)
-        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)
-        extract = self._map[min_r:max_r, min_c:max_c]
+        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)        
 
         close_preys = {}
         close_predators = {}
-        close_food = {}
+        close_food = []
         
-        for i in range(extract.shape[0]):
-            for j in range(extract.shape[1]):
+        for i in range(min_r, max_r):
+            for j in range(min_c, max_c):
                 box = self._map[i][j]
                 if isinstance(box, Floor):
                     if box.hasPrey():
@@ -136,7 +163,7 @@ class Environment03(Environment):
                     if box.hasPredator():
                         close_predators[(i,j)] = box.predator
                     if box.hasFood():
-                        close_food[(i,j)] = box.food
+                        close_food.append((i,j))
                 elif isinstance(box, Burrow):
                     if box.hasPrey():
                         close_preys[(i,j)] = box.prey
@@ -152,15 +179,14 @@ class Environment03(Environment):
         min_r = max(0, r-self.prop_prey.vision_radius)
         min_c = max(0, c-self.prop_prey.vision_radius)
         max_r = min(self._map.shape[0], r+self.prop_prey.vision_radius+1)
-        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)
-        extract = self._map[min_r:max_r, min_c:max_c]
+        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)        
 
         close_preys = {}
         close_predators = {}
         close_food = {}
         
-        for i in range(extract.shape[0]):
-            for j in range(extract.shape[1]):
+        for i in range(range(min_r, max_r)):
+            for j in range(min_c, max_c):
                 box = self._map[i][j]
                 if isinstance(box, Floor):
                     if box.hasPrey():
@@ -180,8 +206,8 @@ class Environment03(Environment):
         delete_preys = []
         for prey, (i, j) in self.preys.items():
             prey : PreyAgent
-            if prey.energy <= 0:
-                delete_preys.append((i,j))
+            if prey.energy <= 0 or prey.life <= 0:
+                delete_preys.append(prey)
                 box = self._map[i][j]
                 if isinstance(box, (Burrow, Floor)):
                     if not box.hasPrey():
@@ -189,15 +215,15 @@ class Environment03(Environment):
                     box.RemovePrey()
                 else:
                     raise Exception('Presa lista para morirse, que no esta en ningun lugar')
-        for (i, j) in delete_preys:
-            self._map[i][j].RemovePrey()
+        for prey in delete_preys:
+            self.preys.pop(prey)
         del(delete_preys)
 
         delete_predators = []
         for predator, (i, j) in self.predators.items():
             predator : PredatorAgent
             if predator.energy <= 0:
-                delete_predators.append((i,j))
+                delete_predators.append(predator)
                 box = self._map[i][j]
                 if isinstance(box, Floor):
                     if not box.hasPredator():
@@ -205,13 +231,38 @@ class Environment03(Environment):
                     box.RemovePredator()
                 else:
                     raise Exception('Predator lista para morirse, que no esta en ningun lugar')
-        for (i, j) in delete_predators:
-            self._map[i][j].RemovePredator()
+        for predator in delete_predators:
+            self.predators.pop(predator)
         del(delete_predators)
+    
+    def gen_preys(self, actions_preys):        
+        for prey, action in actions_preys:            
+            if action.reproduce:                
+                r, c = self.preys[prey]
+                min_r = max(0, r-1)
+                min_c = max(0, c-1)
+                max_r = min(self._map.shape[0], r+1+1)
+                max_c = min(self._map.shape[1], c+1+1) 
+                emptys = []
+                for i in range(min_r, max_r):
+                    for j in range(min_c, max_c):
+                        box= self._map[i][j]
+                        if box == Plant() or box == Obstacle():
+                            continue
+                        if box.hasPrey():
+                            continue
+                        emptys.append((i,j))
+                news_positions = self._rand.sample(emptys, min(len(emptys), action.count_reproduce))
+                for position in news_positions:
+                    prey = PreyAgent(self.prop_prey)
+                    self._map[position[0]][position[1]].AddPrey(prey)
+                    self.preys[prey] = position                
 
 
     def transform(self, actions_predators, actions_preys):
         
+        self.gen_preys(actions_preys)
+
         delete_prey = []
         new_positions_predators = {}
         for predator, action in actions_predators:
@@ -235,7 +286,8 @@ class Environment03(Environment):
                 new_positions_predators[new_position] = predator
             elif new_position == old_position:
                 new_positions_predators[new_position] = predator
-            elif new_positions_predators.get(new_position, None) is None:
+            elif new_positions_predators.get(new_position, None) is None and \
+                    self._map[new_position[0]][new_position[1]].hasPredator():
                 new_positions_predators[new_position] = predator
 
         for new_position, predator in new_positions_predators.items():
@@ -258,9 +310,9 @@ class Environment03(Environment):
             new_r, new_c = new_position
             old_r, old_c = old_position = self.preys[prey]
             box = self._map[old_r][old_c]
-            if not (isinstance(box, Floor) and box.prey == prey):
-                raise Exception('Presa en mapa, no coincide con la presa actual')
-            if not (isinstance(box, Burrow) and box.prey == prey):
+            if not isinstance(box, (Floor, Burrow)):
+                raise Exception('La presa no esta ni en el suelo ni en la madriguera')
+            if not box.prey == prey:
                 raise Exception('Presa en mapa, no coincide con la presa actual')
             if abs(new_r - old_r) > 1 or abs(new_c - old_c) > 1:
                 raise Exception('Movimiento errado de la presa')
@@ -269,11 +321,13 @@ class Environment03(Environment):
                     raise Exception('Presa que se mueve y come a la vez')
                 if not box.hasFood():
                     raise Exception('Presa comiendo en una casilla sin Comida')
-                box.RemoveFood()                
+                box.RemoveFood() 
+                self.count_foods -=1               
                 new_positions_preys[new_position] = prey
             elif new_position == old_position:
                 new_positions_preys[new_position] = prey
-            elif new_positions_preys.get(new_position, None) is None:
+            elif new_positions_preys.get(new_position, None) is None and \
+                    not self._map[new_position[0]][new_position[1]].hasPrey():
                 new_positions_preys[new_position] = prey
 
         for new_position, prey in new_positions_preys.items():
@@ -294,7 +348,7 @@ class Environment03(Environment):
     def next_step(self):
         self.cicle += 1
         self.remove_dead_agents()        
-        self.gen_food()
+        self.gen_food()        
 
         actions_predators = []
         for predator in self.predators.keys():            
@@ -312,7 +366,7 @@ class Environment03(Environment):
 
 
     def outputs(self):
-        return None
+        return len(self.preys), self.count_foods
 
     def reset(self):
         self.prop_prey.delete()

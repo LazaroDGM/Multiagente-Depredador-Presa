@@ -29,8 +29,13 @@ class Plant(object):
     Entidad que modela una Planta. Es una clase Singleton para evitar el 
     abuso innecesario de memoria
     '''
-    def __init__(self) -> None:
-        pass
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(Plant, cls).__new__(cls)            
+        return cls.instance
+
+    def __repr__(self) -> str:
+        return 'p'
 
 class Burrow():
 
