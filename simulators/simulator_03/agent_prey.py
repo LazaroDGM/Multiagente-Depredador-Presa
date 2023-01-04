@@ -227,6 +227,8 @@ class PreyAgent(ProactiveAgent):
             else:
                 self.objetive == NOTHING
                 self.current_path = None
+        else:
+            self.objetive = NOTHING
 
     ##################### OPTIONS #############################
 
@@ -270,6 +272,10 @@ class PreyAgent(ProactiveAgent):
                         self.objetive = EAT
                         self.current_path = None
                         return self.__eat(P)
+                    elif P.position in P.close_food:
+                        self.objetive = EAT
+                        self.current_path = None
+                        return self.__eat(P)
                     else:
                         self.__intention_go_to_eat(P)
                         self.objetive = GO_EAT
@@ -286,7 +292,11 @@ class PreyAgent(ProactiveAgent):
                 elif self.objetive == GO_EAT:                    
                     return self.intention_walk_to(P)
                 elif self.objetive == FIND_EAT:
-                    if len(P.close_food) > 0 and 0.8 * self.hungry_desire >= self.energy:                    
+                    if P.position in P.close_food:
+                        self.objetive = EAT
+                        self.current_path = None
+                        return self.__eat(P)
+                    elif len(P.close_food) > 0 and 0.8 * self.hungry_desire >= self.energy:                    
                         self.__intention_go_to_eat(P)
                         self.objetive = GO_EAT
                         return self.intention_walk_to(P)
@@ -346,10 +356,10 @@ class PreyAgent(ProactiveAgent):
 
         
     def __intention_go_to_eat(self, P: PerceptionPrey):
-        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_food, obstacle=lambda cell: cell is Obstacle() or cell is Plant(), vision= 1000000)
-
+        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_food, obstacle=lambda cell: cell == Obstacle() or cell == Plant(), vision= 1000000)
+        print(path)
         (x, y) = P.position
-        
+        print(food_matrix)
         food_abundance_matrix = transform(food_matrix)
         (dx, dy) = betterMove(food_abundance_matrix)
          
@@ -361,7 +371,7 @@ class PreyAgent(ProactiveAgent):
 
     def __intention_search_food(self, P: PerceptionPrey):
         if self.food_memory.count() > 0:
-            nearest_memory_food_cell = self.food_memory.suggestion()
+            nearest_memory_food_cell = self.food_memory.suggestion()            
             #chosed_memory_slot_index = random.choices([0, 1, 2, 3], [weight for weight in self.food_memory.weights])[0]
             #sugested_slot = self.food_memory.slots[chosed_memory_slot_index]
             #nearest_memory_food_cell = min(  [    max(abs(P.position[0] - pos[0]), abs(P.position[1] - pos[1]))            for pos in sugested_slot            ]  )                  # positcion con menor distancia de manhathan
@@ -369,7 +379,11 @@ class PreyAgent(ProactiveAgent):
             nearest_memory_food_cell = (-1, -1)
             while(nearest_memory_food_cell == (-1, -1)):
                 new_pos = (random.randint(0, self.prop.map.shape[0] - 1), random.randint(0, self.prop.map.shape[1] - 1))
-                if self.prop.map[new_pos[0]][new_pos[1]] != Obstacle() and self.prop.map[new_pos[0]][new_pos[1]] != Plant():
+                if self.prop.map[new_pos[0]][new_pos[1]] != Obstacle() and \
+                    self.prop.map[new_pos[0]][new_pos[1]] != Plant() and \
+                        P.position != new_pos:
                     nearest_memory_food_cell = new_pos
-        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) == nearest_memory_food_cell, obstacle=lambda cell: cell is Obstacle() or cell is Plant(), stop_with=1, vision=1000000)
+        print('BUscando comida', nearest_memory_food_cell)
+        food_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) == nearest_memory_food_cell, obstacle=lambda cell: cell == Obstacle() or cell == Plant(), stop_with=1, vision=1000000)
+        print(path)
         self.current_path = path

@@ -42,6 +42,7 @@ def AStarPlus(numpy_array, x, y, vision, found, obstacle, stop_with = 3):
                     if current_direction == 0:
                         matrix[j + 1][k + 1].append(1)
                         founded+= 1
+                        the_way = current_way + [cell]
                     else: 
                         matrix[int((current_direction - 1) / 3)][(current_direction - 1) % 3].append(current_cost + 1)
                         founded+= 1
