@@ -95,8 +95,8 @@ class Environment03(Environment):
                 not box.hasPrey() and \
                 not box.hasPredator():
                 predator = PredatorAgent(self.prop_predator)
-                box.AddPrey(predator)
-                self.preys[prey] = new_pos
+                box.AddPredator(predator)
+                self.predators[predator] = new_pos
                 count_predators -= 1
 
     
@@ -175,17 +175,16 @@ class Environment03(Environment):
         )
     
     def seePredator(self, predator):
-        r, c = self.preys[predator]
-        min_r = max(0, r-self.prop_prey.vision_radius)
-        min_c = max(0, c-self.prop_prey.vision_radius)
-        max_r = min(self._map.shape[0], r+self.prop_prey.vision_radius+1)
-        max_c = min(self._map.shape[1], c+self.prop_prey.vision_radius+1)        
+        r, c = self.predators[predator]
+        min_r = max(0, r-self.prop_predator.vision_radius)
+        min_c = max(0, c-self.prop_predator.vision_radius)
+        max_r = min(self._map.shape[0], r+self.prop_predator.vision_radius+1)
+        max_c = min(self._map.shape[1], c+self.prop_predator.vision_radius+1)        
 
         close_preys = {}
         close_predators = {}
-        close_food = {}
         
-        for i in range(range(min_r, max_r)):
+        for i in range(min_r, max_r):
             for j in range(min_c, max_c):
                 box = self._map[i][j]
                 if isinstance(box, Floor):
@@ -193,13 +192,11 @@ class Environment03(Environment):
                         close_preys[(i,j)] = box.prey
                     if box.hasPredator():
                         close_predators[(i,j)] = box.predator
-                    if box.hasFood():
-                        close_food[(i,j)] = box.food
         
         return PerceptionPredator(
             position= (r,c),
             close_preys= close_preys,
-            close_food= close_food
+            close_predators= close_predators
         )
 
     def remove_dead_agents(self):
@@ -222,7 +219,7 @@ class Environment03(Environment):
         delete_predators = []
         for predator, (i, j) in self.predators.items():
             predator : PredatorAgent
-            if predator.energy <= 0:
+            if predator.energy <= 0 or predator.energy <= 0:
                 delete_predators.append(predator)
                 box = self._map[i][j]
                 if isinstance(box, Floor):
@@ -287,7 +284,7 @@ class Environment03(Environment):
             elif new_position == old_position:
                 new_positions_predators[new_position] = predator
             elif new_positions_predators.get(new_position, None) is None and \
-                    self._map[new_position[0]][new_position[1]].hasPredator():
+                    not self._map[new_position[0]][new_position[1]].hasPredator():
                 new_positions_predators[new_position] = predator
 
         for new_position, predator in new_positions_predators.items():

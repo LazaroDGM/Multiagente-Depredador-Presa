@@ -130,10 +130,9 @@ class PreyMemory:
     
     def Tick(self):
         self.time += 1
-        if len(self.times) > 0:
-            while self.times[0] == self.time:
-                self.preys.pop(0)
-                self.times.pop(0)
+        while len(self.times) > 0 and self.times[0] == self.time:
+            self.preys.pop(0)
+            self.times.pop(0)
     
     def Remember(self, prey):
         try:
@@ -159,10 +158,9 @@ class PredatorMemory:
     
     def Tick(self):
         self.time += 1
-        if len(self.times) > 0:
-            while self.times[0] == self.time:
-                self.predators.pop(0)
-                self.times.pop(0)
+        while len(self.times) > 0 and self.times[0] == self.time:
+            self.predators.pop(0)
+            self.times.pop(0)
     
     def Remember(self, predator):
         try:
