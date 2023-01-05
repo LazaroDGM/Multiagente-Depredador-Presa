@@ -301,7 +301,7 @@ class PreyAgent(ProactiveAgent):
         # if self.hungry_desire > 0.5
 
         #~~~ Agente Precavido ~~~#
-        if self.scape_desire < len(P.close_predators):
+        if 0 < len(P.close_predators):
             self.objetive = NOTHING
             return self.intention_scape(P)
         # Hambriento
@@ -350,6 +350,10 @@ class PreyAgent(ProactiveAgent):
             return self.intention_walk_to(P)
         elif self.objetive == EAT_GESTATE and \
             self.prop.breeding_point <= self.extra_energy:
+            ######### Borrar ########
+            self.objetive = GESTATE
+            return self.__gestate(P)
+            #########################
             self.__intention_go_to_gestate(P)
             self.objetive = GO_GESTATE
             return self.intention_walk_to(P)
