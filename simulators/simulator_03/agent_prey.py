@@ -268,10 +268,10 @@ class PreyAgent(ProactiveAgent):
 
     def options(self, P: PerceptionPrey):
         
-        self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 4))
-        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 100/2))
+        self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 3))
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 4))
         if len(P.close_predators) > 0:
-            self.scape_desire = abs(self.prop.rand.normalvariate(0, 0.02 * self.prop.vision_radius ))
+            self.scape_desire = abs(self.prop.rand.normalvariate(0, 0.5 * self.prop.vision_radius ))
         else:
             self.scape_desire = 0
         
@@ -302,9 +302,10 @@ class PreyAgent(ProactiveAgent):
 
         #~~~ Agente Precavido ~~~#
         if self.scape_desire < len(P.close_predators):
-            return self.intention_scape()
+            self.objetive = NOTHING
+            return self.intention_scape(P)
         # Hambriento
-        elif self.objetive == EAT:
+        if self.objetive == EAT:
             # Comer para llenarse # TODO
             if self.energy <= self.prop.max_energy * 0.8:
                 self.hungry_desire = math.inf
@@ -408,7 +409,7 @@ class PreyAgent(ProactiveAgent):
             raise Exception('Intencion de moverse, sin camino')     
 
         future_position = None
-        if len(self.current_path) > 1 and P.close_preys.get(self.current_path[1], None) is not None:
+        if len(self.current_path) > 1 :#and P.close_preys.get(self.current_path[1], None) is not None:
             future_position = self.current_path[1]
         #elif self.current_path[0] != P.position and \
         #        P.close_preys.get(self.current_path[1], None) is not None:
@@ -435,7 +436,14 @@ class PreyAgent(ProactiveAgent):
         return self.__mov(P, self.current_path[0])
 
     def intention_scape(self, P: PerceptionPrey):
-        predators_matrix, path = AStarPlus(numpy_array=self.prop.map, x=P.position[0], y=P.position[1], found=lambda x, y: (x, y) in P.close_predators, obstacle=lambda x, y: self.prop.map[x][y] == Obstacle() or self.prop.map[x][y] == Plant() or P.close_preys.get((x,y),None) is not None, vision=1000000)
+        predators_matrix, path = AStarPlus(numpy_array=self.prop.map,
+                            x=P.position[0],
+                            y=P.position[1],
+                            found=lambda x, y: (x, y) in P.close_predators,
+                            obstacle=lambda x, y: self.prop.map[x][y] == Obstacle() or \
+                                    self.prop.map[x][y] == Plant(), #or \
+                                    #P.close_preys.get((x,y),None) is not None,
+                            vision=1000000)
         predators_abundance_matrix = transform(predators_matrix, xpansion_distance= 1)
         (x, y) = P.position
         pounded_matrix = [[0, 0, 0], 
