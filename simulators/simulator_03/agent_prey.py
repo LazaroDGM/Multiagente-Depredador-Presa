@@ -271,7 +271,7 @@ class PreyAgent(ProactiveAgent):
         self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 3))
         self.breeding_desire = abs(self.prop.rand.normalvariate(0, 4))
         if len(P.close_predators) > 0:
-            self.scape_desire = abs(self.prop.rand.normalvariate(0, 0.02 * self.prop.vision_radius ))
+            self.scape_desire = abs(self.prop.rand.normalvariate(0, 0.5 * self.prop.vision_radius ))
         else:
             self.scape_desire = 0
         
@@ -305,7 +305,7 @@ class PreyAgent(ProactiveAgent):
             self.objetive = NOTHING
             return self.intention_scape(P)
         # Hambriento
-        elif self.objetive == EAT:
+        if self.objetive == EAT:
             # Comer para llenarse # TODO
             if self.energy <= self.prop.max_energy * 0.8:
                 self.hungry_desire = math.inf

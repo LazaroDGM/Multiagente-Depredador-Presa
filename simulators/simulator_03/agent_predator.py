@@ -70,8 +70,6 @@ class ParamsPredator():
             vision_radius,
             lost_energy_wait,
             lost_energy_walk,
-            lost_energy_wait_burrow,
-            lost_energy_walk_burrow,
             memory_prey_wait_time,
             memory_predator_wait_time,
             forget_tick,
@@ -89,8 +87,6 @@ class ParamsPredator():
         self.vision_radius = vision_radius
         self.lost_energy_wait = lost_energy_wait
         self.lost_energy_walk = lost_energy_walk
-        self.lost_energy_wait_burrow = lost_energy_wait_burrow
-        self.lost_energy_walk_burrow = lost_energy_walk_burrow
         self.memory_prey_wait_time = memory_prey_wait_time
         self.memory_predator_wait_time = memory_predator_wait_time
         self.forget_tick = forget_tick
@@ -119,8 +115,6 @@ class PredatorAgentPropierties:
             cls.map = np.copy(map)
             cls.lost_energy_wait = params.lost_energy_wait
             cls.lost_energy_walk = params.lost_energy_walk
-            cls.lost_energy_wait_burrow = params.lost_energy_wait_burrow
-            cls.lost_energy_walk_burrow = params.lost_energy_walk_burrow
             cls.memory_prey_wait_time = params.memory_prey_wait_time
             cls.memory_predator_wait_time = params.memory_predator_wait_time
             cls.forget_tick = params.forget_tick
@@ -156,7 +150,7 @@ class PredatorAgent(ProactiveAgent):
         self.wait_move = 1
         self.extra_energy = 0
         self.gestating = 0
-        self.gestate_wait = 0
+        self.gestate_wait = self.prop.gestate_again_time
 
         # Desires
         self.breeding_desire = 0
@@ -218,7 +212,7 @@ class PredatorAgent(ProactiveAgent):
             return ActionPredator(new_position= P.position,
                             eat= False,
                             reproduce=True,
-                            count_reproduce= int(abs(self.prop.rand.normalvariate(self.prop.reproduction_ratio, 2)))+1)
+                            count_reproduce= self.prop.reproduction_ratio) #int(abs(self.prop.rand.normalvariate(self.prop.reproduction_ratio, 2)))+1)
         return ActionPredator(new_position= P.position, eat= False)
 
     ################ BRF ###################
@@ -246,8 +240,8 @@ class PredatorAgent(ProactiveAgent):
 
         # Actualizando avance del Camino Actual
         if self.current_path is None or len(self.current_path) == 0:
-            if self.objetive == GESTATE:
-                self.objetive=NOTHING
+            #if self.objetive == GESTATE:
+            #    self.objetive=NOTHING
             self.current_path = None
         else:
             if P.position == self.current_path[0]:
@@ -287,7 +281,8 @@ class PredatorAgent(ProactiveAgent):
         # if self.breeding_desire > 0.5 and self.hungry_desire < 0.7:
         # if self.scape_desire > 0.5:
         # if self.hungry_desire > 0.5
-
+        if 0.8 <= self.prop.rand.uniform(0,1):
+            self.objetive = NOTHING
         
         # Hambriento
         if self.objetive == EAT:
@@ -325,46 +320,38 @@ class PredatorAgent(ProactiveAgent):
                 self.__intention_search_food(P)
                 self.objetive = FIND_EAT
                 return self.intention_walk_to(P)
-        else:
-            return self.intention_walk_random(P, obstacles=[Plant(), Obstacle(), BURROW])
-        '''
-        if self.objetive == GO_GESTATE:
-            if self.prop.map[P.position[0]][P.position[1]] == BURROW:
-                if 0.2 <= self.prop.rand.uniform(0,1):
-                    return self.intention_walk_random(P,[Obstacle(), Plant(), None])
-                self.objetive = GESTATE
-                return self.__gestate(P)
-            return self.intention_walk_to(P)
-        elif self.objetive == EAT_GESTATE and \
-            self.prop.breeding_point <= self.extra_energy:
-            self.__intention_go_to_gestate(P)
-            self.objetive = GO_GESTATE
-            return self.intention_walk_to(P)
-        elif self.objetive in [GO_EAT_GESTATE, FIND_EAT_GESTATE]:
+        #else:
+        #    return self.intention_walk_random(P, obstacles=[Plant(), Obstacle(), BURROW])
+        
+        if self.objetive == EAT_GESTATE and self.prop.breeding_point <= self.extra_energy:
+            self.objetive = GESTATE
+            return self.__gestate(P)
+        if self.objetive in [GO_EAT_GESTATE, FIND_EAT_GESTATE]:            
             if self.objetive == FIND_EAT_GESTATE:
-                if P.position in P.close_food:
+                if P.position in P.close_preys:
                     self.objetive = EAT_GESTATE
                     self.current_path = None
                     return self.__eat(P)
-                if len(P.close_food) > 0:
+                if len(P.close_preys) > 0:
                     self.__intention_go_to_eat(P)
                     self.objetive = GO_EAT_GESTATE
                     return self.intention_walk_to(P)
                 else:
                     return self.intention_walk_to(P)
             elif self.objetive == GO_EAT_GESTATE:
-                if P.position in P.close_food:
+                if P.position in P.close_preys:
                     self.objetive = EAT_GESTATE
                     self.current_path = None
                     return self.__eat(P)
                 return self.intention_walk_to(P)
-        elif 1 * self.breeding_desire >= len(self.prey_memory) and \
+        elif 0.3 * self.breeding_desire >= len(self.predator_memory) and \
                 self.gestate_wait <= 0:
                 #self.food_memory.gen_abundance() >= 0.55 and \
             self.__intention_search_food(P)
             self.objetive = FIND_EAT_GESTATE
-            return self.intention_walk_random(P)
-        '''
+            return self.intention_walk_to(P)
+        else:
+            return self.intention_walk_random(P, obstacles=[Plant(), Obstacle(), BURROW])
 
         
         #elif self.breeding_desire >= len(self.prey_memory):

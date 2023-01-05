@@ -253,12 +253,36 @@ class Environment03(Environment):
                 for position in news_positions:
                     prey = PreyAgent(self.prop_prey)
                     self._map[position[0]][position[1]].AddPrey(prey)
-                    self.preys[prey] = position                
+                    self.preys[prey] = position       
+
+    def gen_predators(self, actions_predators):        
+        for predator, action in actions_predators:
+            if action.reproduce:                
+                r, c = self.predators[predator]
+                min_r = max(0, r-1)
+                min_c = max(0, c-1)
+                max_r = min(self._map.shape[0], r+1+1)
+                max_c = min(self._map.shape[1], c+1+1) 
+                emptys = []
+                for i in range(min_r, max_r):
+                    for j in range(min_c, max_c):
+                        box= self._map[i][j]
+                        if box == Plant() or box == Obstacle() or isinstance(box, Burrow):
+                            continue
+                        if box.hasPredator():
+                            continue
+                        emptys.append((i,j))
+                news_positions = self._rand.sample(emptys, min(len(emptys), action.count_reproduce))
+                for position in news_positions:
+                    predator = PredatorAgent(self.prop_predator)
+                    self._map[position[0]][position[1]].AddPredator(predator)
+                    self.predators[predator] = position          
 
 
     def transform(self, actions_predators, actions_preys):
         
         self.gen_preys(actions_preys)
+        self.gen_predators(actions_predators)
 
         delete_prey = []
         new_positions_predators = {}
