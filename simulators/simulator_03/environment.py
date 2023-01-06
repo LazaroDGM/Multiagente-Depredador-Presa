@@ -29,6 +29,8 @@ class Environment03(Environment):
         self.initial_count_predator = initial_count_predator
         self.prop_prey = PreyAgentPropierties(params_prey, map)
         self.prop_predator = PredatorAgentPropierties(params_predator, map)
+        self.life_preys = []
+        self.life_predators = []
         
         self._see_functions = {
             PreyAgent: self.seePrey,
@@ -203,7 +205,7 @@ class Environment03(Environment):
         delete_preys = []
         for prey, (i, j) in self.preys.items():
             prey : PreyAgent
-            if prey.energy <= 0 or prey.life <= 0:
+            if prey.energy <= 0:
                 delete_preys.append(prey)
                 box = self._map[i][j]
                 if isinstance(box, (Burrow, Floor)):
@@ -213,13 +215,14 @@ class Environment03(Environment):
                 else:
                     raise Exception('Presa lista para morirse, que no esta en ningun lugar')
         for prey in delete_preys:
+            self.life_preys.append(prey.life)
             self.preys.pop(prey)
         del(delete_preys)
 
         delete_predators = []
         for predator, (i, j) in self.predators.items():
             predator : PredatorAgent
-            if predator.energy <= 0 or predator.energy <= 0:
+            if predator.energy <= 0:
                 delete_predators.append(predator)
                 box = self._map[i][j]
                 if isinstance(box, Floor):
@@ -229,6 +232,7 @@ class Environment03(Environment):
                 else:
                     raise Exception('Predator lista para morirse, que no esta en ningun lugar')
         for predator in delete_predators:
+            self.life_predators.append(predator.life)
             self.predators.pop(predator)
         del(delete_predators)
     

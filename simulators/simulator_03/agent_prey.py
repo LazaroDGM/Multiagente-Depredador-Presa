@@ -82,8 +82,7 @@ class ParamsPrey():
             breeding_point,
             food_energy_ratio,
             gestate_time,
-            gestate_again_time,
-            max_life,
+            gestate_again_time,            
             reproduction_ratio,
             gamma,
             bold,
@@ -106,8 +105,7 @@ class ParamsPrey():
         self.breeding_point = breeding_point
         self.food_energy_ratio = food_energy_ratio
         self.gestate_time = gestate_time
-        self.gestate_again_time = gestate_again_time
-        self.max_life = max_life
+        self.gestate_again_time = gestate_again_time        
         self.reproduction_ratio = reproduction_ratio        
         
         if not (0 <=bold <= 1):
@@ -152,8 +150,7 @@ class PreyAgentPropierties:
             cls.breeding_point = params.breeding_point
             cls.food_energy_ratio = params.food_energy_ratio
             cls.gestate_time = params.gestate_time
-            cls.gestate_again_time = params.gestate_again_time
-            cls.max_life = params.max_life
+            cls.gestate_again_time = params.gestate_again_time            
             cls.reproduction_ratio = params.reproduction_ratio
 
             cls.bold = params.bold
@@ -189,7 +186,7 @@ class PreyAgent(ProactiveAgent):
         self.predator_memory = PredatorMemory(self.prop.memory_predator_wait_time)
 
         self.energy = self.prop.max_energy
-        self.life = self.prop.max_life
+        self.life = 0
         self.eating = 0
         self.wait_move = 1
         self.extra_energy = 0
@@ -270,6 +267,8 @@ class PreyAgent(ProactiveAgent):
 
     def brf(self, P: PerceptionPrey):
 
+        self.life += 1
+
         # Olvidando Presas
         self.prey_memory.Tick()
         # Recordando Presas cercanas        
@@ -314,7 +313,7 @@ class PreyAgent(ProactiveAgent):
         
     ##################### FILTER ##############################
 
-    def filter(self, P: PerceptionPrey):
+    def filter(self, P: PerceptionPrey):        
 
         # Acciones que siempre se deben hacer en condiciones determinadas
         if self.wait_move > 0:
@@ -327,7 +326,6 @@ class PreyAgent(ProactiveAgent):
             Ac = self.__wait_gestate(P)
             return Ac
         self.gestate_wait -=1
-        self.life -= 1
         
         # Acciones que dependen de varios factores probabilisticos
         # TODO
