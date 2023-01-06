@@ -1,136 +1,134 @@
-from simulators.simulator_02.environment import Environment02
-from simulator.entities import Obstacle
+from simulators.simulator_03.environment import Environment03, Plant, Obstacle
+from simulators.simulator_03.simulator import Simulator03_2D, Simulator03
+from simulators.simulator_03.agent_predator import ParamsPredator
+from simulators.simulator_03.agent_prey import ParamsPrey
 from simulator.simulator import Simulator
-from simulators.simulator_02.simulator import Simulator02
 import numpy as np
-#a1 = AnimalAgent(0.9)
-#a2 = AnimalAgent(0.5)
-#print(a1 == a2)
-#print(a1.behaviors == a2.behaviors)
-#print(a1.prop.digestion_time)
-#print(a2.prop.digestion_time)
-#
-#a1.action([])
-
-#print(any(filter(lambda x: x>5, c)))
+import time
+import math
+from tests.simulator03.map01.test03 import generate_result, view_results
+import matplotlib.pyplot as plt
+import random
 
 
-#AnimalAgentPropierties()
 
-o = set([Obstacle()])
-v = set()
+#start = time.time()
+#generate_result()
+#step = time.time()
+#print(step - start)
+#view_results()
+#exit()
+
+B = 'BURROW'
+O = Obstacle()
+P = Plant()
+N = None
+
 map = np.array(
     [
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],
-        [v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v,v],            
+        [N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N],
+        [N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N],
+        [N,N,N,N,O,O,O,O,N,N,N,N,N,N,N,N,N,N,N,O,O,O,O,N,N,N,N,N],
+        [N,N,N,N,O,B,B,O,O,N,N,N,N,N,N,O,O,O,P,O,N,N,N,N,N,N,N,N],
+        [N,N,N,O,O,B,B,B,O,N,N,N,N,N,O,O,N,N,O,N,N,N,N,O,O,O,N,N],
+        [N,N,N,O,B,B,B,B,B,N,N,N,N,N,O,N,N,N,N,N,N,N,O,O,N,N,N,N],
+        [N,N,N,O,B,B,B,B,B,N,N,N,N,N,O,N,N,N,N,N,N,N,O,N,N,N,N,N],
+        [N,N,N,N,B,B,O,O,O,N,N,N,N,N,O,N,N,O,O,O,N,N,N,N,N,N,N,N],
+        [N,N,N,N,N,N,N,N,N,N,N,N,N,N,O,O,O,O,N,O,O,N,N,N,P,N,N,N],
+        [N,N,N,N,N,N,N,N,N,N,N,N,O,O,O,N,N,N,N,N,O,O,N,N,N,N,N,N],
+        [N,N,N,N,N,N,N,N,N,N,O,O,O,N,N,N,N,N,N,N,N,O,N,N,N,N,N,N],
+        [N,N,N,N,N,N,N,N,N,O,O,N,N,N,N,P,N,N,N,O,O,O,N,N,N,N,N,N],
+        [N,N,P,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,O,O,N,N,N,N,N],
+        [N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,O,O,O,O,O,B,B,O,N,N],
+        [N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,B,B,B,B,B,B,B,O,N,N],
+        [N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,B,B,B,B,B,B,B,O,N,N],
     ]
 )
 
-sim = Simulator02(Environment02)
-
-simulation = sim.StartSimulation(
-    tick=0.0,
-    stop_steps=5000,
+sim = Simulator03()
+sims= sim.StartManySimulations(
+    count_simulations=1,
+    stop_steps=10000,
     map= map,
-    initial_count_animals= [2,5],
-    breeding_period= [200,50],
-    breeding_ratio= [0.3, 0.2],
-    breeding_population= [0.75,0.5],
-    vision_radius= [6,3],
-    food_generation_period= 50,
-    food_ratio= 0.1,
-    energy_ratio= 0.4,
-    digestion_time= [5,2],
-    max_energy= [150, 60],
-    special_parameters=[[0.3,0.3,2],[0.3,0.4,5]],
+    food_generation_period=70,
+    plant_radius= 3,
+    food_ratio= 0.125,
+    initial_count_prey=3,
+    initial_count_predator=1,
+    params_prey= ParamsPrey(
+        digestion_time=3,
+        max_energy= 150,
+        velocity= 1,
+        vision_radius= 3,
+        lost_energy_wait=0.5,
+        lost_energy_wait_burrow=0.2,
+        lost_energy_walk=1,
+        lost_energy_walk_burrow=0.4,
+        memory_predator_wait_time=50,
+        memory_prey_wait_time=150,
+        breeding_point=100,
+        food_energy_ratio=0.3,
+        forget_tick= 30,
+        weight_memory_food= 20,
+        gestate_again_time= 0,
+        gestate_time= 10,        
+        reproduction_ratio=2,
+        gamma=0.0,
+        bold=0.8,
+        lamb= 2,
+        beta=6,
+        sigma=4
+    ),
+    params_predator= ParamsPredator(
+        digestion_time=5,
+        max_energy= 300,
+        velocity= 0,
+        vision_radius= 5,
+        lost_energy_wait=0.5,
+        lost_energy_walk=1,
+        memory_predator_wait_time=300,
+        memory_prey_wait_time=100,
+        breeding_point=250,
+        food_energy_ratio=0.8,
+        forget_tick= 30,
+        weight_memory_food= 20,
+        gestate_again_time= 100,
+        gestate_time= 10,
+        reproduction_ratio=1,
+        bold=0.8,
+        beta=9,
+        sigma=2
+    )
 )
 
-#sim = Simulator01(EnvironmentSimulator01)
-#
-#simulation = sim.StartSimulation(
-#    tick=0.1,
-#    stop_steps=1000,
-#    shape_map= (5,5),
-#    initial_count_animals= 2,
-#    breeding_period= 500,
-#    breeding_ratio= 0.3,
-#    vision_radius= 5,
-#    food_generation_period= 20,
-#    food_ratio= 0.125,
-#    energy_ratio= 1,
-#    digestion_time= 3,
-#    max_energy= 200
-#)
-#
-results = np.array(simulation[1]).T
-#
-print(results)
-import matplotlib.pyplot as plt
-#
-t = range(results.shape[1])
-plt.plot(t, results[0])
-plt.plot(t, results[1])
-plt.plot(t, results[2])
+import seaborn as sb
+
+sb.heatmap(sims[0][3])
+plt.show()
+sb.heatmap(sims[0][4])
 plt.show()
 
+results = np.array([result for result in sims[0][0]]).T
 
 
+print(results)
+import matplotlib.pyplot as plt
+plt.plot(range(len(results[0])), results[0])
+plt.plot(range(len(results[0])), results[1])
+plt.plot(range(len(results[0])), results[2])
+plt.show()
 
-env = Environment02(
-    map= map,
-    initial_count_animals= [0,3],
-    breeding_period= [500,200],
-    breeding_ratio= [0.3, 0.2],
-    vision_radius= [5,3],
-    food_generation_period= 20,
-    food_ratio= 0.125,
-    energy_ratio= 1,
-    digestion_time= [3,6],
-    max_energy= [200, 500],
-    special_parameters=[[0,0],[1,1]],
-)
+print(np.mean(sims[0][1]))
+print(np.mean(sims[0][2]))
 
-print(env.agents_groups)
-print(env.breeding_period)
-print(env.breeding_ratio)
-print(env.cicle)
-print(env.cicle_breeding)
-print(env.cicle_food)
-print(env.count_foods)
-print(env.digestion_time)
-print(env.energy_ratio)
-print(env.food_generation_period)
-print(env.food_ratio)
-print(env.initial_count_animals)
-print(env.max_energy)
-print(env._see_functions)
+#env = Environment03(
+#    map= map,
+#    food_generation_period=40,
+#    plant_radius= 3,
+#    food_ratio= 0.1,
+#    initial_count_prey=0,
+#    initial_count_predator=0,
+#    params_prey=[],
+#    params_predator=[]
+#)
 
-print(env._map)
-env.next_step()
-print(env._map)
-env.next_step()
-print(env._map)
-env.next_step()
-print(env._map)
-
-env.next_step()
-print(env._map)
-env.next_step()
-print(env._map)
-env.next_step()
-print(env._map)
-
-#print(e.seeAgent(list(e.agents.keys())[0]))
