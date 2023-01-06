@@ -6,12 +6,12 @@ from simulator.simulator import Simulator
 import numpy as np
 import time
 import math
-from tests.simulator03.map01.test07 import generate_result, view_results
+from tests.simulator03.map01.test08 import generate_result, view_results
 import matplotlib.pyplot as plt
 import random
 
 start = time.time()
-generate_result()
+#generate_result()
 end = time.time()
 print(end-start)
 view_results()

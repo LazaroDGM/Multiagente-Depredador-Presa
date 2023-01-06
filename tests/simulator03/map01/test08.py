@@ -63,12 +63,12 @@ def generate_result():
             weight_memory_food= 20,
             gestate_again_time= 0,
             gestate_time= 10,        
-            reproduction_ratio=2,
-            gamma=0.0,
-            bold=0.8,
-            lamb= 2,
-            beta=6,
-            sigma=4
+            reproduction_ratio=5.38,
+            gamma=0.62,
+            lamb= 0.25,
+            beta=10.8,
+            sigma=9.34,
+            bold=0.78
         ),
         params_predator= ParamsPredator(
             digestion_time=5,
@@ -86,9 +86,9 @@ def generate_result():
             gestate_again_time= 100,
             gestate_time= 10,
             reproduction_ratio=1,
-            bold=0.8,
-            beta=9,
-            sigma=2
+            beta=16.82,
+            sigma=6.72,
+            bold=0.17
         )
     )
 
@@ -109,7 +109,7 @@ def generate_result():
     heatmap_preys = np.array([simulation[3] for simulation in simulations])
     heatmap_predators = np.array([simulation[4] for simulation in simulations])
     
-    with open('results/simulator03/map01/04.npz', 'wb') as ft:
+    with open('results/simulator03/map01/08.npz', 'wb') as ft:
         np.savez(ft,
             counts_preys= counts_preys,
             counts_predators = counts_predators,
@@ -125,7 +125,7 @@ def generate_result():
         )
 
 def view_results():
-    with open('results/simulator03/map01/04.npz', 'rb') as ft:
+    with open('results/simulator03/map01/08.npz', 'rb') as ft:
         obj = np.load(ft)
         
         #print(results.shape)
@@ -157,8 +157,15 @@ def view_results():
         plt.show()        
         
         sb.heatmap(np.mean(obj['heatmap_preys'], axis=0))
-        plt.show()  
+        plt.show() 
+
         sb.heatmap(np.mean(obj['heatmap_predators'], axis=0))
-        plt.show()         
+        plt.show()        
+
+        print(obj['mean_life_preys'].mean())
+        print(obj['mean_life_predators'].mean())
+
+        plt.plot(obj['counts_preys'].mean(axis=0)[10000:], obj['counts_predators'].mean(axis=0)[10000:], '.', linewidth= 0.8)
+        plt.show()
 
         
