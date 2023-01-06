@@ -4,10 +4,8 @@ import numpy as np
 import numpy.linalg as linalg
 
 def den_D1(l, alpha, sigma, gamma):
-    if sigma > alpha:
-        raise Exception('"sigma" debe ser menor que "l"')
-    if not (l <= alpha <= alpha + l):
-        raise Exception('"alpha" debe ser un valor entre "l" y "sigma + l"')
+    if l >= alpha:
+        raise Exception('"l" debe ser menor que "alpha"')
     if gamma > 1 or gamma < 0:
         raise Exception('"gamma" debe ser un valor en el intervalo [0,1]')
     
@@ -39,9 +37,9 @@ def den_D1(l, alpha, sigma, gamma):
     
     return f
 
-def generator_D1(l, alpha, sigma, gamma):
-    if sigma > alpha:
-        raise Exception('"sigma" debe ser menor que "l"')
+def generator_D1(l, alpha, sigma, gamma, rand_var=None):
+    if l >= alpha:
+        raise Exception('"l" debe ser menor que "alpha"')
     if gamma > 1 or gamma < 0:
         raise Exception('"gamma" debe ser un valor en el intervalo [0,1]')
     
@@ -74,13 +72,21 @@ def generator_D1(l, alpha, sigma, gamma):
     g = 1/(L - l)
     c = (L-l)* (sol[2]*alpha + sol[0])
 
-    rand = random.Random()
+    if rand_var is None:
+        rand_var = random.Random()
     def generator():        
-        y = rand.uniform(l, L)
-        x = rand.uniform(0,1)
+        y = rand_var.uniform(l, L)
+        x = rand_var.uniform(0,1)
         while x >= f(y) / (c * g):
-            x = rand.uniform(0,1)
-            y = rand.uniform(l, L)
+            x = rand_var.uniform(0,1)
+            y = rand_var.uniform(l, L)
             print('iter')    
         return y
     return generator
+
+#rand = random.Random()
+#gen = generator_D1(l=1, alpha= 2, sigma=8, gamma= 0)
+#l = [int(rand.expovariate(2))+1 for i in range(0, 1000)]
+#plt.hist(l,30)
+#plt.show()
+#exit()

@@ -9,6 +9,7 @@ from Algorithms.transform import transform, betterMove
 import numpy as np
 import random
 import math
+import stats.prob as prob
 
 BURROW = 'BURROW'
 FLOOR = None
@@ -134,6 +135,13 @@ class PreyAgentPropierties:
             cls.max_life = params.max_life
             cls.reproduction_ratio = params.reproduction_ratio
             cls.rand = random.Random()
+            cls.rand_reproduction = (prob.generator_D1(
+                l= 1,
+                alpha=params.reproduction_ratio,
+                sigma=2,
+                gamma=0.0,
+                rand_var=cls.rand
+            ),)
         return cls.instance
     
     @classmethod
@@ -223,10 +231,11 @@ class PreyAgent(ProactiveAgent):
         self.gestating -= 1
         if self.gestating <= 0:
             self.gestate_wait = self.prop.gestate_again_time
+            n = int(self.prop.rand_reproduction[0]())
             return ActionPrey(new_position= P.position,
                             eat= False,
                             reproduce=True,
-                            count_reproduce= int(abs(self.prop.rand.normalvariate(self.prop.reproduction_ratio, 2)))+1)
+                            count_reproduce= n)
         return ActionPrey(new_position= P.position, eat= False)
 
     ################ BRF ###################
@@ -268,10 +277,10 @@ class PreyAgent(ProactiveAgent):
 
     def options(self, P: PerceptionPrey):
         
-        self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 3))
+        self.hungry_desire = self.prop.max_energy * abs(self.prop.rand.betavariate(alpha=2, beta=6))
         self.breeding_desire = abs(self.prop.rand.normalvariate(0, 4))
         if len(P.close_predators) > 0:
-            self.scape_desire = abs(self.prop.rand.normalvariate(0, 0.5 * self.prop.vision_radius ))
+            self.scape_desire = self.prop.rand.expovariate(1.5)+1
         else:
             self.scape_desire = 0
         
@@ -301,7 +310,7 @@ class PreyAgent(ProactiveAgent):
         # if self.hungry_desire > 0.5
 
         #~~~ Agente Precavido ~~~#
-        if 0 < len(P.close_predators):
+        if 0 < len(P.close_predators) and len(P.close_predators) <= self.scape_desire:
             self.objetive = NOTHING
             return self.intention_scape(P)
         # Hambriento

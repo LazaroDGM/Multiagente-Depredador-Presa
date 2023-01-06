@@ -387,7 +387,7 @@ class Environment03(Environment):
 
 
     def outputs(self):
-        return len(self.preys), self.count_foods
+        return len(self.preys), len(self.predators), self.count_foods
 
     def reset(self):
         self.prop_prey.delete()

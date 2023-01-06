@@ -1,9 +1,10 @@
 import random
 import numpy as np
 from heapq import heapify, heappop, heappush
+import stats.prob as prob
 
 class FoodMemory:
-    def __init__(self, weight = 20, forget_tick = 10):
+    def __init__(self, weight = 20, forget_tick = 10, rand_var=None):
         self.slots = [[], [], [], []]
         self.weights = [int(weight * 0.3),
                                 int(weight * 0.3),
@@ -12,8 +13,8 @@ class FoodMemory:
         self.len = sum(self.weights)
         self.memories_location = lambda ratio: 0 if ratio >0.25 else 1 if ratio > 0.2 else 2 if ratio > 0.1 else 3
         self.forget_tick = forget_tick
-        self.current_tick = 0
-        self.rnd = random.Random()
+        self.current_tick = 0        
+        self.rand_manhathan = prob.generator_D1(l= 2, alpha=6, sigma=1, gamma=0.0, rand_var= rand_var)
 
         self.max_abundance = 4 * self.weights[0] + 3 * self.weights[1] + 2* self.weights[2] + self.weights[3]
 
@@ -45,7 +46,7 @@ class FoodMemory:
             if len(current_slot) < self.weights[location]: 
                 current_slot.append(pos)
                 return
-            choix = abs(int(self.rnd.normalvariate(0, 4.5)))
+            choix = self.rand_manhathan()
             for i in range(len(current_slot)):
                 manhathan_distance = max(abs(current_slot[i][0] - pos[0]), abs(current_slot[i][1] - pos[1]))
                 if manhathan_distance <= choix:

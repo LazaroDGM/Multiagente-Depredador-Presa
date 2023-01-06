@@ -254,8 +254,8 @@ class PredatorAgent(ProactiveAgent):
 
     def options(self, P: PerceptionPredator):
         
-        self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 8))
-        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 50/2))
+        self.hungry_desire = self.prop.max_energy * self.prop.rand.betavariate(alpha=2, beta=9)
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 2))
         
     ##################### FILTER ##############################
 
@@ -344,7 +344,7 @@ class PredatorAgent(ProactiveAgent):
                     self.current_path = None
                     return self.__eat(P)
                 return self.intention_walk_to(P)
-        elif 0.3 * self.breeding_desire >= len(self.predator_memory) and \
+        elif self.breeding_desire >= len(self.predator_memory) and \
                 self.gestate_wait <= 0:
                 #self.food_memory.gen_abundance() >= 0.55 and \
             self.__intention_search_food(P)
