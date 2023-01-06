@@ -6,12 +6,13 @@ from simulator.simulator import Simulator
 import numpy as np
 import time
 import math
-from tests.simulator03.map01.test03 import generate_result, view_results
+from tests.simulator03.map01.test04 import generate_result, view_results
 import matplotlib.pyplot as plt
 import random
 
-
-
+#generate_result()
+view_results()
+exit()
 #start = time.time()
 #generate_result()
 #step = time.time()
@@ -108,7 +109,7 @@ plt.show()
 sb.heatmap(sims[0][4])
 plt.show()
 
-results = np.array([result for result in sims[0][0]]).T
+results = np.array([result[0:3] for result in sims[0][0]]).T
 
 
 print(results)

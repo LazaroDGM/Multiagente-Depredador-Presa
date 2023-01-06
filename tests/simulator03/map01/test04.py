@@ -2,10 +2,12 @@ from simulators.simulator_03.environment import Environment03, Plant, Obstacle
 from simulators.simulator_03.simulator import Simulator03_2D
 from simulators.simulator_03.agent_predator import ParamsPredator
 from simulators.simulator_03.agent_prey import ParamsPrey
-from simulator.simulator import Simulator
+from simulators.simulator_03.simulator import Simulator03
 import numpy as np
 import matplotlib.pyplot as plt
 import stats.stats as st
+import statistics
+import seaborn as sb
 
 def generate_result():
 
@@ -35,10 +37,9 @@ def generate_result():
         ]
     )
 
-    sim = Simulator(Environment03)
-    simulation= sim.StartManySimulations(
-        count_simulations=2,
-        stop_steps=1000,
+    sim = Simulator03()
+    simulations= sim.StartManySimulationsThreading(        
+        stop_steps=10000,
         map= map,
         food_generation_period=70,
         plant_radius= 3,
@@ -90,47 +91,64 @@ def generate_result():
             sigma=2
         )
     )
-    #results = np.array(results).T
 
-#env = Environment03(
-#    map= map,
-#    food_generation_period=40,
-#    plant_radius= 3,
-#    food_ratio= 0.1,
-#    initial_count_prey=0,
-#    initial_count_predator=0,
-#    params_prey=[],
-#    params_predator=[]
-#)
+    counts = [np.array(simulation[0]).T for simulation in simulations]
+    counts_preys = [count[0] for count in counts]
+    counts_predators = [count[1] for count in counts]
+    counts_food = [count[2] for count in counts]
 
-    results = np.array(simulation)
+    mean_life_preys = [np.mean(simulation[1]) for simulation in simulations]
+    mean_life_predators = [np.mean(simulation[2]) for simulation in simulations]
+
+    median_life_preys = [np.median(simulation[1]) for simulation in simulations]
+    median_life_predators = [np.median(simulation[2]) for simulation in simulations]
+
+    mode_life_preys = [statistics.mode(simulation[1]) if len(simulation[1]) > 0 else np.nan for simulation in simulations]
+    mode_life_predators = [statistics.mode(simulation[2]) if len(simulation[2]) > 0 else np.nan for simulation in simulations]    
+
+    heatmap_preys = np.array([simulation[3] for simulation in simulations])
+    heatmap_predators = np.array([simulation[4] for simulation in simulations])
+    
     with open('results/simulator03/map01/04.npz', 'wb') as ft:
-        np.savez(ft, results= results)
+        np.savez(ft,
+            counts_preys= counts_preys,
+            counts_predators = counts_predators,
+            counts_food = counts_food,
+            mean_life_preys= mean_life_preys,
+            mean_life_predators = mean_life_predators,
+            median_life_preys = median_life_preys,
+            median_life_predators= median_life_predators,
+            mode_life_preys= mode_life_preys,
+            mode_life_predators= mode_life_predators,
+            heatmap_preys = heatmap_preys,
+            heatmap_predators = heatmap_predators
+        )
 
 def view_results():
-    with open('results/simulator03/map01/03.npz', 'rb') as ft:
+    with open('results/simulator03/map01/04.npz', 'rb') as ft:
         obj = np.load(ft)
-        results = obj['results']
+        
         #print(results.shape)
 
-        for result in results:
-            plt.plot(range(result.shape[0]), results.T[0], linewidth=0.8)
-        m = st.select_from_results(results, 0)
-        mean = m.mean(axis=0)
-        std = m.std(axis=0)
-        plt.plot(range(result.shape[0]), mean, '-.', color= 'black', linewidth= 4)
-        plt.plot(range(result.shape[0]), mean + std, '--', color= 'black', linewidth= 2)
-        plt.plot(range(result.shape[0]), mean - std, '--', color= 'black', linewidth= 2)
+        for result in obj['counts_preys']:
+            plt.plot(range(result.shape[0]), result, linewidth=0.8)        
+        mean = obj['counts_preys'].mean(axis=0)
+        std = obj['counts_preys'].std(axis=0)
+        plt.plot(range(len(mean)), mean, '-.', color= 'black', linewidth= 4)
+        plt.plot(range(len(mean)), mean + std, '--', color= 'black', linewidth= 2)
+        plt.plot(range(len(mean)), mean - std, '--', color= 'black', linewidth= 2)
         plt.show()
 
-        for result in results:
-            plt.plot(range(result.shape[0]), results.T[1], linewidth=0.8)
-        m = st.select_from_results(results, 1)
-        mean = m.mean(axis=0)
-        std = m.std(axis=0)
-        plt.plot(range(result.shape[0]), mean, '-.', color= 'black', linewidth= 4)
-        plt.plot(range(result.shape[0]), mean + std, '--', color= 'black', linewidth= 2)
-        plt.plot(range(result.shape[0]), mean - std, '--', color= 'black', linewidth= 2)
-        plt.show()
+        for result in obj['counts_predators']:
+            plt.plot(range(result.shape[0]), result, linewidth=0.8)        
+        mean = obj['counts_predators'].mean(axis=0)
+        std = obj['counts_predators'].std(axis=0)
+        plt.plot(range(len(mean)), mean, '-.', color= 'black', linewidth= 4)
+        plt.plot(range(len(mean)), mean + std, '--', color= 'black', linewidth= 2)
+        plt.plot(range(len(mean)), mean - std, '--', color= 'black', linewidth= 2)
+        plt.show()        
         
-        print(m.shape)
+        sb.heatmap(np.mean(obj['heatmap_preys'], axis=0))
+        plt.show()        
+
+        
