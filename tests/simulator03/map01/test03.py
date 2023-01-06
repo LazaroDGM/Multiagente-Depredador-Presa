@@ -1,5 +1,5 @@
 from simulators.simulator_03.environment import Environment03, Plant, Obstacle
-from simulators.simulator_03.simulator import Simulator03
+from simulators.simulator_03.simulator import Simulator03_2D
 from simulators.simulator_03.agent_predator import ParamsPredator
 from simulators.simulator_03.agent_prey import ParamsPrey
 from simulator.simulator import Simulator

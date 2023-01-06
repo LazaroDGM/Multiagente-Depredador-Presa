@@ -1,5 +1,5 @@
 from simulators.simulator_03.environment import Environment03, Plant, Obstacle
-from simulators.simulator_03.simulator import Simulator03
+from simulators.simulator_03.simulator import Simulator03_2D, Simulator03
 from simulators.simulator_03.agent_predator import ParamsPredator
 from simulators.simulator_03.agent_prey import ParamsPrey
 from simulator.simulator import Simulator
@@ -45,10 +45,10 @@ map = np.array(
     ]
 )
 
-sim = Simulator03(Environment03)
-_, results= sim.StartSimulation(
-    tick= 0.0,
-    stop_steps=15000,
+sim = Simulator03()
+sims= sim.StartManySimulations(
+    count_simulations=1,
+    stop_steps=10000,
     map= map,
     food_generation_period=70,
     plant_radius= 3,
@@ -100,13 +100,27 @@ _, results= sim.StartSimulation(
         sigma=2
     )
 )
-results = np.array(results).T
+
+import seaborn as sb
+
+sb.heatmap(sims[0][3])
+plt.show()
+sb.heatmap(sims[0][4])
+plt.show()
+
+results = np.array([result for result in sims[0][0]]).T
+
 
 print(results)
 import matplotlib.pyplot as plt
 plt.plot(range(len(results[0])), results[0])
 plt.plot(range(len(results[0])), results[1])
+plt.plot(range(len(results[0])), results[2])
 plt.show()
+
+print(np.mean(sims[0][1]))
+print(np.mean(sims[0][2]))
+
 #env = Environment03(
 #    map= map,
 #    food_generation_period=40,

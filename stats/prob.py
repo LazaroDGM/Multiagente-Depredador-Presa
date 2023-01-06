@@ -79,8 +79,7 @@ def generator_D1(l, alpha, sigma, gamma, rand_var=None):
         x = rand_var.uniform(0,1)
         while x >= f(y) / (c * g):
             x = rand_var.uniform(0,1)
-            y = rand_var.uniform(l, L)
-            print('iter')    
+            y = rand_var.uniform(l, L)            
         return y
     return generator
 

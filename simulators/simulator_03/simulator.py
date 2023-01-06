@@ -1,9 +1,9 @@
 from simulators.simulator_03.environment import Environment03, Food, Obstacle, Plant, Burrow, Floor
-from simulator.simulator import Simulator2D
+from simulator.simulator import Simulator2D, Simulator
 import drawing.util as draw
 import pygame
 
-class Simulator03(Simulator2D):
+class Simulator03_2D(Simulator2D):
     def __init__(self, ClassEnvironment) -> None:
         super().__init__(ClassEnvironment)
 
@@ -31,3 +31,16 @@ class Simulator03(Simulator2D):
                 else:
                     raise Exception('Error al pintar. Casilla Invalida')
         pygame.display.flip()
+
+class Simulator03(Simulator):
+    def __init__(self) -> None:
+        super().__init__(Environment03)
+
+    def StartManySimulations(self, count_simulations, stop_steps, reset= True, *args, **kvargs):
+        simulations = []
+        for _ in range(count_simulations):
+            outputs = self.StartSimulation(stop_steps, reset, *args, **kvargs)            
+            env = outputs[0]
+            env : Environment03
+            simulations.append((outputs[1], env.life_preys, env.life_predators, env.heatmap_preys, env.heatmap_predators))
+        return simulations
