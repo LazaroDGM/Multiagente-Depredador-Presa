@@ -77,9 +77,11 @@ class ParamsPredator():
             breeding_point,
             food_energy_ratio,
             gestate_time,
-            gestate_again_time,
-            max_life,
-            reproduction_ratio
+            gestate_again_time,            
+            reproduction_ratio,
+            bold,
+            beta,
+            sigma
         ) -> None:
         self.digestion_time = digestion_time
         self.max_energy = max_energy
@@ -94,9 +96,18 @@ class ParamsPredator():
         self.breeding_point = breeding_point
         self.food_energy_ratio = food_energy_ratio
         self.gestate_time = gestate_time
-        self.gestate_again_time = gestate_again_time
-        self.max_life = max_life
+        self.gestate_again_time = gestate_again_time        
         self.reproduction_ratio = reproduction_ratio
+        if not (0 <=bold <= 1):
+            raise Exception('El parametro "bold" debe estar en el intervalo de [0,1]')
+        self.bold = bold
+        if not (1<= beta <=20):
+            raise Exception('El parametro "beta" debe estar en el intervalo de [1,20]')
+        self.beta = beta
+        if not (1<= sigma <=10):
+            raise Exception('El parametro "beta" debe estar en el intervalo de [1,20]')
+        self.sigma = sigma
+
 
 
 ###################### PROPIERTIES #################################
@@ -123,9 +134,11 @@ class PredatorAgentPropierties:
             cls.food_energy_ratio = params.food_energy_ratio
             cls.gestate_time = params.gestate_time
             cls.gestate_again_time = params.gestate_again_time
-            cls.max_life = params.max_life
             cls.reproduction_ratio = params.reproduction_ratio
             cls.rand = random.Random()
+            cls.bold = params.bold
+            cls.beta = params.beta
+            cls.sigma = params.sigma
         return cls.instance
     
     @classmethod
@@ -145,7 +158,7 @@ class PredatorAgent(ProactiveAgent):
         self.predator_memory = PredatorMemory(self.prop.memory_predator_wait_time)
 
         self.energy = self.prop.max_energy
-        self.life = self.prop.max_life
+        self.life = 0
         self.eating = 0
         self.wait_move = 1
         self.extra_energy = 0
@@ -219,6 +232,8 @@ class PredatorAgent(ProactiveAgent):
 
     def brf(self, P: PerceptionPredator):
 
+        self.life += 1
+
         # Olvidando Presas
         self.prey_memory.Tick()
         # Recordando Presas cercanas        
@@ -254,13 +269,13 @@ class PredatorAgent(ProactiveAgent):
 
     def options(self, P: PerceptionPredator):
         
-        self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 8))
-        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 50/2))
+        self.hungry_desire = self.prop.max_energy * self.prop.rand.betavariate(alpha=2, beta=self.prop.beta)
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, self.prop.sigma))
         
     ##################### FILTER ##############################
 
     def filter(self, P: PerceptionPredator):
-
+        
         # Acciones que siempre se deben hacer en condiciones determinadas
         if self.wait_move > 0:
             Ac = self.__wait_move(P)
@@ -272,7 +287,6 @@ class PredatorAgent(ProactiveAgent):
             Ac = self.__wait_gestate(P)
             return Ac
         self.gestate_wait -=1
-        self.life -= 1
         
         # Acciones que dependen de varios factores probabilisticos
         # TODO
@@ -281,7 +295,7 @@ class PredatorAgent(ProactiveAgent):
         # if self.breeding_desire > 0.5 and self.hungry_desire < 0.7:
         # if self.scape_desire > 0.5:
         # if self.hungry_desire > 0.5
-        if 0.8 <= self.prop.rand.uniform(0,1):
+        if self.prop.bold <= self.prop.rand.uniform(0,1):
             self.objetive = NOTHING
         
         # Hambriento
@@ -344,7 +358,7 @@ class PredatorAgent(ProactiveAgent):
                     self.current_path = None
                     return self.__eat(P)
                 return self.intention_walk_to(P)
-        elif 0.3 * self.breeding_desire >= len(self.predator_memory) and \
+        elif self.breeding_desire >= len(self.predator_memory) and \
                 self.gestate_wait <= 0:
                 #self.food_memory.gen_abundance() >= 0.55 and \
             self.__intention_search_food(P)

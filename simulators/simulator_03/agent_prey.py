@@ -9,6 +9,7 @@ from Algorithms.transform import transform, betterMove
 import numpy as np
 import random
 import math
+import stats.prob as prob
 
 BURROW = 'BURROW'
 FLOOR = None
@@ -81,9 +82,13 @@ class ParamsPrey():
             breeding_point,
             food_energy_ratio,
             gestate_time,
-            gestate_again_time,
-            max_life,
-            reproduction_ratio
+            gestate_again_time,            
+            reproduction_ratio,
+            gamma,
+            bold,
+            lamb,
+            beta,
+            sigma
         ) -> None:
         self.digestion_time = digestion_time
         self.max_energy = max_energy
@@ -100,9 +105,24 @@ class ParamsPrey():
         self.breeding_point = breeding_point
         self.food_energy_ratio = food_energy_ratio
         self.gestate_time = gestate_time
-        self.gestate_again_time = gestate_again_time
-        self.max_life = max_life
-        self.reproduction_ratio = reproduction_ratio
+        self.gestate_again_time = gestate_again_time        
+        self.reproduction_ratio = reproduction_ratio        
+        
+        if not (0 <=bold <= 1):
+            raise Exception('El parametro "bold" debe estar en el intervalo de [0,1]')
+        self.bold = bold
+        if not (0 <= lamb <= 2):
+            raise Exception('El parametro "lamb" debe estar en el intervalo de [0,2]')
+        self.lamb = lamb
+        if not (0 <=gamma <= 1):
+            raise Exception('El parametro "gamma" debe estar en el intervalo de [0,1]')
+        self.gamma = gamma
+        if not (1<= beta <=20):
+            raise Exception('El parametro "beta" debe estar en el intervalo de [1,20]')
+        self.beta = beta
+        if not (1<= sigma <=10):
+            raise Exception('El parametro "beta" debe estar en el intervalo de [1,20]')
+        self.sigma = sigma
 
 
 ###################### PROPIERTIES #################################
@@ -130,10 +150,23 @@ class PreyAgentPropierties:
             cls.breeding_point = params.breeding_point
             cls.food_energy_ratio = params.food_energy_ratio
             cls.gestate_time = params.gestate_time
-            cls.gestate_again_time = params.gestate_again_time
-            cls.max_life = params.max_life
+            cls.gestate_again_time = params.gestate_again_time            
             cls.reproduction_ratio = params.reproduction_ratio
+
+            cls.bold = params.bold
+            cls.lamb = params.lamb
+            cls.gamma = params.gamma
+            cls.beta = params.beta
+            cls.sigma = params.sigma
+
             cls.rand = random.Random()
+            cls.rand_reproduction = (prob.generator_D1(
+                l= 1,
+                alpha=params.reproduction_ratio,
+                sigma=2,
+                gamma=params.gamma,
+                rand_var=cls.rand
+            ),)
         return cls.instance
     
     @classmethod
@@ -153,7 +186,7 @@ class PreyAgent(ProactiveAgent):
         self.predator_memory = PredatorMemory(self.prop.memory_predator_wait_time)
 
         self.energy = self.prop.max_energy
-        self.life = self.prop.max_life
+        self.life = 0
         self.eating = 0
         self.wait_move = 1
         self.extra_energy = 0
@@ -223,15 +256,18 @@ class PreyAgent(ProactiveAgent):
         self.gestating -= 1
         if self.gestating <= 0:
             self.gestate_wait = self.prop.gestate_again_time
+            n = int(self.prop.rand_reproduction[0]())
             return ActionPrey(new_position= P.position,
                             eat= False,
                             reproduce=True,
-                            count_reproduce= int(abs(self.prop.rand.normalvariate(self.prop.reproduction_ratio, 2)))+1)
+                            count_reproduce= n)
         return ActionPrey(new_position= P.position, eat= False)
 
     ################ BRF ###################
 
     def brf(self, P: PerceptionPrey):
+
+        self.life += 1
 
         # Olvidando Presas
         self.prey_memory.Tick()
@@ -268,16 +304,16 @@ class PreyAgent(ProactiveAgent):
 
     def options(self, P: PerceptionPrey):
         
-        self.hungry_desire = abs(self.prop.rand.normalvariate(0, self.prop.max_energy / 3))
-        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 4))
+        self.hungry_desire = self.prop.max_energy * abs(self.prop.rand.betavariate(alpha=2, beta=self.prop.beta))
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, self.prop.sigma))
         if len(P.close_predators) > 0:
-            self.scape_desire = abs(self.prop.rand.normalvariate(0, 0.5 * self.prop.vision_radius ))
+            self.scape_desire = int(self.prop.rand.expovariate(self.prop.lamb))+1
         else:
             self.scape_desire = 0
         
     ##################### FILTER ##############################
 
-    def filter(self, P: PerceptionPrey):
+    def filter(self, P: PerceptionPrey):        
 
         # Acciones que siempre se deben hacer en condiciones determinadas
         if self.wait_move > 0:
@@ -290,7 +326,6 @@ class PreyAgent(ProactiveAgent):
             Ac = self.__wait_gestate(P)
             return Ac
         self.gestate_wait -=1
-        self.life -= 1
         
         # Acciones que dependen de varios factores probabilisticos
         # TODO
@@ -300,8 +335,11 @@ class PreyAgent(ProactiveAgent):
         # if self.scape_desire > 0.5:
         # if self.hungry_desire > 0.5
 
+        if self.prop.bold <= self.prop.rand.uniform(0,1):
+            self.objetive = NOTHING
+
         #~~~ Agente Precavido ~~~#
-        if self.scape_desire < len(P.close_predators):
+        if 0 < len(P.close_predators) and len(P.close_predators) >= self.scape_desire:
             self.objetive = NOTHING
             return self.intention_scape(P)
         # Hambriento
@@ -350,6 +388,10 @@ class PreyAgent(ProactiveAgent):
             return self.intention_walk_to(P)
         elif self.objetive == EAT_GESTATE and \
             self.prop.breeding_point <= self.extra_energy:
+            ######### Borrar ########
+            self.objetive = GESTATE
+            return self.__gestate(P)
+            #########################
             self.__intention_go_to_gestate(P)
             self.objetive = GO_GESTATE
             return self.intention_walk_to(P)

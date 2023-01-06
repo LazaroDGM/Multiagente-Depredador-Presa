@@ -29,6 +29,8 @@ class Environment03(Environment):
         self.initial_count_predator = initial_count_predator
         self.prop_prey = PreyAgentPropierties(params_prey, map)
         self.prop_predator = PredatorAgentPropierties(params_predator, map)
+        self.life_preys = []
+        self.life_predators = []
         
         self._see_functions = {
             PreyAgent: self.seePrey,
@@ -54,6 +56,8 @@ class Environment03(Environment):
         self.count_foods = 0
         
         self._init_map(map)
+        self.heatmap_preys = np.zeros(self.shape_map, dtype=np.int32)
+        self.heatmap_predators = np.zeros(self.shape_map, dtype=np.int32)
 
     
     def _init_map(self, map):
@@ -203,7 +207,7 @@ class Environment03(Environment):
         delete_preys = []
         for prey, (i, j) in self.preys.items():
             prey : PreyAgent
-            if prey.energy <= 0 or prey.life <= 0:
+            if prey.energy <= 0:
                 delete_preys.append(prey)
                 box = self._map[i][j]
                 if isinstance(box, (Burrow, Floor)):
@@ -213,13 +217,14 @@ class Environment03(Environment):
                 else:
                     raise Exception('Presa lista para morirse, que no esta en ningun lugar')
         for prey in delete_preys:
+            self.life_preys.append(prey.life)
             self.preys.pop(prey)
         del(delete_preys)
 
         delete_predators = []
         for predator, (i, j) in self.predators.items():
             predator : PredatorAgent
-            if predator.energy <= 0 or predator.energy <= 0:
+            if predator.energy <= 0:
                 delete_predators.append(predator)
                 box = self._map[i][j]
                 if isinstance(box, Floor):
@@ -229,6 +234,7 @@ class Environment03(Environment):
                 else:
                     raise Exception('Predator lista para morirse, que no esta en ningun lugar')
         for predator in delete_predators:
+            self.life_predators.append(predator.life)
             self.predators.pop(predator)
         del(delete_predators)
     
@@ -385,9 +391,13 @@ class Environment03(Environment):
 
         self.transform(actions_predators=actions_predators, actions_preys=actions_preys)
 
+        for (i, j) in self.preys.values():
+            self.heatmap_preys[i][j] += 1
+        for (i, j) in self.predators.values():
+            self.heatmap_predators[i][j] += 1
 
     def outputs(self):
-        return len(self.preys), self.count_foods
+        return len(self.preys), len(self.predators), self.count_foods
 
     def reset(self):
         self.prop_prey.delete()
