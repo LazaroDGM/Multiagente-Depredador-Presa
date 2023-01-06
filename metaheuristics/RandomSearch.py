@@ -1,6 +1,15 @@
 from math import inf
 import heapq
 
+from dataclasses import dataclass, field
+from typing import Any
+
+@dataclass(order=True)
+class PrioritizedItem:
+    priority: int
+    item: Any=field(compare=False)
+
+
 def RandomSearch(function, random_generation, fitness_eval, max_count_solution, minimize=False):
     '''
     Metaheuristica RandomSearch para optimizacion de funciones. Se generan varios
@@ -16,11 +25,13 @@ def RandomSearch(function, random_generation, fitness_eval, max_count_solution, 
     if minimize:
         fitness_eval = lambda x : - fitness_eval(x)
 
-    best_solutions = [-inf] * 10
-    count = 0
-    while count < max_count_solution:
+    best_solutions = [PrioritizedItem(-inf, None)] * 25
+    
+    for _ in range(max_count_solution):
         rand_vector = random_generation()
         result = function(rand_vector)
-        fitness = fitness_eval(result)
-        heapq.heappushpop(best_solutions,(fitness, result))
-    return heapq.nlargest(best_solutions)
+        fitness = fitness_eval(*result)
+        heapq.heappushpop(best_solutions,PrioritizedItem(fitness, rand_vector))
+        print(fitness, rand_vector)
+    
+    return heapq.nlargest(25,best_solutions)
