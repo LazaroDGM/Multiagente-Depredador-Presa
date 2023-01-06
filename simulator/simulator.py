@@ -57,25 +57,25 @@ class Simulator():
         parent_conn1, child_conn1 = multiprocessing.Pipe()
         thread1 = multiprocessing.Process(
             target= self.ThreadSimulations,
-            args=(child_conn1, 2, stop_steps, *args),
+            args=(child_conn1, 8, stop_steps, *args),
             kwargs=kvargs, daemon= True)
 
         parent_conn2, child_conn2 = multiprocessing.Pipe()
         thread2 = multiprocessing.Process(
             target= self.ThreadSimulations,
-            args=(child_conn2, 2, stop_steps, *args),
+            args=(child_conn2, 8, stop_steps, *args),
             kwargs=kvargs, daemon= True)
 
         parent_conn3, child_conn3 = multiprocessing.Pipe()
         thread3 = multiprocessing.Process(
             target= self.ThreadSimulations,
-            args=(child_conn3, 2, stop_steps, *args),
+            args=(child_conn3, 7, stop_steps, *args),
             kwargs=kvargs, daemon= True)   
 
         parent_conn4, child_conn4 = multiprocessing.Pipe()
         thread4 = multiprocessing.Process(
             target= self.ThreadSimulations,
-            args=(child_conn4, 2, stop_steps, *args),
+            args=(child_conn4, 7, stop_steps, *args),
             kwargs=kvargs, daemon= True)       
 
         thread1.start()

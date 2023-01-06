@@ -6,13 +6,16 @@ from simulator.simulator import Simulator
 import numpy as np
 import time
 import math
-from tests.simulator03.map01.test05 import search
+from tests.simulator03.map01.test04 import generate_result, view_results
 import matplotlib.pyplot as plt
 import random
 
-#generate_result()
-#view_results()
-search()
+start = time.time()
+generate_result()
+end = time.time()
+print(end-start)
+view_results()
+#search()
 exit()
 #start = time.time()
 #generate_result()
@@ -54,7 +57,7 @@ sims= sim.StartManySimulations(
     map= map,
     food_generation_period=70,
     plant_radius= 3,
-    food_ratio= 0.125,
+    food_ratio= 0.2,
     initial_count_prey=3,
     initial_count_predator=1,
     params_prey= ParamsPrey(
