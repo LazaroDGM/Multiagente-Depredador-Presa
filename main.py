@@ -6,7 +6,7 @@ from simulator.simulator import Simulator
 import numpy as np
 import time
 import math
-from tests.simulator03.map01.test04 import generate_result, view_results
+from tests.simulator03.map01.test07 import generate_result, view_results
 import matplotlib.pyplot as plt
 import random
 
