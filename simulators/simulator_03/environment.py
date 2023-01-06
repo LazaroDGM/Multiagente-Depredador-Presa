@@ -56,6 +56,8 @@ class Environment03(Environment):
         self.count_foods = 0
         
         self._init_map(map)
+        self.heatmap_preys = np.zeros(self.shape_map, dtype=np.int32)
+        self.heatmap_predators = np.zeros(self.shape_map, dtype=np.int32)
 
     
     def _init_map(self, map):
@@ -389,6 +391,10 @@ class Environment03(Environment):
 
         self.transform(actions_predators=actions_predators, actions_preys=actions_preys)
 
+        for (i, j) in self.preys.values():
+            self.heatmap_preys[i][j] += 1
+        for (i, j) in self.predators.values():
+            self.heatmap_predators[i][j] += 1
 
     def outputs(self):
         return len(self.preys), len(self.predators), self.count_foods
