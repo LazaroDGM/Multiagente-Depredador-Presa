@@ -79,7 +79,10 @@ class ParamsPredator():
             gestate_time,
             gestate_again_time,
             max_life,
-            reproduction_ratio
+            reproduction_ratio,
+            bold,
+            beta,
+            sigma
         ) -> None:
         self.digestion_time = digestion_time
         self.max_energy = max_energy
@@ -97,6 +100,16 @@ class ParamsPredator():
         self.gestate_again_time = gestate_again_time
         self.max_life = max_life
         self.reproduction_ratio = reproduction_ratio
+        if not (0 <=bold <= 1):
+            raise Exception('El parametro "bold" debe estar en el intervalo de [0,1]')
+        self.bold = bold
+        if not (1<= beta <=20):
+            raise Exception('El parametro "beta" debe estar en el intervalo de [1,20]')
+        self.beta = beta
+        if not (1<= sigma <=10):
+            raise Exception('El parametro "beta" debe estar en el intervalo de [1,20]')
+        self.sigma = sigma
+
 
 
 ###################### PROPIERTIES #################################
@@ -126,6 +139,9 @@ class PredatorAgentPropierties:
             cls.max_life = params.max_life
             cls.reproduction_ratio = params.reproduction_ratio
             cls.rand = random.Random()
+            cls.bold = params.bold
+            cls.beta = params.beta
+            cls.sigma = params.sigma
         return cls.instance
     
     @classmethod
@@ -254,8 +270,8 @@ class PredatorAgent(ProactiveAgent):
 
     def options(self, P: PerceptionPredator):
         
-        self.hungry_desire = self.prop.max_energy * self.prop.rand.betavariate(alpha=2, beta=9)
-        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 2))
+        self.hungry_desire = self.prop.max_energy * self.prop.rand.betavariate(alpha=2, beta=self.prop.beta)
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, self.prop.sigma))
         
     ##################### FILTER ##############################
 
@@ -281,7 +297,7 @@ class PredatorAgent(ProactiveAgent):
         # if self.breeding_desire > 0.5 and self.hungry_desire < 0.7:
         # if self.scape_desire > 0.5:
         # if self.hungry_desire > 0.5
-        if 0.8 <= self.prop.rand.uniform(0,1):
+        if self.prop.bold <= self.prop.rand.uniform(0,1):
             self.objetive = NOTHING
         
         # Hambriento

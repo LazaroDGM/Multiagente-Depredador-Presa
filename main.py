@@ -52,7 +52,7 @@ _, results= sim.StartSimulation(
     map= map,
     food_generation_period=70,
     plant_radius= 3,
-    food_ratio= 0.2,
+    food_ratio= 0.125,
     initial_count_prey=3,
     initial_count_predator=1,
     params_prey= ParamsPrey(
@@ -73,7 +73,12 @@ _, results= sim.StartSimulation(
         gestate_again_time= 0,
         gestate_time= 10,
         max_life= math.inf,
-        reproduction_ratio=2
+        reproduction_ratio=2,
+        gamma=0.0,
+        bold=0.8,
+        lamb= 2,
+        beta=6,
+        sigma=4
     ),
     params_predator= ParamsPredator(
         digestion_time=5,
@@ -91,7 +96,10 @@ _, results= sim.StartSimulation(
         gestate_again_time= 100,
         gestate_time= 10,
         max_life= math.inf,
-        reproduction_ratio=1
+        reproduction_ratio=1,
+        bold=0.8,
+        beta=9,
+        sigma=2
     )
 )
 results = np.array(results).T

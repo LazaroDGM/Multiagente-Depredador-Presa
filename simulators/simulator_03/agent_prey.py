@@ -84,7 +84,12 @@ class ParamsPrey():
             gestate_time,
             gestate_again_time,
             max_life,
-            reproduction_ratio
+            reproduction_ratio,
+            gamma,
+            bold,
+            lamb,
+            beta,
+            sigma
         ) -> None:
         self.digestion_time = digestion_time
         self.max_energy = max_energy
@@ -103,7 +108,23 @@ class ParamsPrey():
         self.gestate_time = gestate_time
         self.gestate_again_time = gestate_again_time
         self.max_life = max_life
-        self.reproduction_ratio = reproduction_ratio
+        self.reproduction_ratio = reproduction_ratio        
+        
+        if not (0 <=bold <= 1):
+            raise Exception('El parametro "bold" debe estar en el intervalo de [0,1]')
+        self.bold = bold
+        if not (0 <= lamb <= 2):
+            raise Exception('El parametro "lamb" debe estar en el intervalo de [0,2]')
+        self.lamb = lamb
+        if not (0 <=gamma <= 1):
+            raise Exception('El parametro "gamma" debe estar en el intervalo de [0,1]')
+        self.gamma = gamma
+        if not (1<= beta <=20):
+            raise Exception('El parametro "beta" debe estar en el intervalo de [1,20]')
+        self.beta = beta
+        if not (1<= sigma <=10):
+            raise Exception('El parametro "beta" debe estar en el intervalo de [1,20]')
+        self.sigma = sigma
 
 
 ###################### PROPIERTIES #################################
@@ -134,12 +155,19 @@ class PreyAgentPropierties:
             cls.gestate_again_time = params.gestate_again_time
             cls.max_life = params.max_life
             cls.reproduction_ratio = params.reproduction_ratio
+
+            cls.bold = params.bold
+            cls.lamb = params.lamb
+            cls.gamma = params.gamma
+            cls.beta = params.beta
+            cls.sigma = params.sigma
+
             cls.rand = random.Random()
             cls.rand_reproduction = (prob.generator_D1(
                 l= 1,
                 alpha=params.reproduction_ratio,
                 sigma=2,
-                gamma=0.0,
+                gamma=params.gamma,
                 rand_var=cls.rand
             ),)
         return cls.instance
@@ -277,10 +305,10 @@ class PreyAgent(ProactiveAgent):
 
     def options(self, P: PerceptionPrey):
         
-        self.hungry_desire = self.prop.max_energy * abs(self.prop.rand.betavariate(alpha=2, beta=6))
-        self.breeding_desire = abs(self.prop.rand.normalvariate(0, 4))
+        self.hungry_desire = self.prop.max_energy * abs(self.prop.rand.betavariate(alpha=2, beta=self.prop.beta))
+        self.breeding_desire = abs(self.prop.rand.normalvariate(0, self.prop.sigma))
         if len(P.close_predators) > 0:
-            self.scape_desire = int(self.prop.rand.expovariate(2))+1
+            self.scape_desire = int(self.prop.rand.expovariate(self.prop.lamb))+1
         else:
             self.scape_desire = 0
         
@@ -308,6 +336,9 @@ class PreyAgent(ProactiveAgent):
         # if self.breeding_desire > 0.5 and self.hungry_desire < 0.7:
         # if self.scape_desire > 0.5:
         # if self.hungry_desire > 0.5
+
+        if self.prop.bold <= self.prop.rand.uniform(0,1):
+            self.objetive = NOTHING
 
         #~~~ Agente Precavido ~~~#
         if 0 < len(P.close_predators) and len(P.close_predators) >= self.scape_desire:
