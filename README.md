@@ -185,3 +185,39 @@ $$X \sim D_1(l=1,\alpha=6,\sigma =2,\gamma=0)$$
 
 Esta distribución se usa para la generación de las presas, instpirado en la reproducción de los conejos, donde de un rango común de nacimiento, algunos van muriendo posteriormente en sus etapas tempranas de vida. En nuestro caso, $alpha$ sería la moda de reproducción.
 
+
+## Resultados Finales obtenidos
+
+Con los parámetros iniciales supuestos
+
+- alpha: 6
+- gamma: 0
+- lambda: 1
+- beta_prey: 6
+- beta_predator: 9
+- sigma_prey: 4
+- sigma_predator: 2
+- bold_prey: 0.8
+- bold_predator: 0.8
+
+obtuvimos los siguietes resultados:
+
+Presas en el tiempo
+![](/img/test4Preys.png)
+
+Depredadores en el tiempo
+![](/img/test4Predators.png)
+
+Mapa de exploración de las Presas
+![](/img/test4HeatMapPreys.png)
+
+Mapa de exploración de los Depredadores
+![](/img/test4HeatMapPredators.png)
+
+Presas y depredadores al pasar el tiempo
+![](/img/test4Circ.png)
+
+Además la esperanza de vida fue de:
+
+- Presa: 1790
+- depredadores: 2951

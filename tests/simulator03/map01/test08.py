@@ -128,6 +128,11 @@ def view_results():
     with open('results/simulator03/map01/08.npz', 'rb') as ft:
         obj = np.load(ft)
         
+        #plt.plot(range(obj['counts_food'][20].shape[0]), obj['counts_food'][20], linewidth=0.8)
+        plt.plot(range(obj['counts_preys'][20].shape[0]), obj['counts_preys'][20], linewidth=0.8)
+        plt.plot(range(obj['counts_predators'][20].shape[0]), obj['counts_predators'][20], linewidth=0.8)
+        plt.show()
+
         #print(results.shape)
         for result in obj['counts_food']:
             plt.plot(range(result.shape[0]), result, linewidth=0.8)        

@@ -127,6 +127,11 @@ def generate_result():
 def view_results():
     with open('results/simulator03/map01/04.npz', 'rb') as ft:
         obj = np.load(ft)
+
+        plt.plot(range(obj['counts_food'][20].shape[0]), obj['counts_food'][20], linewidth=0.8)
+        plt.plot(range(obj['counts_preys'][20].shape[0]), obj['counts_preys'][20], linewidth=0.8)
+        plt.plot(range(obj['counts_predators'][20].shape[0]), obj['counts_predators'][20], linewidth=0.8)
+        plt.show()
         
         #print(results.shape)
         for result in obj['counts_food']:
@@ -161,4 +166,8 @@ def view_results():
         sb.heatmap(np.mean(obj['heatmap_predators'], axis=0))
         plt.show()         
 
-        
+        print(obj['mean_life_preys'].mean())
+        print(obj['mean_life_predators'].mean())
+
+        plt.plot(obj['counts_preys'].mean(axis=0)[10000:], obj['counts_predators'].mean(axis=0)[10000:], '.', linewidth= 0.8)
+        plt.show()

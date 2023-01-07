@@ -6,7 +6,7 @@ from simulator.simulator import Simulator
 import numpy as np
 import time
 import math
-from tests.simulator03.map01.test04 import generate_result, view_results
+from tests.simulator03.map01.test08 import generate_result, view_results
 import matplotlib.pyplot as plt
 import random
 
@@ -16,7 +16,7 @@ import random
 #print(end-start)
 #view_results()
 #search()
-exit()
+#exit()
 #start = time.time()
 #generate_result()
 #step = time.time()
@@ -50,9 +50,9 @@ map = np.array(
     ]
 )
 
-sim = Simulator03()
-sims= sim.StartManySimulations(
-    count_simulations=1,
+sim = Simulator03_2D(Environment03)
+sims= sim.StartSimulation(
+    tick=0.0,
     stop_steps=10000,
     map= map,
     food_generation_period=70,

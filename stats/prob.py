@@ -83,11 +83,11 @@ def generator_D1(l, alpha, sigma, gamma, rand_var=None):
         return y
     return generator
 
-rand = random.Random()
-gen = generator_D1(l=1, alpha= 6, sigma=2, gamma= 0)
-d = den_D1(l=1, alpha= 6, sigma=2, gamma= 0)
-#l = [gen() for i in range(0, 1000)]
-#plt.hist(l,30)
-plt.plot(np.arange(0,9,0.01), [d(i) for i in np.arange(0,9,0.01)])
-plt.show()
-exit()
+#rand = random.Random()
+#gen = generator_D1(l=1, alpha= 6, sigma=2, gamma= 0)
+#d = den_D1(l=1, alpha= 6, sigma=2, gamma= 0)
+##l = [gen() for i in range(0, 1000)]
+##plt.hist(l,30)
+#plt.plot(np.arange(0,9,0.01), [d(i) for i in np.arange(0,9,0.01)])
+#plt.show()
+#exit()
