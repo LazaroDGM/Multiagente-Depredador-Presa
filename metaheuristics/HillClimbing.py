@@ -46,6 +46,7 @@ def HillClimbing(initil_vector, function, generate_neighbours, fitness_eval, max
             break
         actual_fitness = max_fitness
         actual_vector = max_neighbour
+        count +=1
     
     return actual_vector, actual_fitness, count
 
