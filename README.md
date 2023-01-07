@@ -131,19 +131,57 @@ Por lo tanto aquí se actualizarán estas memorias con las percepciones captadas
 
 Aquí se deben generar los nuevos deseos. Pero volvemos a la interrogante de qué sería un deseo? Los deseos se deben ver como un indicador de cuánto quiere un agente ahcer una cosa. Tenemos que aclarar que tener mucho deseo de hacer algo no implica directamente que se haga eso, ya que las necesidades y deseos no siempre concuerdan, sin embargo debemos tener en cuenta que los deseos van a influir mucho en las intenciones que se formulen. En la práctica se concibió entonces los deseos como valores numéricos que dependen de las creencias, intenciones actuales y algunos factores aleatorios. Los deseos de las presas son:
 
-- self.hungry_desire: Deseo de comer $X \sim Beta(\alpha=2, \Beta\in [1,20])$
-- self.breeding_desire: Deseo de reproducirse $|X| \sim N(\mu = 0, \sigma \in [1, 10])$
-- self.scape_desire: Deseo de Escapar $X \sim Exp(\lambda \in [0,2]) + 1$
+- `self.hungry_desire`: Deseo de comer $X \sim Beta(\alpha=2, \beta\in [1,20])$
+- `self.breeding_desire`: Deseo de reproducirse $|X| \sim N(\mu = 0, \sigma \in [1, 10])$
+- `self.scape_desire`: Deseo de Escapar $X \sim Exp(\lambda \in [0,2]) + 1$
 
 mientras que el depredador cuenta con los 2 primeros de igual forma y con el mismo intervalo de los parámetros pero particular para los depredadores.
 
-Estas distribuciones pueden visualizarse a continuación con algunos parámetros:
+Estas distribuciones pueden visualizarse a continuación con algunos parámetros fijados, para varias generaciones de forma discreta y continua:
 
-#### $X \sim Beta(\alpha=2, \Beta=6)$
+#### $X \sim Beta(\alpha=2, \beta=6)$
 ![$X \sim Beta(\alpha=2, \Beta=6)$](/img/Beta6.png)
 
 #### $X \sim |N(\mu = 0, \sigma = 4)|$
 ![$X \sim |N(\mu = 0, \sigma = 4)|$](/img/Norm4.png)
 
-#### $X \sim Exp(\lambda = 1$
+#### $X \sim Exp(\lambda = 1)$
 ![Discretización de $X \sim Exp(\lambda = 1$](/img/ExpLambd1.png)
+
+*FILTER*
+
+Aquí entonces de las posibles opciones que tenemos filtraremos qué hacer. Es decir generaremos una nueva intención o seguiremos la misma. Desde otro punto de vista aquí decidiremos si cambiamos de objetivo o no. En la definición de cada agente ([simulator_03/agent_prey.py](https://github.com/LazaroDGM/Multiagente-Depredador-Presa/blob/main/simulators/simulator_03/agent_prey.py) y [simulator_03/agent_predator.py](https://github.com/LazaroDGM/Multiagente-Depredador-Presa/blob/main/simulators/simulator_03/agent_predator.py)), hay una implementación bastnate entendible y legible de la lógica de toma de decisiones. Primero se revisan los objetivos e intenciones actuales, y si no se puede generar un nuevo cambio por la naturaleza de este, nos mantenemos. Este tipo de acciones son las que consideramos como acciones deterministas y son necesarias para poder simular comportamientos como la digestión, la velocidad y la gestación.
+
+Luego es que se ejecuta como tal la selección de las acciones. Hay que tener en cuenta que por comodidad hablaremos en terminos generales de *Reproducirse*, *Comer* y *Huir*, pero realmente cada uno de estos comportamientos conlleva una serie de acciones e intenciones, como por ejemplo, para comer, si no se sabe dónde hay comida, entoces hay que explorar el área para encontrarla; si a veces está al alcance vamos a ir por ella; si estamos arriba de una comida y muy hambriento nos la comemos. Es decir la lógica detrás de esto es complicada y es un árbol de acciones. Entonces necesitamos abstraernos a estos términos más abarcadores para explicar las reglas que los agentes seguirán.
+
+### Reglas para ambas especies
+Siendo $X_1$, $X_2$, las variables aleatorias de los deseos ya vistas, tales que:
+
+- $X_1 \sim Beta(\alpha, \beta)$
+- $X_2 \sim |N(\mu, \sigma)|$
+
+Entoces las reglas para comer y reproducirse son:
+
+- $Energía Máxima \cdot X_1 \ge Energía \Rightarrow Comer $
+- $Agentes Recordados \le X_2 \Rightarrow Reproducirse $
+
+Desde cierto punto de vista luce una arquitectura de Brooks pero ahora influyen más factores no deterministas. Otras reglas que tiene la presa es con $X_3 \sim Exp(\lambda)$:
+
+- $Cantidad Depredadores > 0 y Cantidad Depredadores \ge X_3 \Rightarrow Huir$
+
+Por último hablemos de la reproducción. En esta simulación la reproducción se produce cuando el agente queire reproducirse y a generado bastante energía extra para reproducirse. La energía extra se genera, al comer y sobrepasar la energía máxima que se puede tener. Este excedente se va acumulando en otro indicador que al llenar o sobrepasarse, se está listo para reproducirse pero debe ser el agente el que decida esto.
+
+En el caso de los depredadores la reproducción se concibió unitaria. Es decir un individuo tendrá a lo sumo un cría al reproducirse. Para el caso de las presas, se creó una distribución de probabilidad propia, que su forma general es:
+
+$$ X \sim D_1(l,\alpha,\sigma,\gamma)$$
+
+Que asemeja el comportamientoa una distribución triangular pero que puede ser truncada en sus colas. De hecho se podría decir que la dsitribución triangular sería una particularización de esta. La función de densidad para sus parámetros prefijados, sería:
+
+$$X \sim D_1(l=1,\alpha=6,\sigma =2,\gamma=0)$$
+
+![lo](/img/D_1d.png)
+
+![jj](/img/D_1.png)
+
+Esta distribución se usa para la generación de las presas, instpirado en la reproducción de los conejos, donde de un rango común de nacimiento, algunos van muriendo posteriormente en sus etapas tempranas de vida. En nuestro caso, $alpha$ sería la moda de reproducción.
+

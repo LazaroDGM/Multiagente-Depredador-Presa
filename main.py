@@ -10,11 +10,11 @@ from tests.simulator03.map01.test04 import generate_result, view_results
 import matplotlib.pyplot as plt
 import random
 
-start = time.time()
-generate_result()
-end = time.time()
-print(end-start)
-view_results()
+#start = time.time()
+#generate_result()
+#end = time.time()
+#print(end-start)
+#view_results()
 #search()
 exit()
 #start = time.time()
