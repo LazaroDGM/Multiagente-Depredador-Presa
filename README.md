@@ -186,6 +186,74 @@ $$X \sim D_1(l=1,\alpha=6,\sigma =2,\gamma=0)$$
 Esta distribución se usa para la generación de las presas, instpirado en la reproducción de los conejos, donde de un rango común de nacimiento, algunos van muriendo posteriormente en sus etapas tempranas de vida. En nuestro caso, $alpha$ sería la moda de reproducción.
 
 
+## Inteligencia en Agentes
+
+### Busqueda en el mapa
+
+Como parte de la simulación de la predicción que poseen los animales para el movimiento, utilizamos un algoritmo compuesto por dos fases.
+1. Utilización del algoritmo `A*` con función de costo igual a la longitud del camino y heurística igual a la distancia de Manhatan hasta los puntos deseados a alcanzar. También se le pasan dos funciones como parámetro, ambas a la vez reciben como parámetro una posición de la matriz(x, y), y retornan si existe, un objeto buscado, y un obstáculo, respectivamente. Esta función devuelve una matriz de proximidad al agente, que contiene 9 casillas(3x3), 8 de ellas válidas, que incluyen en cada una de las posiciones, una lista de números donde:
+   - Cada número implica que desde la casilla donde está se partió y alcanzó un camino, de forma óptima en distancia.
+   - Devuelve -1 en las casillas próximas al agente donde se encontraba un obstáculo, según la función de detección de obstáculos en sus parámetros
+2. Aplicación del algoritmo `transform`. Este **va de la mano con el resultado del algoritmo `A*`** modificado que describimos. Toma la matriz de 3x3 que se retornó y se tienen en cuenta los siguientes aspectos y transformaciones:
+   1. Hará una **expansión** de las casillas válidas, o sea, que no hayan contenido obstáculos en ellas.
+   2. La **expansión** es de forma intuitiva vista como: si una casilla me indica el camino para llegar a una posición que estoy buscando, las casillas adyacentes a esta, también son buenas, aunque en una menor medida...
+   3. Se devolverá de este algoritmo, una matriz nuevamente de 3x3, pero en este caso ya no tendrá una lista de números en cada casilla, sino, un número por casilla.
+   4. Se obtiene una 1ra matriz. Cada número de dicha matriz es la sumatoria de los números de la lista devuleta en la misma posición, pero en la matriz devuelta por el A*.
+   5. Como estos números constituyen distancias, y queremos dar, a mayor distancia menor peso y viceversa, siempre hayaremos en lo que sigue, una 2da matriz que es el **valor inverso** a la distancia; este proceso en cada casilla.
+   6. Se obtiene una 3da matriz constituida por la **expansión** de las casillas de la matriz anterior. 
+   7. La **expansión** está constituida por la suma de todas las casillas adyacentes según el **factor de expansión** que se le pase como parámetro. El siguiente fragmento de pseudo-código es una descripción de lo que se hace a grandes rasgos para obtener estas tres matrices.
+
+
+```python
+positions = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)] # no incluye (1, 1) porque es la posición del agente
+matriz_1 = matriz_2 = matriz3 = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+
+for i, j in positions:
+    matriz_1[i][j] = sum(Matriz_A*_[i][j])
+
+for i, j in positions:
+    # Esto se hace para invertir el número pero mantenerlo en el rango [min_m1, max_m1]
+    matriz_2 = max(matriz_1) - matriz_1[i][j] + min(matriz_1)   
+
+factor_de_expansion = 2
+for i, j in positions:
+    for o, p in positions:
+        # Se hace si la distancia es menor que el factor de expansión y si la esta última resta es mayor que 0. Se excluye de la suma la casilla del agente y la misma casilla
+        continue if (i == o and o == p) or (distancia( (i, j), (o, p) ))  >  factor_de_expansion) or (matriz_2[i][j] - distancia( (i, j), (o, p) )  > 0)
+        matriz_3[i][j] += matriz_2[o][p] - distancia( (i, j), (o, p) )  
+```
+
+
+   8. Luego de hacer esto se obtendrá una última matriz que es la suma de `matriz_2` y `matriz_3`, que sería la matriz de expansión
+Luego de este proceso, se seleccionará el mejor moviemiento como la casilla con mayor valor(o una posición aleatoria entre las de máximo e igual valor) de las 8 casillas de la matriz de expansión; siendo esta posición la devuelta...
+
+### Memoria
+- La memoria está constituida básicamente por una estructura que contiene 4 `slots` o espacios, los cuales tienen diferente prioridad para recordar.
+- Cada uno de los `slots`: 0, 1, 2 y 3; tienen de mayor a menor prioridad para recordar, en ese orden, siendo el slot 0 el que más prioridad tiene.
+- El funcionamiento tiene los siguientes aspectos:
+  1. Al introducir un evento en la memoria, esta pide un **factor de importancia** atribuido al evento, este determina en cual de los `slots` de la memoria estará adjunto dicho evento a recordar.
+  2. El **factor de importancia (f)** es un número entre 0 y 1, y se asignará un evento a un slot según la siguiente tabla:
+
+        |<center>0</center>|<center>1</center>|<center>2</center>|<center>3</center>|
+        |-|-|-|-|
+        |0.6 $\leq$ f $\leq$ 1|0.4 $\leq$ f < 0.6|0.2 $\leq$ f < 0.4|0 < f < 0.2|
+    3. Fijarse que con esto simulamos el aspecto realista de la memoria para recordar más, un evento de mayor significación o importancia.
+    4. También hemos decidido que solo se olvide a lo sumo un recuerdo a la vez para hacer balance entre la acción de olvidar con el tamaño pequeño de la memoria.
+    5. La memoria, al igual que la simulación en general pasa por unidades de tiempo o **Ticks**. Para olvidar un evento se hará de la siguiente forma según el slot donde esté ubicado cada evento: 
+        |<center>Slot</center>|<center>Multiplicidad del Tick</center>|
+        |---------------------|------------------------------|
+        |**0**|8|
+        |**1**|4|
+        |**2**|2|
+        |**3**|1|
+        Así que por ejemplo:
+        - en el **tick número 16 se olvidará el evento más antiguo del slot 0** 
+        - en el **tick 12 se olvidará el evento más antiguo del slot 1** 
+        - en el **tick 3 se olvidará el evento más antiguo del slot 3**
+        - en el **tick 6 se olvidará el evento más antiguo del slot 2**
+    
+        De forma que se puede decir que la memoria olvida el recuerdo más antiguo del slot con una multiplicidad igual al máximo común divisor entre 8 y el tick actual :)
+
 ## Resultados Finales obtenidos
 
 Con los parámetros iniciales supuestos
