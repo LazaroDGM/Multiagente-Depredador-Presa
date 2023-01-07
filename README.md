@@ -45,10 +45,57 @@ Los agentes inteligentes se pueden agrupar en 3 grandes grupos:
 
 Para las simulaciones realizadas nos enfocamos en los 2 primeros tipos de agente, aunque para la 3ra Arquitectura, los agentes cuentan con pinceladas de sociabilización desde un punto de vista más conceptual y sencillo, pero no se podría categorizar como sociables del todo.
 
-En la 1era Arquiectura solo se tuvo en cuenta Agentes Puramente Reactivos, es decir, agentes que solo con la Percepción actual del medio reaccionan antes sus cambios sin considerar una historia. El resultado de esta simulación realmente no fue malo, pero solo se consideraba una especie animal, sin embargo en los resúmenes explicaremos que realmente esta modelación de un animal, en realidad se comporta como el modelo analítico Depredador-Presa, donde el depredador es este animal, y la presa es la comida. En la 2da Arquitectura también se consideraron agentes reactivos, con algunos heurísticas en sus comportamientos pero predominando un comportamiento reactivo. Ya en la 3era Arquitectura se hizo una aptación de arquitecturas de capas donde los agentes ahora son
+En la 1era Arquiectura solo se tuvo en cuenta Agentes Puramente Reactivos, es decir, agentes que solo con la Percepción actual del medio reaccionan antes sus cambios sin considerar una historia. El resultado de esta simulación realmente no fue malo, pero solo se consideraba una especie animal, sin embargo en los resúmenes explicaremos que realmente esta modelación de un animal, en realidad se comporta como el modelo analítico Depredador-Presa, donde el depredador es este animal, y la presa es la comida. En la 2da Arquitectura también se consideraron agentes reactivos, con algunos heurísticas en sus comportamientos pero predominando un comportamiento reactivo. Ya en la 3era Arquitectura se hizo una aptación de arquitecturas de capas donde los agentes ahora eran principalmente proactivo, donde se definía un objetivo y perseguían este; sin embargo contaban con algunas características reactivas, de acorde a las circunstancias.
+
+Antes de seguir debemos llamar la atención en que trabajamos con agentes con estados internos por lo que se definió un clase Abstracta para representar este tipo de agente. Los agentes de por sí deben tener la función `action(self, P)` que dada las percepciones genere una acción. Esto se puede ver en la clase `Agent`. Pero como queremos ahora agregar stados internos, entonces creamos otra clase abstracta `AgentState` que además cuenta con la función `next(self, P)`, la cual recibe las percepciones del medio, realiza cambios, y luego al ejecutar `action` se genera una acción. Ver [agent.py](https://github.com/LazaroDGM/Multiagente-Depredador-Presa/blob/main/simulator/agent.py).
 
 
 ## Arquitectura 2
-### Basada en la Arquitectura Brook
+### Basada en la Arquitectura Brooks
 
+Para agentes puramente reactivos vimos conveniente implementar una arquitectura de agente basada en Brooks. En esta se definen conductas de la forma:
 
+$$<predicado, acción> $$
+
+y se establece un ordenamiento estricto. Luego para saber qué acción debe ejecutar un agente se evaluan los predicados de las conductas ordenadas, y para el primero que sea cierto, se ejecuta la acción correspondiente.
+
+Para tener una mayor comodidad a la hora de trabajar a lo largo del tiempo, se definió primeramente la base abstracta de un Agente de Brooks en [agent.py](https://github.com/LazaroDGM/Multiagente-Depredador-Presa/blob/main/simulator/agent.py) como `BrooksAgent` y tiene este comportamiento ya implementado, solo bastaría con definir una lista ordenada por prioridad como propiedad del agente con el nombre `self.behaviors`. Esta lista debería contener tuplas de la forma, ya explicada, y deben ser funciones, que en el primer caso sería un predicado o condicional, y en el segundo, lo que produce es una acción. Ambas funciones deben recibir las percepciones que fueron captadas.
+
+Por ejemplo:
+```
+cls._behaviors = [                
+                (condicion_para_esconderse, accion_de_esconderse),
+                (condicion_para_buscar_escondite, accion_de_buscar_escondite),
+                (condicion_para_huir, accion_de_huir),                
+                (condicion_para_comer, accion_de_comer),
+                (condicion_para_buscar_comida, accion_de_buscar_comida),
+                (condicion_para_caminar, accion_de_caminar),                
+            ]
+```
+
+esta es una forma válida de definir las conductas del agente presa. Solamente es necesario ahora tener bien definidas las funciones de condiciones y las de acciones. En [/simulator_02/agent.py](https://github.com/LazaroDGM/Multiagente-Depredador-Presa/blob/main/simulators/simulator_02/agent.py) se encuentra la definición completa de todas las reglas, ya que aquí solo se presentaron estas para una mejor visualización; pero en la práctica hay otras conductas pero más internas relacionadas con los estados del agente. A continuación se mostrarán las reglas escogidas para estos agentes.
+
+*Presa*:
+
+- Comiendo $\Rightarrow$ Seguir Comiendo
+- Hay depredadores cerca y hay escondite $\Rightarrow$ Quedarse escondido
+- Hay depredadores cerca $\Rightarrow$ huir
+- Hay comida y Energía $\le \alpha$ Energía Máxima $\Rightarrow$ Comer
+- Energía $\le \beta$ Energía Máxima $\Rightarrow$ Buscar comida
+- `True` $\Rightarrow$ Moverse Aleatorio
+
+*Depredador*:
+
+- Comiendo $\Rightarrow$ Seguir Comiendo
+- Hay comida y Energía $\le \alpha$ Energía Máxima $\Rightarrow$ Comer
+- Energía $\le \beta$ Energía Máxima $\Rightarrow$ Buscar comida
+- `True` $\Rightarrow$ Moverse Aleatorio
+
+Note que con estas reglas sencillas se puede empezar a hacer simulaciones a ver el comportamiento de los agentes.
+
+Con respecto al *Medio Ambiente* hay que tener en cuenta que la reproducción de comidas para las presas se hacía de forma uniforme en todo el terreno, según un périodo de tiempo premedio distribuido con una función exponencial, y en una proporción del área. Estos parámetros son regulables. Por otro lado la reproducción de las especies estaba dada por también eventos episódicos discretos (distribuidos con función exponencial igualmente, y variable). Sin embargo la reproducción tenía la característica de ser en proporción a la población, lo cual es lógico, pero solamente y de forma única para las presas, si nos basamos en el modelo diferencial. Sin embargo el crecimiento de los depredadores dismuniye con la población de estas. Para hacer esto más real, se agregó un factor de energía para reproducirse, donde a la hora de reproducir a la población de cualquier agente, solo crecerá la población proporcional a la catidad de agentes con la enrgía suficiente para esto. Este parámetro es controlable y tambíen el índice de densidad de reproducción.
+
+NOTA: Esto último es una consideración super imortante del modelo, ya que se podría dar el caso de que se acaben las presas, y que con una población muy grande de depredadores el crecimietno de los depredadores sea casi constante o incremental sin alimentación, debido a que aunque nunca ganan energía, estos se pueden reproducir en grandes cantidades.
+
+## Arquitectura 3
+### Basada
