@@ -309,7 +309,7 @@ Mapa de exploración de los Depredadores
 Presas y depredadores al pasar el tiempo
 ![](/img/test9Circ.png)
 
-Es evidente la mejora pero, pero luego quisiemos explorar más y utilizamos un algoritmo génetico para mezclar las mejores soluciones y obtenr nuevas, considerenado principalmente el promedio, entre soluciones, y una combinación de valores. Uno de los mejores resultados fue el siguiente:
+Es evidente la mejora, pero luego quisiemos explorar más y utilizamos un algoritmo génetico para mezclar las mejores soluciones y obtenr nuevas, considerenado principalmente el promedio, entre soluciones, y una combinación de valores. Uno de los mejores resultados fue el siguiente:
 
 Presas en el tiempo
 ![](/img/test8Preys.png)
