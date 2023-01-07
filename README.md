@@ -3,6 +3,7 @@
 En este proyecto se hace una implementaación de un posible modelo Depredador-Presa, usando simulacion en un entorno multiagente. Para ello nos basamos primeramente en el modelo de ecuaciones diferenciales de Lotka-Volterra en el que se consideran solamente dos tipos de animales, cuyas ecuaciones de crecimiento poblacional están dadas por:
 
 $$ p^{\prime} = \alpha p - \beta pd $$
+
 $$ d^{\prime} = \delta pd - \gamma d $$
 
 El modelo se basa en la evolución de las especies y las interacciones entre ellas,  siendo $p$ el número de presas y $d$ el número de depredadores. La interpretación de la primera ecuación es que el crecimiento de la población de presas viene dado proporcionalmente al propio tamaño de esta, y inversamente proporcional a los encuentros con depredadores. Análogamente la segunda ecuación se interpreta como que el crecimiento de los depredadores está dado proporcional a los encuentros con las presas e inversamente proporcional a su propia pobablación (esto último puede verse como el enfrentamiento entre ellos al escacear su comida, es decir, las presas).
@@ -49,8 +50,8 @@ En la 1era Arquiectura solo se tuvo en cuenta Agentes Puramente Reactivos, es de
 
 Antes de seguir debemos llamar la atención en que trabajamos con agentes con estados internos por lo que se definió un clase Abstracta para representar este tipo de agente. Los agentes de por sí deben tener la función `action(self, P)` que dada las percepciones genere una acción. Esto se puede ver en la clase `Agent`. Pero como queremos ahora agregar stados internos, entonces creamos otra clase abstracta `AgentState` que además cuenta con la función `next(self, P)`, la cual recibe las percepciones del medio, realiza cambios, y luego al ejecutar `action` se genera una acción. Ver [agent.py](https://github.com/LazaroDGM/Multiagente-Depredador-Presa/blob/main/simulator/agent.py).
 
-
 ## Arquitectura 2
+----------
 ### Basada en la Arquitectura Brooks
 
 Para agentes puramente reactivos vimos conveniente implementar una arquitectura de agente basada en Brooks. En esta se definen conductas de la forma:
@@ -98,4 +99,39 @@ Con respecto al *Medio Ambiente* hay que tener en cuenta que la reproducción de
 NOTA: Esto último es una consideración super imortante del modelo, ya que se podría dar el caso de que se acaben las presas, y que con una población muy grande de depredadores el crecimietno de los depredadores sea casi constante o incremental sin alimentación, debido a que aunque nunca ganan energía, estos se pueden reproducir en grandes cantidades.
 
 ## Arquitectura 3
-### Basada
+----------
+### Basada en Belives-Desires-Intentions (BDI)
+
+En la 3ra Arquitectura los agentes ahora dejaron de ser complemente reactivos, y se volvieron principalmente reacctivos. Estos agentes son ahora de Razonamiento Práctico, es decir, deciden qué objetivos quieren lograr, y planifican cumplir su objetivo. Sin embargo tienen la capacidad de replantearse sus obejtivos.
+
+En la práctica se implementó la arquitectura BDI como base para este tipo de agente. La implementación base se encuentra en la clase `ProactiveAgent` dentro de [agent.py](https://github.com/LazaroDGM/Multiagente-Depredador-Presa/blob/main/simulator/agent.py). En esta se conciben 3 funciones principales:
+
+- `brf(self, P)`: Que disponiendo de las creencias actuales se formulan nuevas creencias.
+- `options(self, P)`: De las creencias e intenciones actuales, se formulan nuevos deseos.
+- `filter(self, P)`: De las creencias, deseos e intenciones actuales, se formulan nuevos intenciones y se ejecuta una nueva acción
+
+Podemos entenderlo mejor con el siguiente mapa conceptual:
+![Razonamiento Práctico](/img/RazonamientoPractico.png)
+
+Llevarlo a la práctica realmente es lo complicado, ya que había que materializar estas abstracciones. Para ello explicaremos las cosnideraciones por cada una de estas funciones. Antes de hacer esto comentaremos la estructura de este nuevo Medio Ambiente.
+
+*Medio Ambiente*
+
+Ahora el Medio Ambiente es un poco más complejo. La reproducción de los agentes solo será permitida individualmente por agente, y no global y episódica sino más dinámica. La reproducción de comida ahora tampoco será global pero sí episódica, pero con un nuevo elemento que se suma: **Planta**. Este componente puede verse como un agente pero realmente fue concebido como una entidad que servirá de referencia al Medio para generar comida. Además su comportamiento no llegar a ser tan inteligente como el de los otros agentes (haciendo abuso de la palabra inteligencia). Las plantas tendrán un radio de producción de comida y una media de tiempo de reproducción que serán variables, pero global para todas las plantas. Estas a su vez se considerarán obstáculos para ambas especies animales, y estas la percebirán como un obstáculo, y no como una planta, así que no tendrán una idea (inicial) de que ellas producen los alimentos. Por otra parte ahora el terreno también cuenta con zonas de madriguera (o cueva, o escondite, o como zona de madriguera). Estas porciones del mapa solo son percibidas como tal por las presas, y pueden ser transitadas por estas. En cambio los depredadores solo las perciben como obstáculos incluso si dentro tienen una presa.
+
+Por último la percepción de los agentes en el resto de aspectos sigue siendo igual que en las anteriores arquitecturas, solo con implementaciones más optimizadas para ahorrar recursos. Sin embargo algo que debemos señalar que antes ningún agente tenía idea del mapa completo a no ser que su visión fuera lo suficieentemente grande. En esta nueva arquitectura, todos los agentes conocen el terreno entero, pero solo saben las entidades y agentes que hay dentro de su rango de visión. Esto es una ventaja que tienen ahora ambas especies a su favor en cierta medida. Además se añadió para hacer más interesante la búsqueda de rutas con el algoritmo A* que se explicará más adelante.
+
+*BRF*:
+
+En esta función debemos generar nuevas creencias, pero qué se considerará una creencia? Luego de pensar en varias posibles respuestos, concluímos que se debía concebir como el conocimiento que el agente puede tener del mundo y las entidades y agentes que lo rodean, producto de las percepciones que recibe. Para ello se creó un concepto de memoria inspirado en la mente de nosotros los humanos. Esta memoria es capaz de guardar cierta cantidad de información y desecharla con el tiempo considerando varias heurísticas, que se explicarán en el apartado **Inteligencia en Agentes**. Las presas tendrán una memoria de comida y una memoria presas (también cuentan con una de depredadores pero realmente no se le da mucho uso). Y los depredadores también cuetan con memoria pero solo 2: la memoria de comida (o de presas) y la de depredadores.
+
+Por lo tanto aquí se actualizarán estas memorias con las percepciones captadas, además de actualizar el avance por un camino si se logró caminar. Esto último, es producto de la proactividad de los agentes, los cuales, pueden plantearse recorrer un camino, por diferentes razones.
+
+*OPTIONS*:
+
+Aquí se deben generar los nuevos deseos. Pero volvemos a la interrogante de qué sería un deseo? Los deseos se deben ver como un indicador de cuánto quiere un agente ahcer una cosa. Tenemos que aclarar que tener mucho deseo de hacer algo no implica directamente que se haga eso, ya que las necesidades y deseos no siempre concuerdan, sin embargo debemos tener en cuenta que los deseos van a influir mucho en las intenciones que se formulen. En la práctica se concibió entonces los deseos como valores numéricos que dependen de las creencias, intenciones actuales y algunos factores aleatorios. Los deseos de las presas son:
+
+- self.hungry_desire: Deseo de comer $X \sim Beta(\alpha=2, \Beta\in [1,20])$
+- self.breeding_desire: Deseo de reproducirse $|X| \sim N(\mu = 0, \sigma \in [1, 10])$
+- self.scape_desire: Deseo de Escapar $X \sim Exp(\lambda \in [0,2]) + 1$
+
