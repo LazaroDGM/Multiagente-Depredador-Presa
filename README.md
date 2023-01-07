@@ -236,7 +236,7 @@ Luego de este proceso, se seleccionará el mejor moviemiento como la casilla con
 
         |<center>0</center>|<center>1</center>|<center>2</center>|<center>3</center>|
         |-|-|-|-|
-        |0.6 $\leq$ f $\leq$ 1|0.4 $\leq$ f < 0.6|0.2 $\leq$ f < 0.4|0 < f < 0.2|
+        |0.25 $\leq$ f $\leq$ 1|0.2 $\leq$ f < 0.25|0.1 $\leq$ f < 0.2|0 < f < 0.1|
     3. Fijarse que con esto simulamos el aspecto realista de la memoria para recordar más, un evento de mayor significación o importancia.
     4. También hemos decidido que solo se olvide a lo sumo un recuerdo a la vez para hacer balance entre la acción de olvidar con el tamaño pequeño de la memoria.
     5. La memoria, al igual que la simulación en general pasa por unidades de tiempo o **Ticks**. Para olvidar un evento se hará de la siguiente forma según el slot donde esté ubicado cada evento: 
@@ -254,7 +254,37 @@ Luego de este proceso, se seleccionará el mejor moviemiento como la casilla con
     
         De forma que se puede decir que la memoria olvida el recuerdo más antiguo del slot con una multiplicidad igual al máximo común divisor entre 8 y el tick actual :)
 
+#### Recuerdos
+
+La memoria no siempre tiene que agregar y quitar las posiciones que recuerda el agente, ya que estaríamos olvidando o lugares lejanos al actual en el que sabemos q hay mucha comida, o estaremos agregando repetidamente lugares en la misma zoa para especificar que hay comida. Para eso agregamos una heurística de reemplazo.
+
+La idea principal es, que si recuerdo que cerca de aqui hay comida, reemplazo la posición vieja de comida por la actual. Note que de esta manera, preservamos lugares distantes, y evitamos la inundación de la memoria de comida con valores muy similares. Ahora bien, la heurística creada en la práctica uso la distribución creada por nosotros comentada arriba pero ahora con los parámetros siguientes:
+
+$$ X \sim D_1(l=2,\alpha = 6,\sigma = 1,\gamma=0)$$
+
+Su distribución puede verse así:
+
+![Memoria](/img/D_1Memoria.png)
+
+Una vez distribuida esta variable, se comprueba que:
+
+$$Manhathan(actual, vieja) \le X $$
+
+y de ser así se reemplaza. Note que siempre se reemplazarán las distancias menores o iguales a 2. Y además tenga en cuenta que el reemplazo, reinicia el conteo de eliminación
+
+
+### Caminata Inteligente
+
+Tanto depredadores como presas, cuando se plantean recorrer un camino, este puede ser intercptado por otro agente de su misma especie con el que colicionará. Si colisiona tendrá que esperar un tiempo para poder proseguir, o tendrá que recalcular su nueva ruta. Para evitar el corte en el flujo del tráfico intraagente, se diseñó una heurística de reconstrucción de camino. Esta es muy sencilla, intuitiva a nuestro criterio muy curiosa.
+
+Cuando en el camino objetivo, la casilla a la que el agente se va a mover en este momento está ocupada este considerá cambiar su ruta modificando la siguiente casilla, a una adyacente tanto a la actual en la que se encuentra, como a la que en el turno despues del siguiente debe moverse. De esta forma el camino que igual de consistente. Increiblemente los mejores resultados dieron con probabilidades muy altas.
+
+- 50% seguir en la actual y 25% para cambiar a dos posibles adyacentes
+- 66% actual y 33% para cambiara a una sola posible adyacente
+
 ## Resultados Finales obtenidos
+
+Luego de todo lo antes explicado se fijaron varios paráemtros y se corrienron simulaciones para observar la cantidad de presas, depredadores y comida a lo largo del tiempo, así como la esperanza de vida de ambas poblaciones, y los mapas de calor de las zonas más visitadas en el mapa. Los parámetros variables se muestran a continuación y son aquellos de los qeu depende la toma de decisiones de los agentes. Empezaremos con el vector que propusimos probar y luego se explicarán cómo se mejorar los resultados, nuevamente haciendo uso de la inteligencia artificial y esta vez con metaheurísticas
 
 Con los parámetros iniciales supuestos
 
@@ -271,18 +301,23 @@ Con los parámetros iniciales supuestos
 obtuvimos los siguietes resultados:
 
 Presas en el tiempo
+
 ![](/img/test4Preys.png)
 
 Depredadores en el tiempo
+
 ![](/img/test4Predators.png)
 
 Mapa de exploración de las Presas
+
 ![](/img/test4HeatMapPreys.png)
 
 Mapa de exploración de los Depredadores
+
 ![](/img/test4HeatMapPredators.png)
 
 Presas y depredadores al pasar el tiempo
+
 ![](/img/test4Circ.png)
 
 Además la esperanza de vida fue de:
@@ -294,37 +329,68 @@ Además la esperanza de vida fue de:
 
 Como queremos mejorar los resultados obtenidos, utilizamos metahurísticas para generar varios vectores de prámetros que en un principio proporcionaran la mayor cantidad de equilibrio al sistema. Para ello se implementaron varios algoritmos de heurísticas, en tre ellos la búsqueda aleatoria, y el ascenso de colina. Con ellos primero generamos varios conjuntos de 10 simulaciones para cada corrida y utilizamos una función de fitness que considerara el promedio de equilibrio de todas las simulaciones. La intención era generar primero algunas buenas soluciones aletorias y luego hacer el ascenso de colina. Para ello utilizamos la mejor solución que nos dio en algoritmo para 25 generaciones de vectores. E hicimos ascenso de colina. El resultado fue el siguiente:
 
+- alpha: 2.9
+- gamma: 0.82
+- lambda: 0.5
+- beta_prey: 5.9
+- beta_predator: 1.26
+- sigma_prey: 8.25
+- sigma_predator: 2.6
+- bold_prey: 0.85
+- bold_predator: 0.13
+
 Presas en el tiempo
-![](/img/test9Preys.png)
+
+![Presas en el tiempo](/img/test9Preys.png)
 
 Depredadores en el tiempo
-![](/img/test9Predators.png)
+
+![Depredadores en el tiempo](/img/test9Predators.png)
 
 Mapa de exploración de las Presas
-![](/img/test9HeatMapPreys.png)
+
+![Mapa de exploración de las Presas](/img/test9HeatMapPreys.png)
 
 Mapa de exploración de los Depredadores
-![](/img/test9HeatMapPredators.png)
+
+![Mapa de exploración de los Depredadores](/img/test9HeatMapPredators.png)
 
 Presas y depredadores al pasar el tiempo
+
 ![](/img/test9Circ.png)
 
 Es evidente la mejora pero, pero luego quisiemos explorar más y utilizamos un algoritmo génetico para mezclar las mejores soluciones y obtenr nuevas, considerenado principalmente el promedio, entre soluciones, y una combinación de valores. Uno de los mejores resultados fue el siguiente:
 
+- alpha: 5.38
+- gamma: 0.62
+- lambda: 0.25
+- beta_prey: 10.8
+- beta_predator: 16.82
+- sigma_prey: 9.34
+- sigma_predator: 6.72
+- bold_prey: 0.78
+- bold_predator: 0.17
+
 Presas en el tiempo
+
 ![](/img/test8Preys.png)
 
 Depredadores en el tiempo
+
 ![](/img/test8Predators.png)
 
 Mapa de exploración de las Presas
+
 ![](/img/test8HeatMapPreys.png)
 
 Mapa de exploración de los Depredadores
+
 ![](/img/test8HeatMapPredators.png)
 
 Presas y depredadores al pasar el tiempo
+
 ![](/img/test8Circ.png)
 
 Presas y depredadores al pasar el tiempo en equilibrio
+
 ![](/img/test8CircFinal.png)
