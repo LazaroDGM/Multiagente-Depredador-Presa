@@ -188,7 +188,7 @@ Esta distribución se usa para la generación de las presas, instpirado en la re
 
 ## Inteligencia en Agentes
 
-### Busqueda en el mapa
+### Búsqueda en el mapa
 
 Como parte de la simulación de la predicción que poseen los animales para el movimiento, utilizamos un algoritmo compuesto por dos fases.
 1. Utilización del algoritmo `A*` con función de costo igual a la longitud del camino y heurística igual a la distancia de Manhatan hasta los puntos deseados a alcanzar. También se le pasan dos funciones como parámetro, ambas a la vez reciben como parámetro una posición de la matriz(x, y), y retornan si existe, un objeto buscado, y un obstáculo, respectivamente. Esta función devuelve una matriz de proximidad al agente, que contiene 9 casillas(3x3), 8 de ellas válidas, que incluyen en cada una de las posiciones, una lista de números donde:
