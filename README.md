@@ -135,3 +135,15 @@ Aquí se deben generar los nuevos deseos. Pero volvemos a la interrogante de qu�
 - self.breeding_desire: Deseo de reproducirse $|X| \sim N(\mu = 0, \sigma \in [1, 10])$
 - self.scape_desire: Deseo de Escapar $X \sim Exp(\lambda \in [0,2]) + 1$
 
+mientras que el depredador cuenta con los 2 primeros de igual forma y con el mismo intervalo de los parámetros pero particular para los depredadores.
+
+Estas distribuciones pueden visualizarse a continuación con algunos parámetros:
+
+#### $X \sim Beta(\alpha=2, \Beta=6)$
+![$X \sim Beta(\alpha=2, \Beta=6)$](/img/Beta6.png)
+
+#### $X \sim |N(\mu = 0, \sigma = 4)|$
+![$X \sim |N(\mu = 0, \sigma = 4)|$](/img/Norm4.png)
+
+#### $X \sim Exp(\lambda = 1$
+![Discretización de $X \sim Exp(\lambda = 1$](/img/ExpLambd1.png)
