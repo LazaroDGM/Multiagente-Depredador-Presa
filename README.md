@@ -361,16 +361,6 @@ Presas y depredadores al pasar el tiempo
 
 Es evidente la mejora pero, pero luego quisiemos explorar más y utilizamos un algoritmo génetico para mezclar las mejores soluciones y obtenr nuevas, considerenado principalmente el promedio, entre soluciones, y una combinación de valores. Uno de los mejores resultados fue el siguiente:
 
-- alpha: 5.38
-- gamma: 0.62
-- lambda: 0.25
-- beta_prey: 10.8
-- beta_predator: 16.82
-- sigma_prey: 9.34
-- sigma_predator: 6.72
-- bold_prey: 0.78
-- bold_predator: 0.17
-
 Presas en el tiempo
 
 ![](/img/test8Preys.png)
