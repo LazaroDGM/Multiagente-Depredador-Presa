@@ -221,3 +221,42 @@ Además la esperanza de vida fue de:
 
 - Presa: 1790
 - depredadores: 2951
+
+### Más Inteligencia Artificial
+
+Como queremos mejorar los resultados obtenidos, utilizamos metahurísticas para generar varios vectores de prámetros que en un principio proporcionaran la mayor cantidad de equilibrio al sistema. Para ello se implementaron varios algoritmos de heurísticas, en tre ellos la búsqueda aleatoria, y el ascenso de colina. Con ellos primero generamos varios conjuntos de 10 simulaciones para cada corrida y utilizamos una función de fitness que considerara el promedio de equilibrio de todas las simulaciones. La intención era generar primero algunas buenas soluciones aletorias y luego hacer el ascenso de colina. Para ello utilizamos la mejor solución que nos dio en algoritmo para 25 generaciones de vectores. E hicimos ascenso de colina. El resultado fue el siguiente:
+
+Presas en el tiempo
+![](/img/test9Preys.png)
+
+Depredadores en el tiempo
+![](/img/test9Predators.png)
+
+Mapa de exploración de las Presas
+![](/img/test9HeatMapPreys.png)
+
+Mapa de exploración de los Depredadores
+![](/img/test9HeatMapPredators.png)
+
+Presas y depredadores al pasar el tiempo
+![](/img/test9Circ.png)
+
+Es evidente la mejora pero, pero luego quisiemos explorar más y utilizamos un algoritmo génetico para mezclar las mejores soluciones y obtenr nuevas, considerenado principalmente el promedio, entre soluciones, y una combinación de valores. Uno de los mejores resultados fue el siguiente:
+
+Presas en el tiempo
+![](/img/test8Preys.png)
+
+Depredadores en el tiempo
+![](/img/test8Predators.png)
+
+Mapa de exploración de las Presas
+![](/img/test8HeatMapPreys.png)
+
+Mapa de exploración de los Depredadores
+![](/img/test8HeatMapPredators.png)
+
+Presas y depredadores al pasar el tiempo
+![](/img/test8Circ.png)
+
+Presas y depredadores al pasar el tiempo en equilibrio
+![](/img/test8CircFinal.png)
