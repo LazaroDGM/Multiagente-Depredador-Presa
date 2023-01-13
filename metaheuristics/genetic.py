@@ -53,6 +53,7 @@ def geneticeval(parameters_number: int, fitness_function, function, simulation_t
             better_solutions.append(heappop(heapp))
         heapp.clear()
         heapp += [(-fitness_function(solution), solution) for solution in merch([sol[1] for sol in better_solutions])]
+        heapp += generate_population(weight= 5)
         heapify(heapp)
     return [item[1] for item in heapp][:10]
         
