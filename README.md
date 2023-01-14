@@ -190,6 +190,8 @@ Esta distribución se usa para la generación de las presas, instpirado en la re
 
 ### Búsqueda en el mapa
 
+> Los agentes en el Medio tienen la capacidad de moverse, sea con cualquier fin. Sin embargo tanto agentes con arquitectura de Brooks, como BDI, basan sus acciones en condiciones previas (con sus particularidades). En base a esto es necesario definir un comportamiento para el movimiento en cada caso. A continuación se explicará de forma general cuál sería la base del movimiento estándar, y luego explicaremos las particularidades para cada agente.
+
 Como parte de la simulación de la predicción que poseen los animales para el movimiento, utilizamos un algoritmo compuesto por dos fases.
 1. Utilización del algoritmo `A*` con función de costo igual a la longitud del camino y heurística igual a la distancia de Manhatan hasta los puntos deseados a alcanzar. También se le pasan dos funciones como parámetro, ambas a la vez reciben como parámetro una posición de la matriz(x, y), y retornan si existe, un objeto buscado, y un obstáculo, respectivamente. Esta función devuelve una matriz de proximidad al agente, que contiene 9 casillas(3x3), 8 de ellas válidas, que incluyen en cada una de las posiciones, una lista de números donde:
    - Cada número implica que desde la casilla donde está se partió y alcanzó un camino, de forma óptima en distancia.
@@ -227,7 +229,39 @@ for i, j in positions:
    8. Luego de hacer esto se obtendrá una última matriz que es la suma de `matriz_2` y `matriz_3`, que sería la matriz de expansión
 Luego de este proceso, se seleccionará el mejor moviemiento como la casilla con mayor valor(o una posición aleatoria entre las de máximo e igual valor) de las 8 casillas de la matriz de expansión; siendo esta posición la devuelta...
 
-### Memoria
+
+> Todos los agentes necesitan comer, aunque lo que represente *la comida* para ambos no sea lo mismo.
+> 
+> - En el caso de las **Presas de Brooks**, como son puramente reactivas solo se generará la próxima casilla adyacente hacia donde se moverán. Para esto se utiliza la Matriz de Expansión. Las presas, necesitan comer y no ser comida por los depredadores; por este uúltimo motivo, además de calcular la *Matriz de Expansión Invertida de Comida* ($M_C$) se hallará la *Matriz de Expansión de Depredadores* ($M_D$) que prioriza zonas donde hayaa menos depredadores (usando igualmente *`A*`* en la búsqueda). Finalmente se obtiene la *Matriz Final de Movimiento* ($M_F$):
+> $$ M_F =   a \cdot M_C + (1 - c)\cdot M_D$$
+> Aquí se añade una constante parametrizable $c$ para gestionar qué se priorizará más, si el comer o el huir.
+> 
+> - Las **Presas BDI** en contraste con las otras se plantean objetivos, aunque no están ajenos de modificarlos. Su proactividad se traduce en buscar un camino hacia una zona de comida, o un objeto comida en específico. En el momento de seleccionar el objeto comida en específico se utiliza la misma estrategia anterior descrita solamente considerando la $M_C$, salvo que en este caso se genera una ruta hacia alguna de las comidas a las que se pueden acceder desde la casilla adyacente con mayor prioridad. Note que una vez teniendo el camino, no tiene que volver a hacerse este cálculo, ya que se tiene un objetivo fijado; sin embargo, el agente puede replantearse de nuevos sus objetivos y dicho caso, si lo que AÚN QUIERE es comer entonces se hace nuevamente este proceso.
+>   Con respecto a la huida de este agente, esta será reactiva con un movimiento similar al de la Presa Brooks, considerando en vez de la *Matriz de Comida*, la *Matriz de Madrigueras* que no es más que una *Matriz de Expansión Inversa de Madrigueras*.
+> $$M_F =   a \cdot M_M + (1 - c)\cdot M_D$$
+>
+> - Los **Depredadores Brooks** para comer se comportan iguales a las Presas de Brooks, lo que su *Matriz de Prioridad Final* está dada por la $Matriz de Expansión Inversa de Depredadores$.
+> $$M_F = M_P$$
+> - Los **Depredadores BDI** se comportan análogos a las Presas Brooks solamente para comer, ya que estos no necesitan huir; y claramente la selección de la zona de presas, o una presa específica lo que tiene en cuenta para la ruta es la *Matriz de Presas*.
+> La combinación de estas estrategias, más las pequeñas bases de conocimiento que poseen los agentes que explicaremos a continuación, permiten hacer el diseño de la *Planificación* de los agentes BDI
+
+### Conocimiento en los agentes
+
+> Los agentes BDI en su propia estructura requieren un conjunto de creencias en la teoría. En la práctica había varias formas de plasmar estas creencias, y una forma de estas era generando alguna especie de conocimiento particularizado a lo que a cada agente le importe. Los agentes procesan las percepciones que reciben, y a estos DATOS puede dársele una interpretación momentánea generando conocimiento. En la práctica esto se hace para los Agentes Brooks pero note que realmente no es un conocimiento que se pueda almacenar, ni reutilizar para deducir *algo*. En cambio con los Agentes BDI, la estrategia fue diferente: estos de las percepciones recibidas generan nuevos datos para incorporarlos a una base de conocimientos que llamaremos *Memoria*, y luego utilizan esta memoria para inferir ciertas informaciones.
+>
+> La intención era crear una especie de memoria para los agentes similar a como funciona (en parte) el cerebro animal para recordar, inspirado un poco en la capacidad que tienen los humanos para esto. El conocimiento que se quiere generar es sobre las zonas de comida de ambos agentes (los objetos comida para las Presas, y las Presas para los Depredadores). La idea general para modelar esto se basa en:
+>
+> - Recordar un objeto, un evento, o algo (en sentido general) tiene un grado de importancia.
+> - El conjunto de elementos recordados (recuerdos almacenados) es limitado
+> - Cuando la capacidad de la base de conocimientos está llena, se hace necesario eliminar alguna de las informaciones almacenadas para permitir que se incorpore información nueva.
+> - Con el tiempo el conocimiento que se tiene se va desgastando (se eliminan recuerdos)
+> - El conocimiento desechado por lo general debe ser el menos relevante.
+> 
+> En el caso particular de nuestros agentes lo que se almacena en su *Memmoria* es las posiciones en las estando ellos parados, pudieron ver una mayor cantidad de comida en su área de visión. Y la importancia de recordar esta posición estará dada por la proporción de comida con respecto a su área de visión, es decir, mientras más comida hay en su área de visión, mayor será la importancia atribuida a la posición actual. Note que una primera idea era recordar exactamente las posiciones de la comida pero realmente creemos que nosotros como humanos recordaríamos (en casos similares a este), regiones donde hay comida, y no justo el lugar donde hay comida; la ventaja de recordar el área es que sabremos que por lo general, cerca de la posición encontraremos comida, mientras que solo recordando las posiciones de la comida y a cudiendo particularmente a ella, tendremos más probabilidad de no encontrar lo que buscames y que cerca de dicha posición, tampoco encontremos nada que nos interese. Llevado a la vida real, si estamos en un centro comercial, sabemos que tendremos opciones cercanas de puestos de comida, en cambio si recordamos que en algún pasillo de este había un puesto de dulces y nos dirijimos a este, corremos el riesgo de que esté cerrado, o ya no exista, y estaremos lejos de los restantes puestos de comida del centro comercial.
+>
+> A continuación se explicará a profundidad detalles de la implementación de la *Memoria de Comida* y las reglas que sigue para recordar y olvidar (agregar y eliminar conocimiento).
+
+#### Memoria
 - La memoria está constituida básicamente por una estructura que contiene 4 `slots` o espacios, los cuales tienen diferente prioridad para recordar.
 - Cada uno de los `slots`: 0, 1, 2 y 3; tienen de mayor a menor prioridad para recordar, en ese orden, siendo el slot 0 el que más prioridad tiene.
 - El funcionamiento tiene los siguientes aspectos:
@@ -254,11 +288,11 @@ Luego de este proceso, se seleccionará el mejor moviemiento como la casilla con
     
         De forma que se puede decir que la memoria olvida el recuerdo más antiguo del slot con una multiplicidad igual al máximo común divisor entre 8 y el tick actual :)
 
-#### Recuerdos
+#### Reemplazo de Recuerdos
 
-La memoria no siempre tiene que agregar y quitar las posiciones que recuerda el agente, ya que estaríamos olvidando o lugares lejanos al actual en el que sabemos q hay mucha comida, o estaremos agregando repetidamente lugares en la misma zoa para especificar que hay comida. Para eso agregamos una heurística de reemplazo.
+La memoria no siempre tiene que agregar y quitar las posiciones que recuerda el agente, ya que estaríamos olvidando o lugares lejanos al actual en el que sabemos que hay mucha comida, o estaremos agregando repetidamente lugares en la misma zona para especificar que hay comida. Para eso agregamos una heurística de reemplazo de recuerdos.
 
-La idea principal es, que si recuerdo que cerca de aqui hay comida, reemplazo la posición vieja de comida por la actual. Note que de esta manera, preservamos lugares distantes, y evitamos la inundación de la memoria de comida con valores muy similares. Ahora bien, la heurística creada en la práctica uso la distribución creada por nosotros comentada arriba pero ahora con los parámetros siguientes:
+La idea principal es, que si recuerdo que cerca de aquí hay comida, reemplazo la posición vieja de comida por la actual restaurando su *tiempo* en ser eliminada. Note que de esta manera, preservamos lugares distantes, y evitamos la inundación de la memoria de comida con valores muy similares. Ahora bien, la heurística creada en la práctica usó la distribución creada por nosotros comentada arriba pero ahora con los parámetros siguientes:
 
 $$ X \sim D_1(l=2,\alpha = 6,\sigma = 1,\gamma=0)$$
 
@@ -270,8 +304,11 @@ Una vez distribuida esta variable, se comprueba que:
 
 $$Manhathan(actual, vieja) \le X $$
 
-y de ser así se reemplaza. Note que siempre se reemplazarán las distancias menores o iguales a 2. Y además tenga en cuenta que el reemplazo, reinicia el conteo de eliminación
+y de ser así se reemplaza. Note que siempre se reemplazarán las distancias menores o iguales a 2. Y además tenga en cuenta que el reemplazo, reinicia el conteo de eliminación.
 
+> #### Recomendación de la Memoria
+> 
+> Un aspecto que no se ha mencionado es que la *Memoria* almacena conocimiento, pero no hemos hablado de cómo se infiere un conocimiento de esta. La intención de guardar información de zonas de abundancia de comida, es para poder después deducir lugares con alta probabilidad de encontrar comida al estar el agente sometido a diversas condiciones pero que en su raíz parte de la necesidad de buscar comida (tanto para comer por hambre o por reproducción). La *Memoria* realiza una recomendación de las mejores zonas principalmente 
 
 ### Caminata Inteligente
 
