@@ -308,7 +308,22 @@ y de ser así se reemplaza. Note que siempre se reemplazarán las distancias men
 
 > #### Recomendación de la Memoria
 > 
-> Un aspecto que no se ha mencionado es que la *Memoria* almacena conocimiento, pero no hemos hablado de cómo se infiere un conocimiento de esta. La intención de guardar información de zonas de abundancia de comida, es para poder después deducir lugares con alta probabilidad de encontrar comida al estar el agente sometido a diversas condiciones pero que en su raíz parte de la necesidad de buscar comida (tanto para comer por hambre o por reproducción). La *Memoria* realiza una recomendación de las mejores zonas principalmente 
+> Un aspecto que no se ha mencionado es que la *Memoria* almacena conocimiento, pero no hemos hablado de cómo se infiere un conocimiento de esta. La intención de guardar información de zonas de abundancia de comida, es para poder después deducir lugares con alta probabilidad de encontrar comida al estar el agente sometido a diversas condiciones pero que en su raíz parte de la necesidad de buscar comida (tanto para comer por hambre o por reproducción). La *Memoria* realiza una recomendación de las mejores zonas principalmente. Para ello reparte las porciones de memoria como si fuera una ruleta, es decir, se le asignara a cada bloque un valor de importancia (entero positivo, $I(bloque)$) y la probabilidad de seleccionar un bloque $X = {1,2,3,4}$, será $\frac{I(X)}{I(1) + I(2) + I(3)+ I(4)}$. Luego del bloque candidato se selecciona uniformemente al azar una posición y esta pasa a ser la posición recomendada.
+>
+> Adicionalmente la recomendación se amplía si la memoria recibe (opcionalmente) un conjunto de posiciones extras, categorizadas como posiciones de baja importancia y que en la práctica son posiciones aleatorias del terreno donde no se sabe realmente información de la existencia de comida. Si este conjunto no es vacío a la función de probabilidad mencionada solo habrá que agregarle un sumando $I(5)$ en el denominador, y $X = {1,...,5}$, siendo $X=5$ el conjunto de posiciones extras. Note que esta opción lo que permite es incitar exploración de zonas desconocidas, y tendrá más peso cuando la *Memoria* esté ligeramente vacía.
+> La importancia dada por bloque es la siguiente:
+>
+> - $I(1) = 8$
+> - $I(2) = 5$
+> - $I(3) = 3$
+> - $I(4) = 2$
+> - $I(5) = 1$
+>
+> La implementación de la memoria se encuentra en [memory.py](https://github.com/LazaroDGM/Multiagente-Depredador-Presa/blob/main/simulators/simulator_03/memory.py) con todos los detalles antes comentados.
+>
+> Por último y no menos importante de a forma en que está definida la Memoria puede ser considerado un Sistema Experto dedicado a la sugerencia de zonas de interés para los agentes. Hay que tener claro que sus característica lo vuelvan un sistema basado en reglas, pero con detalles probabilísticos, por lo que no debería considerarse un sistema completamente puro. Y a nuestro criterio la caractéristica principal que no lo hace un sistema experto típico, y la constante y AUTOMÁTICA actualización de su base de conocimientos, que aunque muchos sitemas tienen actualizaciones de esta, por lo general no son completamente automáticas y retroalimentadas.
+>
+> Nota: Una mejora que se le pudiera hacer al sistema, o que se puede tener en cuenta para otros proyectos similares, es en la *Modificación de Recuerdos*, incluir la eliminación o modificación de recuerdos corruptos. El concepto de recuerdo corrupto se inclinaría a información en la base de conocimiento que ya no es correcta, lo cual en nuestro caso sería que para una posición (muy) cercana a la actual haya un recuerdo en la memoria en un bloque muy diferente al que se puede *suponer* que pertenecería. Por ejemplo, un recuerdo corrompido de una posición cercana a la actual, es que en la percepción actual la proporción de comida sea nula, y dicha posición esté categorizada como de abundante comida; en este caso no se puede asegurar que esa posición sea proporción nula igualemente, pero sí se podría SUPONER que ya NO ES de gran abundancia. Esta mejora tiene sentido agregarla con reglas basadas en probabilidades bayesianas.
 
 ### Caminata Inteligente
 
