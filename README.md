@@ -232,12 +232,13 @@ Luego de este proceso, se seleccionará el mejor moviemiento como la casilla con
 
 > Todos los agentes necesitan comer, aunque lo que represente *la comida* para ambos no sea lo mismo.
 > 
-> - En el caso de las **Presas de Brooks**, como son puramente reactivas solo se generará la próxima casilla adyacente hacia donde se moverán. Para esto se utiliza la Matriz de Expansión. Las presas, necesitan comer y no ser comidas por los depredadores; por este último motivo, además de calcular la *Matriz de Expansión Invertida de Comida* ($M_C$) se hallará la *Matriz de Expansión de Depredadores* ($M_D$) que prioriza zonas donde haya menos depredadores (usando igualmente *`A*`* en la búsqueda). Finalmente se obtiene la *Matriz Final de Movimiento* ($M_F$):
+> - En el caso de las **Presas de Brooks**, como son puramente reactivas solo se generará la próxima casilla adyacente hacia donde se moverán. Para esto se utiliza la Matriz de Expansión. Las presas, necesitan comer y no ser comidas por los depredadores; por este último motivo, además de calcular la *Matriz de Expansión Invertida de Comida* ( $M_C$ ) se hallará la *Matriz de Expansión de Depredadores* ( $M_D$ ) que prioriza zonas donde haya menos depredadores (usando igualmente *`A*`* en la búsqueda). Finalmente se obtiene la *Matriz Final de Movimiento* ( $M_F$ ):
 > $$ M_F =   c \cdot M_C + (1 - c)\cdot M_D$$
 > Aquí se añade una constante parametrizable $c$ para gestionar qué se priorizará más, si el comer o el huir.
 > 
 > - Las **Presas BDI** en contraste con las otras se plantean objetivos, aunque no están ajenos de modificarlos. Su proactividad se traduce en buscar un camino hacia una zona de comida, o un objeto comida en específico. En el momento de seleccionar el objeto comida en específico se utiliza la misma estrategia anterior descrita, solamente considerando la $M_C$, salvo que en este caso se genera una ruta hacia alguna de las comidas a las que se pueden acceder desde la casilla adyacente con mayor prioridad. Note que una vez teniendo el camino, no tiene que volver a hacerse este cálculo, ya que se tiene un objetivo fijado; sin embargo, el agente puede replantearse de nuevo sus objetivos y dicho caso, si lo que AÚN QUIERE es comer entonces se hace nuevamente este proceso.
 >   Con respecto a la huida de este agente, esta será reactiva con un movimiento similar al de la Presa Brooks, considerando en vez de la *Matriz de Comida*, la *Matriz de Madrigueras* que no es más que una *Matriz de Expansión Inversa de Madrigueras*.
+>
 > $$M_F =   c \cdot M_M + (1 - c)\cdot M_D$$
 >
 > - Los **Depredadores Brooks** para comer se comportan iguales a las Presas de Brooks, lo que su *Matriz de Prioridad Final* está dada por la *Matriz de Expansión Inversa de Depredadores*.
