@@ -355,16 +355,16 @@ y de ser así se reemplaza. Note que siempre se reemplazarán las distancias men
 
 ### Caminata Inteligente
 
-Tanto depredadores como presas, cuando se plantean recorrer un camino, este puede ser intercptado por otro agente de su misma especie con el que colicionará. Si colisiona tendrá que esperar un tiempo para poder proseguir, o tendrá que recalcular su nueva ruta. Para evitar el corte en el flujo del tráfico intraagente, se diseñó una heurística de reconstrucción de camino. Esta es muy sencilla, intuitiva a nuestro criterio muy curiosa.
+Tanto depredadores como presas, cuando se plantean recorrer un camino, este puede ser interceptado por otro agente de su misma especie con el que colicionará. Si colisiona tendrá que esperar un tiempo para poder proseguir, o tendrá que recalcular su nueva ruta. Para evitar el corte en el flujo del tráfico intraagente, se diseñó una heurística de reconstrucción de camino. Esta es muy sencilla e intuitiva.
 
-Cuando en el camino objetivo, la casilla a la que el agente se va a mover en este momento está ocupada este considerá cambiar su ruta modificando la siguiente casilla, a una adyacente tanto a la actual en la que se encuentra, como a la que en el turno despues del siguiente debe moverse. De esta forma el camino que igual de consistente. Increiblemente los mejores resultados dieron con probabilidades muy altas.
+Cuando en el camino objetivo, la casilla a la que el agente se va a mover en este momento está ocupada, este considerá cambiar su ruta modificando la siguiente casilla, a una adyacente tanto a la actual en la que se encuentra, como a la que en el turno despues del siguiente debe moverse. De esta forma el camino queda igual de consistente. Increíblemente los mejores resultados dieron con probabilidades bastantes altas para cambiar de camino.
 
 - 50% seguir en la actual y 25% para cambiar a dos posibles adyacentes
 - 66% actual y 33% para cambiara a una sola posible adyacente
 
 ## Resultados Finales obtenidos
 
-Luego de todo lo antes explicado se fijaron varios paráemtros y se corrienron simulaciones para observar la cantidad de presas, depredadores y comida a lo largo del tiempo, así como la esperanza de vida de ambas poblaciones, y los mapas de calor de las zonas más visitadas en el mapa. Los parámetros variables se muestran a continuación y son aquellos de los qeu depende la toma de decisiones de los agentes. Empezaremos con el vector que propusimos probar y luego se explicarán cómo se mejorar los resultados, nuevamente haciendo uso de la inteligencia artificial y esta vez con metaheurísticas
+Luego de todo lo antes explicado se fijaron varios paráemtros y se corrienron simulaciones para observar la cantidad de presas, depredadores y comida a lo largo del tiempo, así como la esperanza de vida de ambas poblaciones, y los mapas de calor de las zonas más visitadas en el mapa. Los parámetros variables se muestran a continuación y son aquellos de los que depende la toma de decisiones de los agentes. Empezaremos con el vector que propusimos probar y luego se explicarán cómo se mejoran los resultados, nuevamente haciendo uso de la inteligencia artificial y esta vez con metaheurísticas.
 
 Con los parámetros iniciales supuestos
 
@@ -405,9 +405,15 @@ Además la esperanza de vida fue de:
 - Presa: 1790
 - depredadores: 2951
 
+> #### Interpretación de las observaciones realizadas
+>
+> El mapa cuenta con obstáculos que son los cuadros completamente negros en los mapas de calor. De estos obstáculos hay plantas en las posiciones (12,2), (11,15), (8,24), y (3,18). Así como refugios en las zonas casi cerradas, superior izquierda e inferior derecha. Como el parámetro de la huida de las presas es bastante alto, consideran más en huir por lo que tiene sentido que la zona más concurrida es la de la madriguera y sus alrededores, así como que tiene más sentido la preferencia de la inferior a la superior por la cercanía a más plantas e implícitamente alimentos. También se puede notar que alrededor de la planta (12,2) hay una zona bastante visitada. Con respecto a los depredadores se puede notar que las zonas más visitadas son alrededor del refugio inferior de las presas, lo cual tiene sentido ya que son un área concurrida de las presas. Además se puede notar que los depredadores tienden a dejar un rastro en el mapa de calor del camino principal que toman para cambiar de una entrada de la madriguera a otra, al tener que dar la vuelta para obviar obstáculos.
+>
+> De las gráficas de presas y depredadores en función del tiempo, se uede notar que hubo muchas simulaciones donde no se alcanzó el equilibrio y al menos alguna de las 2 especies murió. Se puede notar que el promedio de los resultado de los depredadores que la población de esta especie tiende a desaparecer con el tiempo.
+
 ### Más Inteligencia Artificial
 
-Como queremos mejorar los resultados obtenidos, utilizamos metahurísticas para generar varios vectores de prámetros que en un principio proporcionaran la mayor cantidad de equilibrio al sistema. Para ello se implementaron varios algoritmos de heurísticas, en tre ellos la búsqueda aleatoria, y el ascenso de colina. Con ellos primero generamos varios conjuntos de 10 simulaciones para cada corrida y utilizamos una función de fitness que considerara el promedio de equilibrio de todas las simulaciones. La intención era generar primero algunas buenas soluciones aletorias y luego hacer el ascenso de colina. Para ello utilizamos la mejor solución que nos dio en algoritmo para 25 generaciones de vectores. E hicimos ascenso de colina. El resultado fue el siguiente:
+> Como queremos mejorar los resultados obtenidos, utilizamos metahurísticas para generar varios vectores de parámetros que en un principio proporcionaran la mayor cantidad de equilibrio al sistema. Para ello se implementaron varios algoritmos de heurísticas, entre ellos la búsqueda aleatoria, y el ascenso de colina. Con ellos primero generamos varios conjuntos de 10 simulaciones para cada corrida y utilizamos una función de fitness que considerara el promedio de equilibrio de todas las simulaciones. La intención era generar primero algunas buenas soluciones aletorias y luego hacer el ascenso de colina. Para ello utilizamos las 10 mejores soluciones que nos dio el algoritmo para 25 generaciones de vectores. E hicimos ascenso de colina. El resultado fue el siguiente para uno de los 10 vectores nuevos:
 
 - alpha: 2.9
 - gamma: 0.82
@@ -439,7 +445,7 @@ Presas y depredadores al pasar el tiempo
 
 ![](/img/test9Circ.png)
 
-Es evidente la mejora pero, pero luego quisiemos explorar más y utilizamos un algoritmo génetico para mezclar las mejores soluciones y obtenr nuevas, considerenado principalmente el promedio, entre soluciones, y una combinación de valores. Uno de los mejores resultados fue el siguiente:
+> La principal desventaja que tenía la combinación anterior era que nos limitábamos a lo sumo a obtener 10 máximos locales, que podían ser menos si algún vector durante el ascenso cambiaba de región convexa. Sin emabrgo para los 10 resultados obtenidos hubo 4 vectores que su valor fue máximo ya que como la función fitness se basaba en el promedio del tiempo en que estuvieron en equilibrio, el máximo que se podía obtener era 30 000 unidades de tiempo que era lo que duró cada simulación. De estos 4, se hicieron 32 simulaciones nuevamente (ya que antes solo se hacían 10 por vector para agilizar un poco la búsqueda), y el vector con los siguientes parámetros:
 
 - alpha: 5.38
 - gamma: 0.62
@@ -450,6 +456,8 @@ Es evidente la mejora pero, pero luego quisiemos explorar más y utilizamos un a
 - sigma_predator: 6.72
 - bold_prey: 0.78
 - bold_predator: 0.17
+
+> Este vector fue el que en promedio alcanzó el mejor equilibrio, pero esta vez tuvo 1 fallo de las 32 simulaciones, donde murieron los depredadores casi desde el inicio. Por lo tanto aunque alcanzó el máximo global en la función de fitness, si hubiéramos cambiado dicha función a hacer las 32 simulaciones, no hubiera alcanzado ese máximo. Sin embargo los resultados fueron los mejores. Note que esta vez, se estabilizan comportándose casi constante en el tiempo el promedio de las poblaciones de presas y depredadores. Además algo interesante es que este vector no prioriza tanto la huida las presas y estas reflejan en el mapa de calor mayor concurrencia cerca de las plantas. Los depredadores por otra parte se focalizan en zonas de tránsito de las presas entre plantas y plantas, o plantas y refugios.
 
 Presas en el tiempo
 
@@ -475,9 +483,30 @@ Presas y depredadores al pasar el tiempo en equilibrio
 
 ![](/img/test8CircFinal.png)
 
+### Inferencia de funciones
+
+> Algo notable es que de los vectores obtenidos 4 fueron máximos globales-locales, que tal vez para una función fitnes mucho más detallada no tenían que ser los máximos globales. Sin embargo lo curioso es que de los 4 hay, 3 muy parecidos al vector anterior:
+>
+> [5.21,0.62, 0.31, 11.2, 18.31, 9.05, 6.83, 0.81, 0.28]
+>
+> [5.17,0.46, 0.36, 12.5, 15.88, 7.30, 6.72, 0.85, 0.30]
+>
+> [5.89,0.48, 0.28, 11.5, 16.52, 9.23, 7.00, 0.78, 0.16]
+>
+> En sentido general como se tuvo 10 máximos locales, es posible que la función objetivo tenga muchos focos de altura, y posiblemente gran cantidad de máximos locales. Sin embargo al ver estos vectores se puede suponer que haya algunas zonas de *mesetas*, lo que en este caso particular, sería una meseta máximo global, pero que no tiene en primer lugar ni que ser cierto en este escenario, ya que a pesar de la cercania pueden ser máximos locales de diferentes focos, y en segundo lugar como la función fitness tenía menos simulaciones, lo más probable es que comp pasó con el vector anterior, puedan tener algún fallo y no ser máximos globales para un fitness que considere 32 simulaciones. Lo que si se puede estar casi seguro es que la función actual debe tener muy probablemente muchos máximos locales y tal vez algún tipo de meseta ocasional.
+
+### Algoritmo genético
+
+> Es evidente la mejora pero, pero luego quisimos tratar de probar otra estrategia y utilizamos un algoritmo génetico para mezclar soluciones y obtener nuevas, considerenado principalmente el promedio, entre soluciones, y una combinación de valores. Realmente no se tuvo buenos resultados al hacer esto, y suponemos que por dos motivos fundamentales:
+>
+> - Al considerar el promedio de valores se está explotando implícitamente.
+> - No hay mutación en la población, lo cual le quita muchísimo de exploración al algoritmo
+>
+> Una forma de mejorar esto es añadiendo directamente la generación de nuevos vectores aleatorios y expcluyendo algunos de los mejores de la población. Lo primero se añadió a la implementación pero no se han hecho las simulaciones pertinentes para dar nuevos resultados. Sin embargo el resultado que hemos alcanzado con el proyectonos es muy satisfactorio, no tan solo porque logramos alcanzar en promedio el equilibrio del sistema, o porque pudimos predecir comportamientos en los agentes según las lógica de accionar que les dimos, sino porque también aprendimos bastante en sentido general de muchos aspectos fundamentalmente prácticos de las Disciplinas de Simulación e Inteligencia Artificial. Por lo tanto para finalizar mostraremos un ejemplo de una sola simulación con el último vector de parámetros que se explicó anteriormente.
+
 ## Ejemplo de una sola simulación
 
-Ahora que ya vimos el comportamiento del sistema de forma general veamos los resultados particulares de alguna de sus simualciones para alguna de sus simulaciones
+Ahora que ya vimos el comportamiento del sistema de forma general veamos los resultados particulares para alguna de las simulaciones (Población de presas (azules) y depredadores (naranja) en función del tiempo).
 
 ![](/img/test8Particular.png)
 
